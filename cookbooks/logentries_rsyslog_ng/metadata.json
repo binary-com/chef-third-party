@@ -1,0 +1,32 @@
+{
+  "name": "logentries_rsyslog_ng",
+  "description": "Installs/Configures logentries_rsyslog_ng",
+  "long_description": "Installs/Configures logentries_rsyslog_ng",
+  "maintainer": "Kostiantyn Lysenko",
+  "maintainer_email": "gshaud@gmail.com",
+  "license": "apache2",
+  "platforms": {
+    "debian": ">= 0.0.0"
+  },
+  "dependencies": {
+  },
+  "recommendations": {
+  },
+  "suggestions": {
+  },
+  "conflicting": {
+  },
+  "providing": {
+  },
+  "replacing": {
+  },
+  "attributes": {
+  },
+  "groupings": {
+  },
+  "recipes": {
+  },
+  "version": "0.0.7",
+  "source_url": "",
+  "issues_url": ""
+}
