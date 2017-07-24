@@ -1,0 +1,83 @@
+<% def aws_driver
+@text = <<EOT
+---
+driver:
+  name: ec2
+  aws_ssh_key_id: #{ENV['AWS_TK_KEY_ID']}
+  security_group_ids: #{[ENV['AWS_TK_SG']]}
+  region: us-east-1
+  availability_zone: #{ENV['AWS_TK_AZ']}
+  subnet_id: #{ENV['AWS_TK_SUBNET']}
+  associate_public_ip: true
+  instance_type: t2.micro
+  require_chef_omnibus: true
+  tags:
+    Name: 'test-kitchen ephemeral test instance'
+
+transport:
+  ssh_key: #{ENV['AWS_TK_KEY_PATH']}
+  
+platforms:
+- name: debian-7.1.0
+  driver:
+    image_id: ami-e0efab88
+  run_list:
+  - recipe[apt]
+
+provisioner:
+  name: chef_zero
+
+suites:
+- name: default
+  attributes:
+    logentries:
+      token: #{ENV['LOGENTRIES_TOKEN']}
+    apt:
+      compile_time_update: true
+  run_list:
+    - recipe[logentries_rsyslog_ng_test_helper::default]
+EOT
+end %>
+
+<% def vagrant_driver
+@text = <<EOT
+---
+driver_plugin: vagrant
+
+platforms:
+- name:  debian-7.4
+  driver:
+    provider: virtualbox
+    customize:
+      memory: 1024
+  run_list:
+  - recipe[apt]
+
+provisioner:
+  name: chef_zero
+
+suites:
+- name: default
+  attributes:
+    logentries:
+      token: #{ENV['LOGENTRIES_TOKEN']}
+    apt:
+      compile_time_update: true
+  run_list:
+    - recipe[logentries_rsyslog_ng_test_helper::default]
+EOT
+end %>
+
+<%
+case ENV['TK_DRIVER']
+  when 'aws'
+    puts 'Using AWS test-kitchen driver'
+    _erbout << aws_driver
+  when 'vagrant'
+    puts 'Using Vagrant test-kitchen driver'
+    _erbout << vagrant_driver
+  else
+    puts "Unknown test-kitchen driver \'#{ENV['TK_DRIVER']}\', using Vagrant test-kitchen driver"
+    _erbout << vagrant_driver
+end
+%>

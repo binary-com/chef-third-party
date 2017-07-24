@@ -1,0 +1,33 @@
+{
+  "name": "user_account",
+  "version": "1.1.0",
+  "description": "Provides a resource for user_account",
+  "long_description": "User_account Cookbook\n=====================\nProvides a lwrp to manage user accounts on systems.\n\nAttributes\n----------\n#### user::default\n<table>\n  <tr>\n    <th>Key</th>\n    <th>Type</th>\n    <th>Description</th>\n    <th>Default</th>\n  </tr>\n  <tr>\n    <td><tt>['user_account']['home_root']</tt></td>\n    <td>String</td>\n    <td>default root home path</td>\n    <td><tt>/home</tt></td>\n  </tr>\n  <tr>\n    <td><tt>['user_account']['default_shell']</tt></td>\n    <td>String</td>\n    <td>default shell to use per platform</td>\n    <td><tt>/bin/bash</tt></td>\n  </tr>\n</table>\n\nResource/Provider\n-----------------\n\n### user_account\nNote: If you do not set the ssh_keys attribute then this resource\nwill ignore the authorized_keys file and you can manage it in\nanother way.\n\n#### Actions\n- **create** - creates a user\n- **delete** - deletes a user\n\n#### Attributes\n- **username** - name of user account\n- **password** - user password\n- **default_group** - name of an existing default group to place user in (instead of creating a group same as username)\n- **groups** - array of groups to add to the user\n- **home** - override home dir if desired\n- **manage_home** - whether to create the home dir\n- **ssh_keys** - array of ssh keys\n- **uid** - specify uid\n- **shell** - shell to use\n- **include_nodes** - only add user to list of nodes\n- **exclude_nodes** - don't add user to list of nodes\n\n```ruby\nuser_account 'jim' do\n  action :create\n  uid 1026\n  groups %w(wheel)\n  ssh_keys 'not a real ssh key'\nend\n\nuser_account 'richard' do\n  action :create\n  groups %w(devs wheel)\n  password 'richardspass'\nend\n```\n\nContributing\n------------\n1. Fork the repository on Github\n2. Create a named feature branch (like `add_component_x`)\n3. Write your change\n4. Write tests for your change (if applicable)\n5. Run the tests, ensuring they all pass\n6. Submit a Pull Request using Github\n\nLicense and Authors\n-------------------\n- Author:: Jim Rosser(jarosser06@gmail.com)\n\n```text\ncopyright (C) 2014-2015 Texas A&M\n\nPermission is hereby granted, free of charge, to any person\nobtaining a copy of this software and associated documentation\nfiles (the “Software”), to deal in the Software without restriction,\nincluding without limitation the rights to use, copy, modify, merge,\npublish, distribute, sublicense, and/or sell copies of the Software,\nand to permit persons to whom the Software is furnished to do so,\nsubject to the following conditions:\n\nThe above copyright notice and this permission notice shall be\nincluded in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,\nEXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES\nOF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND\nNONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT\nHOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,\nWHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING\nFROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR\nOTHER DEALINGS IN THE SOFTWARE.\n```\n",
+  "maintainer": "Texas A&M",
+  "maintainer_email": "jarosser06@gmail.com",
+  "license": "MIT",
+  "platforms": {
+    "ubuntu": ">= 0.0.0",
+    "centos": ">= 0.0.0",
+    "omnios": ">= 0.0.0",
+    "suse": ">= 0.0.0"
+  },
+  "dependencies": {
+  },
+  "recommendations": {
+  },
+  "suggestions": {
+  },
+  "conflicting": {
+  },
+  "providing": {
+  },
+  "replacing": {
+  },
+  "attributes": {
+  },
+  "groupings": {
+  },
+  "recipes": {
+  }
+}
