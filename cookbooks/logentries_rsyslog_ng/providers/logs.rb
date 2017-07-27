@@ -24,8 +24,14 @@ use_inline_resources
 
 action :add do
   account_key = new_resource.logentries_account_key
-  host_key = Logentries.get_host_key(account_key,new_resource.logentries_logset)
-  log_token = Logentries.add_log(account_key,host_key,new_resource.logentries_name)
+  host_key = new_resource.logentries_host_key
+  if host_key == ""
+    host_key = Logentries.get_host_key(account_key,new_resource.logentries_logset)
+  end
+  log_token = new_resource.logentries_log_token
+  if log_token == ""
+    log_token = Logentries.add_log(account_key,host_key,new_resource.logentries_name)
+  end
 
   # define rsyslog service
   service 'rsyslog' do
