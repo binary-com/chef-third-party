@@ -17,14 +17,24 @@
 # limitations under the License.
 #
 
-# Place your API Key here, or set it on the role/environment/node
+# Place your API Key here, or set it on the role/environment/node, or set it on your
+# node `run_state` under the key `['datadog']['api_key']`.
 # The Datadog api key to associate your agent's data with your organization.
 # Can be found here:
 # https://app.datadoghq.com/account/settings
 default['datadog']['api_key'] = nil
 
-# Create an application key on the Account Settings page
+# Create an application key on the Account Settings page.
+# Set it as an attribute, or on your node `run_state` under the key `['datadog']['application_key']`
 default['datadog']['application_key'] = nil
+
+# Use this attribute to send data to additional accounts
+# (agent and handler if enabled)
+# The key can be anything you want, 'prod' is used there as an example
+default['datadog']['extra_endpoints']['prod']['enabled'] = nil
+default['datadog']['extra_endpoints']['prod']['api_key'] = nil
+default['datadog']['extra_endpoints']['prod']['application_key'] = nil
+default['datadog']['extra_endpoints']['prod']['url'] = nil # optional
 
 # Add this prefix to all Chef tags sent to Datadog: "#{tag_prefix}#{tag}"
 # This makes it easy to group hosts in Datadog by their Chef tags, but might be counterproductive
@@ -51,8 +61,21 @@ default['datadog']['create_dd_check_tags'] = nil
 # Collect EC2 tags, set to 'yes' to collect
 default['datadog']['collect_ec2_tags'] = nil
 
+# Set this regex to exclude some Chef node tags from the host tags that the datadog handler sends to Datadog
+# https://github.com/DataDog/chef-handler-datadog/issues/85
+# This means that all the metrics and service checks coming from the
+#  host/Agent would also stop being tagged with these excluded tags.
+# EX: 'app_.*' allows all tags except those which look like app_.*
+default['datadog']['tags_blacklist_regex'] = nil
+
+# Set to `true` if you want the handler to send the Chef policy name and group as host tags
+default['datadog']['send_policy_tags'] = false
+
 # Autorestart agent
 default['datadog']['autorestart'] = false
+
+# Run the agent in developer mode
+default['datadog']['developer_mode'] = false
 
 # Repository configuration
 architecture_map = {
@@ -62,14 +85,38 @@ architecture_map = {
 }
 architecture_map.default = 'x86_64'
 
+# Older versions of yum embed M2Crypto with SSL that doesn't support TLS1.2
+yum_protocol =
+  if node['platform_family'] == 'rhel' && node['platform_version'].to_i < 6
+    'http'
+  else
+    'https'
+  end
+
 default['datadog']['installrepo'] = true
 default['datadog']['aptrepo'] = 'http://apt.datadoghq.com'
 default['datadog']['aptrepo_dist'] = 'stable'
-default['datadog']['yumrepo'] = "http://yum.datadoghq.com/rpm/#{architecture_map[node['kernel']['machine']]}/"
+default['datadog']['yumrepo'] = "#{yum_protocol}://yum.datadoghq.com/rpm/#{architecture_map[node['kernel']['machine']]}/"
+default['datadog']['yumrepo_gpgkey'] = "#{yum_protocol}://yum.datadoghq.com/DATADOG_RPM_KEY.public"
 default['datadog']['yumrepo_proxy'] = nil
 default['datadog']['yumrepo_proxy_username'] = nil
 default['datadog']['yumrepo_proxy_password'] = nil
 default['datadog']['windows_agent_url'] = 'https://s3.amazonaws.com/ddagent-windows-stable/'
+
+# Location of additional rpm gpgkey to import (with signature `e09422b3`). In the future the rpm packages
+# of the Agent will be signed with this key.
+default['datadog']['yumrepo_gpgkey_new'] = "#{yum_protocol}://yum.datadoghq.com/DATADOG_RPM_KEY_E09422B3.public"
+
+# Agent installer checksum
+# Expected checksum to validate correct agent installer is downloaded (Windows only)
+default['datadog']['windows_agent_checksum'] = nil
+
+# Set to `true` to use the EXE installer on Windows, recommended to gracefully handle upgrades from per-user
+# to per-machine installs on most environments. We recommend setting this option to `true` for Agent upgrades from
+# versions <= 5.10.1 to versions >= 5.12.0.
+# The EXE installer exists since Agent release 5.12.0
+# If you're already using version >= 5.12.0 of the Agent, leave this to false.
+default['datadog']['windows_agent_use_exe'] = false
 
 # Values that differ on Windows
 # The location of the config folder (containing conf.d)
@@ -97,11 +144,28 @@ end
 
 # Agent Version
 # Default of `nil` will install latest version. On Windows, this will also upgrade to latest
+# This attribute accepts either a `string` or `hash` with the key as platform_name and value of package version
+# In the case of fedora use platform_name of rhel
+# Example:
+# default['datadog']['agent_version'] = {
+#  'rhel' => '5.9.0-1',
+#  'windows' => '5.9.0',
+#  'debian' => '1:5.9.0-1'
+# }
 default['datadog']['agent_version'] = nil
 
 # Agent package action
 # Allow override with `upgrade` to get latest (Linux only)
 default['datadog']['agent_package_action'] = 'install'
+
+# Agent package options
+# retries and retry_delay for package download/install
+default['datadog']['agent_package_retries'] = nil
+default['datadog']['agent_package_retry_delay'] = nil
+
+# Allow downgrades of the agent (Linux only)
+# Note: on apt-based platforms, this will use the `--force-yes` option on the apt-get command. Use with caution.
+default['datadog']['agent_allow_downgrade'] = false
 
 # Chef handler version
 default['datadog']['chef_handler_version'] = nil
@@ -173,6 +237,7 @@ default['datadog']['dogstatsd'] = true
 default['datadog']['dogstatsd_port'] = 8125
 default['datadog']['dogstatsd_interval'] = 10
 default['datadog']['dogstatsd_normalize'] = 'yes'
+default['datadog']['dogstatsd_target'] = 'http://localhost:17123'
 default['datadog']['statsd_forward_host'] = nil
 default['datadog']['statsd_forward_port'] = 8125
 default['datadog']['statsd_metric_namespace'] = nil
@@ -180,6 +245,14 @@ default['datadog']['statsd_metric_namespace'] = nil
 # Histogram settings
 default['datadog']['histogram_aggregates'] = 'max, median, avg, count'
 default['datadog']['histogram_percentiles'] = '0.95'
+
+# extra config options
+# If an agent is released with a new config option which is not yet supported by this cookbook
+# you can use this attribute to set it. Will be ignored if nil.
+default['datadog']['extra_config']['forwarder_timeout'] = nil
+
+# extra_packages to install
+default['datadog']['extra_packages'] = {}
 
 # For service-specific configuration, use the integration recipes included
 # in this cookbook, and apply them to the appropirate node's run list.
@@ -189,3 +262,34 @@ default['datadog']['histogram_percentiles'] = '0.95'
 default['datadog']['legacy_integrations']['nagios']['enabled'] = false
 default['datadog']['legacy_integrations']['nagios']['description'] = 'Nagios integration'
 default['datadog']['legacy_integrations']['nagios']['config']['nagios_log'] = '/var/log/nagios3/nagios.log'
+
+# Service discovery settings
+# Enable with service_discovery_backend ('docker' is only valid option currently)
+default['datadog']['sd_backend_host'] = '127.0.0.1'
+default['datadog']['sd_backend_port'] = 4001
+default['datadog']['sd_config_backend'] = 'etcd'
+default['datadog']['sd_template_dir'] = '/datadog/check_configs'
+default['datadog']['service_discovery_backend'] = nil
+
+# Trace functionality settings
+# Set `enable_trace_agent` to:
+# * `true` to explicitly enable the trace agent
+# * `false` to explicitly disable it
+# Leave it to `nil` to let the agent's default behavior decide whether to run the trace-agent
+default['datadog']['enable_trace_agent'] = nil
+default['datadog']['trace_env'] = nil
+default['datadog']['extra_sample_rate'] = nil
+default['datadog']['max_traces_per_second'] = nil
+default['datadog']['receiver_port'] = nil
+default['datadog']['connection_limit'] = nil
+
+# ddtrace python version
+default['datadog']['ddtrace_python_version'] = nil
+
+# ddtrace ruby gem version
+default['datadog']['ddtrace_gem_version'] = nil
+
+# For custom gem servers on restricted networks
+# This attribute only works on Chef >= 12.3
+# Change false to the URL of your custom gem server
+default['datadog']['gem_server'] = false

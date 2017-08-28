@@ -1,7 +1,97 @@
 Changes
 =======
 
-# 2.4.0 / Unreleased
+# 2.10.1 / 2017-05-31
+
+* [OPTIMIZE] Add compatibility with `windows` cookbook `3.0`, [#438][] [@olivielpeau][]
+
+# 2.10.0 / 2017-05-08
+
+* [FEATURE] Update nginx configuration template, [#417][] [@iancward][]
+* [FEATURE] Add service discovery attributes to `datadog.conf`, [#420][] [@bflad][]
+* [FEATURE] Add Kubernetes recipe, [#409][] [@xt99][]
+* [FEATURE] Add SQLServer recipe, [#425][] [@mlcooper][]
+* [FEATURE] Add disk integration recipe, [#430][] [@iancward][]
+* [FEATURE] Add more options to Mongo & Elasticsearch templates, [#424][] [@gkze][]
+* [FEATURE] Allow disabling `apm_enabled` in `datadog.conf`, [#428][] [@ed-flanagan][]
+* [FEATURE] Let the trace-agent use its own default settings, [#433][] [@olivielpeau][]
+* [FEATURE] Allow specifying trace env, [#435][] [@krasnoukhov][]
+
+# 2.9.1 / 2017-03-28
+
+* [BUGFIX] Keep main agent config in `Main` section when `enable_trace_agent` is true, [#419][] [@bflad][]
+
+# 2.9.0 / 2017-03-24
+
+This release should be fully compatible with Chef 13.
+
+**Note for Windows users**: Upgrading to Agent versions >= 5.12.0 should be done using the EXE installer
+(see README)
+
+* [FEATURE] Allow configuration of Traces settings in datadog.conf, [#402][] [@mlcooper][]
+* [FEATURE] Support upgrades to Windows Agents >= 5.12.0 (EXE installer option), [#410][] [@olivielpeau][]
+* [FEATURE] Add `send_policy_tags` option for handler, [#398][] [@olivielpeau][]
+* [FEATURE] Add attribute to customize the gem server of the handler, [#413][] [@dsalvador-dsalvador][]
+* [OPTIMIZE] Rename `package[apt-transport-https]` resource for Chef 13 compatibility, [#388][] [@bai][]
+* [OPTIMIZE] Guard new GPG key from always being downloaded, [#404][] [@iancward][]
+* [MISC] Loosen constraint on `chef_handler` cookbook version, [#414][] [@olivielpeau][]
+* [MISC] Add constraint on `windows` cookbook version, [#415][] [@olivielpeau][]
+
+# 2.8.1 / 2017-02-03
+
+* [BUGFIX] Fix agent version pinning on Windows, [#400][] [@olivielpeau][]
+
+# 2.8.0 / 2017-01-25
+
+* [FEATURE] Add `ssl_verify` option to RabbitMQ template, [#383][] [@iancward][]
+* [FEATURE] Add correct sudo commands to Postfix recipe, [#384][] [@BrentOnRails][] & [@degemer][]
+* [FEATURE] Add support for `windows_service` integration, [#387][] [@mlcooper][]
+* [FEATURE] Add attributes for package download retries, [#390][] [@degemer][]
+* [FEATURE] Add tags blacklist regex attribute for handler, [#397][] [@ABrehm264][] & [@degemer][]
+* [FEATURE] Defer evaluation of api and app keys and read from `run_state`, [#395][] [@mfischer-zd][]
+
+# 2.7.0 / 2016-11-15
+
+* [FEATURE] Add `dd-agent` user to `docker` group in `docker`/`docker_daemon` recipes, [#364][] [@jvrplmlmn][]
+* [FEATURE] Add support for `system_swap` check, [#372][] [@iancward][]
+* [FEATURE] Add ability to pin datadog-agent versions per platform, [#368][] [@mlcooper][]
+* [FEATURE] Add support for any config option in `datadog.conf`, [#375][] [@degemer][]
+* [FEATURE] Trust new APT and RPM keys, [#365][] [@olivielpeau][]
+* [OPTIMIZE] Simplify `postgres.yaml` template, [#380][] [@miketheman][]
+* [BUGFIX] Allow instances with no `tags` in `postfix` template, [#374][] [@nyanshak][]
+
+# 2.6.0 / 2016-09-20
+
+* [FEATURE] Allow multiple enpoints/api_keys conf on Agent and handler, [#317][] [@degemer][]
+* [FEATURE] Add `kafka` template versioning, [#340][] [@degemer][]
+* [FEATURE] Add `gunicorn` support, [#355][] [@mlcooper][]
+* [FEATURE] Add attribute to allow agent downgrade, [#359][] [@olivielpeau][]
+* [OPTIMIZE] Fully disable dogstatsd when attribute is set to false/nil, [#348][] [@ccannell67][]
+* [OPTIMIZE] Use HTTPS for `yumrepo` when applicable, [#351][] [@aknarts][]
+* [BUGFIX] Fix agent version test when version contains an epoch, [#357][] [@olivielpeau][]
+* [BUGFIX] Fix `datadog-agent-base` removal guard logic on rhellions, [#358][] [@olivielpeau][]
+* [BUGFIX] Replace deprecated properties of `yum_repository`, [#361][] & [#362][] [@historus][] & [@olivielpeau][]
+
+# 2.5.0 / 2016-08-08
+
+* [FEATURE] Add support for `extra_packages` agent checks, [#271][] [@tmichelet][]
+* [FEATURE] Add Windows support to `remove-dd-agent` recipe (Chef >= 12.6 only), [#332][] [@raycrawford][]
+* [FEATURE] Make yum repo GPG key an attribute, [#326][] [@iancward][]
+* [FEATURE] Add support for `provider` option in `iis` check, [#324][] [@clmoreno][]
+* [FEATURE] Add support for tags in `etcd` check, [#322][] [@stensonb][]
+* [FEATURE] Add `developer_mode` option to `datadog.conf`, [#315][] [@olivielpeau][]
+* [FEATURE] Add support for `win32_event_log` check, [#314][] [@olivielpeau][]
+* [FEATURE] Add `dogstatsd_target` option to `datadog.conf`, [#313][] [@jcftang-r7][]
+* [FEATURE] Add support for`custom_metrics` in `postgres` check, [#284][] [@flah00][]
+* [OPTIMIZE] Update windows support with many improvements, [#334][] [@brentm5][]
+* [OPTIMIZE] Pass the `hostname` attribute to the handler, [#308][] [@gmmeyer][]
+* [MISC] Allow non-breaking updates of `chef_handler`, [#291][] [@eherot][]
+
+  **NOTE** The strict version constraint on `chef_handler` had been introduced because the `1.2` minor release
+  of `chef_handler` broke compatibility with Chef 11. Chef 11 compatibility has been re-introduced in the `1.3`
+  release, we recommend using that version or higher if you use Chef 11.
+
+# 2.4.0 / 2016-05-04
 
 * [FEATURE] Add support for `dns_check`, [#294][] [@nickmarden][]
 * [FEATURE] Add support for `directory` check, [#277][] [@kindlyseth][]
@@ -385,6 +475,7 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [#262]: https://github.com/DataDog/chef-datadog/issues/262
 [#263]: https://github.com/DataDog/chef-datadog/issues/263
 [#266]: https://github.com/DataDog/chef-datadog/issues/266
+[#271]: https://github.com/DataDog/chef-datadog/issues/271
 [#272]: https://github.com/DataDog/chef-datadog/issues/272
 [#273]: https://github.com/DataDog/chef-datadog/issues/273
 [#274]: https://github.com/DataDog/chef-datadog/issues/274
@@ -393,8 +484,10 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [#278]: https://github.com/DataDog/chef-datadog/issues/278
 [#280]: https://github.com/DataDog/chef-datadog/issues/280
 [#281]: https://github.com/DataDog/chef-datadog/issues/281
+[#284]: https://github.com/DataDog/chef-datadog/issues/284
 [#285]: https://github.com/DataDog/chef-datadog/issues/285
 [#286]: https://github.com/DataDog/chef-datadog/issues/286
+[#291]: https://github.com/DataDog/chef-datadog/issues/291
 [#294]: https://github.com/DataDog/chef-datadog/issues/294
 [#295]: https://github.com/DataDog/chef-datadog/issues/295
 [#296]: https://github.com/DataDog/chef-datadog/issues/296
@@ -402,7 +495,60 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [#299]: https://github.com/DataDog/chef-datadog/issues/299
 [#300]: https://github.com/DataDog/chef-datadog/issues/300
 [#304]: https://github.com/DataDog/chef-datadog/issues/304
+[#308]: https://github.com/DataDog/chef-datadog/issues/308
+[#313]: https://github.com/DataDog/chef-datadog/issues/313
+[#314]: https://github.com/DataDog/chef-datadog/issues/314
+[#315]: https://github.com/DataDog/chef-datadog/issues/315
+[#317]: https://github.com/DataDog/chef-datadog/issues/317
+[#322]: https://github.com/DataDog/chef-datadog/issues/322
+[#324]: https://github.com/DataDog/chef-datadog/issues/324
+[#326]: https://github.com/DataDog/chef-datadog/issues/326
+[#332]: https://github.com/DataDog/chef-datadog/issues/332
+[#334]: https://github.com/DataDog/chef-datadog/issues/334
+[#340]: https://github.com/DataDog/chef-datadog/issues/340
+[#348]: https://github.com/DataDog/chef-datadog/issues/348
+[#351]: https://github.com/DataDog/chef-datadog/issues/351
+[#355]: https://github.com/DataDog/chef-datadog/issues/355
+[#357]: https://github.com/DataDog/chef-datadog/issues/357
+[#358]: https://github.com/DataDog/chef-datadog/issues/358
+[#359]: https://github.com/DataDog/chef-datadog/issues/359
+[#361]: https://github.com/DataDog/chef-datadog/issues/361
+[#362]: https://github.com/DataDog/chef-datadog/issues/362
+[#364]: https://github.com/DataDog/chef-datadog/issues/364
+[#365]: https://github.com/DataDog/chef-datadog/issues/365
+[#368]: https://github.com/DataDog/chef-datadog/issues/368
+[#372]: https://github.com/DataDog/chef-datadog/issues/372
+[#374]: https://github.com/DataDog/chef-datadog/issues/374
+[#375]: https://github.com/DataDog/chef-datadog/issues/375
+[#380]: https://github.com/DataDog/chef-datadog/issues/380
+[#383]: https://github.com/DataDog/chef-datadog/issues/383
+[#384]: https://github.com/DataDog/chef-datadog/issues/384
+[#387]: https://github.com/DataDog/chef-datadog/issues/387
+[#388]: https://github.com/DataDog/chef-datadog/issues/388
+[#390]: https://github.com/DataDog/chef-datadog/issues/390
+[#395]: https://github.com/DataDog/chef-datadog/issues/395
+[#397]: https://github.com/DataDog/chef-datadog/issues/397
+[#398]: https://github.com/DataDog/chef-datadog/issues/398
+[#400]: https://github.com/DataDog/chef-datadog/issues/400
+[#402]: https://github.com/DataDog/chef-datadog/issues/402
+[#404]: https://github.com/DataDog/chef-datadog/issues/404
+[#409]: https://github.com/DataDog/chef-datadog/issues/409
+[#410]: https://github.com/DataDog/chef-datadog/issues/410
+[#413]: https://github.com/DataDog/chef-datadog/issues/413
+[#414]: https://github.com/DataDog/chef-datadog/issues/414
+[#415]: https://github.com/DataDog/chef-datadog/issues/415
+[#417]: https://github.com/DataDog/chef-datadog/issues/417
+[#419]: https://github.com/DataDog/chef-datadog/issues/419
+[#420]: https://github.com/DataDog/chef-datadog/issues/420
+[#424]: https://github.com/DataDog/chef-datadog/issues/424
+[#425]: https://github.com/DataDog/chef-datadog/issues/425
+[#428]: https://github.com/DataDog/chef-datadog/issues/428
+[#430]: https://github.com/DataDog/chef-datadog/issues/430
+[#433]: https://github.com/DataDog/chef-datadog/issues/433
+[#435]: https://github.com/DataDog/chef-datadog/issues/435
+[#438]: https://github.com/DataDog/chef-datadog/issues/438
 [@ABrehm264]: https://github.com/ABrehm264
+[@BrentOnRails]: https://github.com/BrentOnRails
 [@DorianZaccaria]: https://github.com/DorianZaccaria
 [@EasyAsABC123]: https://github.com/EasyAsABC123
 [@JoeDeVries]: https://github.com/JoeDeVries
@@ -412,37 +558,52 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [@RedWhiteMiko]: https://github.com/RedWhiteMiko
 [@SelerityMichael]: https://github.com/SelerityMichael
 [@SupermanScott]: https://github.com/SupermanScott
+[@aknarts]: https://github.com/aknarts
 [@alexism]: https://github.com/alexism
 [@alq]: https://github.com/alq
 [@antonio-osorio]: https://github.com/antonio-osorio
 [@arthurnn]: https://github.com/arthurnn
 [@babbottscott]: https://github.com/babbottscott
+[@bai]: https://github.com/bai
+[@bflad]: https://github.com/bflad
 [@bitmonk]: https://github.com/bitmonk
+[@brentm5]: https://github.com/brentm5
+[@ccannell67]: https://github.com/ccannell67
 [@chrissnell]: https://github.com/chrissnell
+[@clmoreno]: https://github.com/clmoreno
 [@clofresh]: https://github.com/clofresh
 [@cobusbernard]: https://github.com/cobusbernard
 [@coosh]: https://github.com/coosh
 [@ctrlok]: https://github.com/ctrlok
 [@darron]: https://github.com/darron
 [@datwiz]: https://github.com/datwiz
+[@degemer]: https://github.com/degemer
 [@dlackty]: https://github.com/dlackty
 [@dominicchan]: https://github.com/dominicchan
 [@donaldguy]: https://github.com/donaldguy
 [@drewrothstein]: https://github.com/drewrothstein
+[@dsalvador-dsalvador]: https://github.com/dsalvador-dsalvador
 [@dwradcliffe]: https://github.com/dwradcliffe
+[@ed-flanagan]: https://github.com/ed-flanagan
+[@eherot]: https://github.com/eherot
 [@elafarge]: https://github.com/elafarge
 [@elijahandrews]: https://github.com/elijahandrews
 [@evan2645]: https://github.com/evan2645
 [@flah00]: https://github.com/flah00
+[@gkze]: https://github.com/gkze
+[@gmmeyer]: https://github.com/gmmeyer
 [@graemej]: https://github.com/graemej
 [@gregf]: https://github.com/gregf
 [@hartfordfive]: https://github.com/hartfordfive
 [@hilli]: https://github.com/hilli
+[@historus]: https://github.com/historus
 [@hydrant25]: https://github.com/hydrant25
+[@iancward]: https://github.com/iancward
 [@iashwash]: https://github.com/iashwash
 [@inokappa]: https://github.com/inokappa
 [@isaacdd]: https://github.com/isaacdd
 [@jblancett]: https://github.com/jblancett
+[@jcftang-r7]: https://github.com/jcftang-r7
 [@jedi4ever]: https://github.com/jedi4ever
 [@jeffbyrnes]: https://github.com/jeffbyrnes
 [@jmanero-r7]: https://github.com/jmanero-r7
@@ -450,32 +611,40 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [@jridgewell]: https://github.com/jridgewell
 [@jtimberman]: https://github.com/jtimberman
 [@juliandunn]: https://github.com/juliandunn
+[@jvrplmlmn]: https://github.com/jvrplmlmn
 [@khouse]: https://github.com/khouse
 [@kindlyseth]: https://github.com/kindlyseth
+[@krasnoukhov]: https://github.com/krasnoukhov
 [@kurochan]: https://github.com/kurochan
 [@martinisoft]: https://github.com/martinisoft
 [@mattrobenolt]: https://github.com/mattrobenolt
 [@mfischer-zd]: https://github.com/mfischer-zd
 [@miketheman]: https://github.com/miketheman
 [@mirceal]: https://github.com/mirceal
+[@mlcooper]: https://github.com/mlcooper
 [@mstepniowski]: https://github.com/mstepniowski
 [@mtougeron]: https://github.com/mtougeron
 [@nickmarden]: https://github.com/nickmarden
 [@nkts]: https://github.com/nkts
+[@nyanshak]: https://github.com/nyanshak
 [@olivielpeau]: https://github.com/olivielpeau
 [@opsline-radek]: https://github.com/opsline-radek
 [@phlipper]: https://github.com/phlipper
 [@qqfr2507]: https://github.com/qqfr2507
+[@raycrawford]: https://github.com/raycrawford
 [@remh]: https://github.com/remh
 [@rlaveycal]: https://github.com/rlaveycal
 [@ryandjurovich]: https://github.com/ryandjurovich
 [@schisamo]: https://github.com/schisamo
 [@sethrosenblum]: https://github.com/sethrosenblum
+[@stensonb]: https://github.com/stensonb
 [@takus]: https://github.com/takus
 [@tejom]: https://github.com/tejom
 [@thisismana]: https://github.com/thisismana
 [@timusg]: https://github.com/timusg
+[@tmichelet]: https://github.com/tmichelet
 [@uzyexe]: https://github.com/uzyexe
 [@wk8]: https://github.com/wk8
+[@xt99]: https://github.com/xt99
 [@yannmh]: https://github.com/yannmh
 [@zshenker]: https://github.com/zshenker

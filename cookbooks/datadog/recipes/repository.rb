@@ -21,10 +21,18 @@ case node['platform_family']
 when 'debian'
   include_recipe 'apt'
 
-  package 'apt-transport-https' do
+  package 'install-apt-transport-https' do
+    package_name 'apt-transport-https'
     action :install
   end
 
+  # Trust new APT key
+  execute 'apt-key import key 382E94DE' do
+    command 'apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 A2923DFF56EDA6E76E55E492D3A80E30382E94DE'
+    not_if 'apt-key list | grep 382E94DE'
+  end
+
+  # Add APT repository
   apt_repository 'datadog' do
     keyserver 'hkp://keyserver.ubuntu.com:80'
     key 'C7A7DA52'
@@ -37,16 +45,39 @@ when 'debian'
 when 'rhel', 'fedora'
   include_recipe 'yum'
 
+  # Import new RPM key
+  if node['datadog']['yumrepo_gpgkey_new']
+    # gnupg is required to check the downloaded key's fingerprint
+    package 'gnupg' do
+      action :install
+    end
+
+    # Download new RPM key
+    key_local_path = ::File.join(Chef::Config[:file_cache_path], 'DATADOG_RPM_KEY_E09422B3.public')
+    remote_file 'DATADOG_RPM_KEY_E09422B3.public' do
+      path key_local_path
+      source node['datadog']['yumrepo_gpgkey_new']
+      not_if 'rpm -q gpg-pubkey-e09422b3' # (key already imported)
+      notifies :run, 'execute[rpm-import datadog key e09422b3]', :immediately
+    end
+
+    # Import key if fingerprint matches
+    execute 'rpm-import datadog key e09422b3' do
+      command "rpm --import #{key_local_path}"
+      only_if "gpg --dry-run --quiet --with-fingerprint #{key_local_path} | grep 'A4C0 B90D 7443 CF6E 4E8A  A341 F106 8E14 E094 22B3'"
+      action :nothing
+    end
+  end
+
+  # Add YUM repository
   yum_repository 'datadog' do
     name 'datadog'
     description 'datadog'
-    url node['datadog']['yumrepo']
+    baseurl node['datadog']['yumrepo']
     proxy node['datadog']['yumrepo_proxy']
     proxy_username node['datadog']['yumrepo_proxy_username']
     proxy_password node['datadog']['yumrepo_proxy_password']
-    # Older versions of yum embed M2Crypto with SSL that doesn't support TLS1.2
-    prefix = node['platform_version'].to_i < 6 ? 'http' : 'https'
-    gpgkey "#{prefix}://yum.datadoghq.com/DATADOG_RPM_KEY.public"
-    action :add
+    gpgkey node['datadog']['yumrepo_gpgkey']
+    action :create
   end
 end
