@@ -34,6 +34,8 @@ chef_gem 'chef-handler-datadog' do # ~FC009
   version node['datadog']['chef_handler_version']
   # Chef 12 introduced `compile_time` - remove when Chef 11 is EOL.
   compile_time true if respond_to?(:compile_time)
+  clear_sources true if node['datadog']['gem_server']
+  source node['datadog']['gem_server'] if node['datadog']['gem_server']
 end
 require 'chef/handler/datadog'
 
@@ -47,14 +49,44 @@ unless web_proxy['host'].nil?
 end
 
 # Create the handler to run at the end of the Chef execution
-chef_handler 'Chef::Handler::Datadog' do
+chef_handler 'Chef::Handler::Datadog' do # rubocop:disable Metrics/BlockLength
+  def extra_endpoints
+    extra_endpoints = []
+    node['datadog']['extra_endpoints'].each do |_, endpoint|
+      next unless endpoint['enabled']
+      endpoint = Mash.new(endpoint)
+      endpoint.delete('enabled')
+      extra_endpoints << endpoint
+    end
+    extra_endpoints
+  end
+
+  def handler_config # rubocop:disable Metrics/AbcSize
+    config = {
+      :api_key => Chef::Datadog.api_key(node),
+      :application_key => Chef::Datadog.application_key(node),
+      :use_ec2_instance_id => node['datadog']['use_ec2_instance_id'],
+      :tag_prefix => node['datadog']['tag_prefix'],
+      :url => node['datadog']['url'],
+      :extra_endpoints => extra_endpoints,
+      :tags_blacklist_regex => node['datadog']['tags_blacklist_regex'],
+      :send_policy_tags => node['datadog']['send_policy_tags']
+    }
+
+    unless node['datadog']['use_ec2_instance_id']
+      config[:hostname] = node['datadog']['hostname']
+    end
+    config
+  end
   source 'chef/handler/datadog'
-  arguments [
-    :api_key => node['datadog']['api_key'],
-    :application_key => node['datadog']['application_key'],
-    :use_ec2_instance_id => node['datadog']['use_ec2_instance_id'],
-    :tag_prefix => node['datadog']['tag_prefix']
-  ]
+  arguments(
+    if respond_to?(:lazy)
+      lazy { [handler_config] }
+    else
+      [handler_config]
+    end
+  )
   supports :report => true, :exception => true
   action :nothing
-end.run_action(:enable) if node['datadog']['chef_handler_enable']
+  only_if { node['datadog']['chef_handler_enable'] }
+end.run_action(:enable)

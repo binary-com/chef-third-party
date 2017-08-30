@@ -17,8 +17,18 @@
 # limitations under the License.
 #
 
+# Fail here at converge time if no api_key is set
+ruby_block 'datadog-api-key-unset' do
+  block do
+    raise "Set ['datadog']['api_key'] as an attribute or on the node's run_state to configure this node's Datadog Agent."
+  end
+  only_if { Chef::Datadog.api_key(node).nil? }
+end
+
+is_windows = node['platform_family'] == 'windows'
+
 # Install the agent
-if node['platform_family'] == 'windows'
+if is_windows
   include_recipe 'datadog::_install-windows'
 else
   include_recipe 'datadog::_install-linux'
@@ -33,14 +43,14 @@ agent_config_file = ::File.join(node['datadog']['config_dir'], 'datadog.conf')
 
 # Make sure the config directory exists
 directory node['datadog']['config_dir'] do
-  if node['platform_family'] == 'windows'
+  if is_windows
     owner 'Administrators'
     rights :full_control, 'Administrators'
     inherits false
   else
     owner 'dd-agent'
     group 'root'
-    mode 0755
+    mode '755'
   end
 end
 
@@ -49,21 +59,40 @@ end
 # To add integration-specific configurations, add 'datadog::config_name' to
 # the node's run_list and set the relevant attributes
 #
-raise "Add a ['datadog']['api_key'] attribute to configure this node's Datadog Agent." if node['datadog'] && node['datadog']['api_key'].nil?
 
-template agent_config_file do
-  if node['platform_family'] == 'windows'
+template agent_config_file do # rubocop:disable Metrics/BlockLength
+  def template_vars # rubocop:disable Metrics/AbcSize
+    api_keys = [Chef::Datadog.api_key(node)]
+    dd_urls = [node['datadog']['url']]
+    node['datadog']['extra_endpoints'].each do |_, endpoint|
+      next unless endpoint['enabled']
+      api_keys << endpoint['api_key']
+      dd_urls << if endpoint['url']
+                   endpoint['url']
+                 else
+                   node['datadog']['url']
+                 end
+    end
+    {
+      :api_keys => api_keys,
+      :dd_urls => dd_urls
+    }
+  end
+  if is_windows
     owner 'Administrators'
     rights :full_control, 'Administrators'
     inherits false
   else
     owner 'dd-agent'
     group 'root'
-    mode 0640
+    mode '640'
   end
   variables(
-    :api_key => node['datadog']['api_key'],
-    :dd_url => node['datadog']['url']
+    if respond_to?(:lazy)
+      lazy { template_vars }
+    else
+      template_vars
+    end
   )
   sensitive true if Chef::Resource.instance_methods(false).include?(:sensitive)
 end
@@ -72,10 +101,13 @@ end
 service 'datadog-agent' do
   service_name node['datadog']['agent_name']
   action [agent_enable, agent_start]
-  if node['platform_family'] == 'windows'
+  if is_windows
     supports :restart => true, :start => true, :stop => true
   else
     supports :restart => true, :status => true, :start => true, :stop => true
   end
   subscribes :restart, "template[#{agent_config_file}]", :delayed unless node['datadog']['agent_start'] == false
 end
+
+# Install integration packages
+include_recipe 'datadog::integrations' unless is_windows

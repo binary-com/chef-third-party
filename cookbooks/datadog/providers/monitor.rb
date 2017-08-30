@@ -16,12 +16,15 @@ action :add do
       inherits false
     else
       owner 'dd-agent'
-      mode 00600
+      mode '600'
     end
+
+    source 'integration.yaml.erb' if new_resource.use_integration_template
+
     variables(
-      :init_config => new_resource.init_config,
-      :instances => new_resource.instances,
-      :version => new_resource.version
+      init_config: new_resource.init_config,
+      instances:   new_resource.instances,
+      version:     new_resource.version
     )
     cookbook new_resource.cookbook
     sensitive true if Chef::Resource.instance_methods(false).include?(:sensitive)
