@@ -26,60 +26,71 @@ rescue LoadError
 end
 
 require "timeout"
+require_relative 'slack_handler_util'
 
 class Chef::Handler::Slack < Chef::Handler
-  attr_reader :team, :api_key, :config, :timeout, :fail_only, :detail_level
+  attr_reader :team, :api_key, :config, :timeout, :fail_only, :message_detail_level, :cookbook_detail_level
 
   def initialize(config = {})
-    @config  = config.dup
-    @team    = @config.delete(:team)
-    @api_key = @config.delete(:api_key)
-    @timeout = @config.delete(:timeout) || 15
-    @fail_only = @config.delete(:fail_only) || false
-    @detail_level = @config.delete(:detail_level) || 'basic'
-    @config.delete(:icon_emoji) if @config[:icon_url] && @config[:icon_emoji]
+    Chef::Log.debug('Initializing Chef::Handler::Slack')
+    @util = SlackHandlerUtil.new(config)
+    @config = config
+    setup_slackr_options(@config)
+
+    @team = @config[:team]
+    @api_key = @config[:api_key]
+    @timeout = @config[:timeout]
+    @fail_only = @config[:fail_only]
+    @message_detail_level = @config[:message_detail_level]
+    @cookbook_detail_level = @config[:cookbook_detail_level]
   end
 
   def report
-    begin
-      Timeout::timeout(@timeout) do
-        Chef::Log.debug("Sending report to Slack ##{config[:channel]}@#{team}.slack.com")
-        if fail_only
-          unless run_status.success?
-            slack_message("Chef client run #{run_status_human_readable} on #{run_status.node.name} #{run_status_detail} \n #{run_status.exception}")
-          end
-        else
-          slack_message("Chef client run #{run_status_human_readable} on #{run_status.node.name} #{run_status_detail}")
-        end
-      end
-    rescue Exception => e
-      Chef::Log.debug("Failed to send message to Slack: #{e.message}")
+    Timeout.timeout(@timeout) do
+      sending_to_slack = if run_status.is_a?(Chef::RunStatus)
+                           report_chef_run_end
+                         else
+                           report_chef_run_start
+                         end
+      Chef::Log.debug("Saying report to Slack channel ##{config[:channel]} on team #{team}.slack.com") if sending_to_slack
     end
+  rescue Exception => e
+    Chef::Log.debug("Failed to send message to Slack: #{e.message}")
   end
 
   private
 
-  def run_status_detail
-    case detail_level
-    when "basic"
-      return
-    when "elapsed"
-      "(#{run_status.elapsed_time} seconds). #{updated_resources.count} resources updated"  unless updated_resources.nil?
-    when "resources"
-      "(#{run_status.elapsed_time} seconds). #{updated_resources.count} resources updated\n#{updated_resources.join(", ").to_s}"  unless updated_resources.nil?
-    else
-      return
+  def setup_slackr_options(config = {})
+    # options to be passed to slackr gem
+    @slackr_options = {}
+    # icon_url takes precedence over icon_emoji
+    if config[:icon_url]
+      @slackr_options[:icon_url] = config[:icon_url]
+    elsif config[:icon_emoji]
+      @slackr_options[:icon_emoji] = config[:icon_emoji]
     end
-    return
+    @slackr_options[:channel] = config[:channel]
+    @slackr_options[:username] = config[:username]
   end
 
-  def slack_message(content)
-    slack = Slackr::connect(team, api_key, config)
+  def report_chef_run_start
+    return false unless @util.send_on_start
+    slack_message(@util.start_message.to_s, run_status.node.name)
+  end
+
+  def report_chef_run_end
+    if run_status.success?
+      return false if @util.fail_only
+      slack_message("#{@util.end_message(run_status)} \n #{run_status.exception}", run_status.node.name)
+    else
+      slack_message(@util.end_message(run_status).to_s, run_status.node.name)
+    end
+  end
+
+  def slack_message(content, node_name)
+    Chef::Log.debug("Saying slack message #{content}")
+    @slackr_options[:username] = node_name unless @slackr_options[:username]
+    slack = Slackr.connect(team, api_key, @slackr_options)
     slack.say(content)
   end
-
-  def run_status_human_readable
-    run_status.success? ? "succeeded" : "failed"
-  end
-
 end
