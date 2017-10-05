@@ -21,24 +21,31 @@ default['chef_client']['handler']['slack']['api_key']    = nil
 ## Optional attributes
 default['chef_client']['handler']['slack']['channel']    = nil
 
-
-
-
-# Attributes for Slack intergration using webhook. No API key required. 
+# Attributes for Slack intergration using webhook. No API key required.
 # Multiple webhooks supported. Report detail and fail_only set per webhook.
 default_unless['chef_client']['handler']['slack']['webhooks']['name'] = []
 # use like this
-#default['chef_client']['handler']['slack']['webhooks']['name'].push('webhook1')
-#default['chef_client']['handler']['slack']['webhooks']['webhook1']['url'] = nil
-#default['chef_client']['handler']['slack']['webhooks']['webhook1']['fail_only'] = nil
-#default['chef_client']['handler']['slack']['webhooks']['webhook1']['detail_level'] = nil
+# default['chef_client']['handler']['slack']['webhooks']['name'].push('webhook1')
+# default['chef_client']['handler']['slack']['webhooks']['webhook1']['url'] = nil
+# default['chef_client']['handler']['slack']['webhooks']['webhook1']['fail_only'] = nil
+# default['chef_client']['handler']['slack']['webhooks']['webhook1']['send_start_message'] = nil
+# default['chef_client']['handler']['slack']['webhooks']['webhook1']['message_detail_level'] = nil
+# default['chef_client']['handler']['slack']['webhooks']['webhook1']['cookbook_detail_level'] = nil
+# default['chef_client']['handler']['slack']['webhooks']['webhook1']['send_environment'] = nil
 
 # shared attributes
-default['chef_client']['handler']['slack']['username']   = node.name
+default['chef_client']['handler']['slack']['timeout']    = 15
+default['chef_client']['handler']['slack']['username']   = nil
 default['chef_client']['handler']['slack']['icon_url']   = nil
 # OR
 default['chef_client']['handler']['slack']['icon_emoji'] = nil
 # Valid options here are basic, elapsed, resources
-default['chef_client']['handler']['slack']['detail_level'] = nil
+default['chef_client']['handler']['slack']['message_detail_level'] = 'basic'
+# Valid options here are off, all
+default['chef_client']['handler']['slack']['cookbook_detail_level'] = 'off'
 # Only report failures
-default['chef_client']['handler']['slack']['fail_only'] = nil
+default['chef_client']['handler']['slack']['fail_only'] = false
+# Whether to send a message to when the Chef run starts
+default['chef_client']['handler']['slack']['send_start_message'] = false
+# Whether to send a message the node.chef_environment as well as the node.name
+default['chef_client']['handler']['slack']['send_environment'] = false

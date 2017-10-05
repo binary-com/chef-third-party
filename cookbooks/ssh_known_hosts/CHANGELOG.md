@@ -1,5 +1,65 @@
-v2.0.0 (2014-12-02)
--------------------
+# ssh_known_hosts CHANGELOG
+
+This file is used to list changes made in each version of the ssh_known_hosts cookbook.
+
+## 5.2.1 (2017-05-30)
+
+- Resolve foodcritic warnings
+
+## 5.2.0 (2017-05-30)
+
+- Update apache2 license string
+- Add supports metadata
+- Remove class_eval usage and require Chef 12.7+
+
+## 5.1.0 (2017-03-14)
+
+- add support for hashed entries when using keyscan
+- Test with Local Delivery instead of Rake
+- add a "deprecated" recipe for back-compat-ish behavior
+
+## 5.0.0 (2017-02-23)
+
+- Require Chef 12.5+ and remove compat_resource dependency
+
+## 4.1.1 (2017-01-06)
+
+- Do not write port number if it is 22
+
+## 4.1.0 (2016-12-29)
+
+- Convert entry LWRP to a custom_resource with a delayed accumulator pattern
+- Resolve sort ordering issues
+- Fix for non-port-22 issues
+- Add helper correctly in the recipe DSL
+
+## 4.0.0 (2016-09-07)
+
+- Require chef 12+
+- Testing updates
+- Remove chef 10 compatibility code
+
+## v3.1.0 (2016-07-18)
+
+- [#59] adds mode, owner, group attributes to the entry resource
+
+## v3.0.1 (2016-07-15)
+
+- [#58] Fix issues brought in with v3.0.0 with ssh-keyscan
+- [#58] Add timeout parameter to entry resource associated with ssh-keyscan
+- [#58] Cleaned up some extraneous old chef-solo code
+
+## v3.0.0 (2016-07-14)
+
+- [#55] Remove deprecated cookbook dependency on partial_search making cookbook Chef 12+ only
+
+## v2.1.0 (2016-07-13)
+
+- [#51] Add support for ECDSA and ED25519 keys josacar
+- [#42] Check for nil FQDN realloc
+
+## v2.0.0 (2014-12-02)
+
 - [#36] Fix the way keys are rendered
 - [#22] Update to README
 - [#32] Clean up logging
@@ -9,65 +69,63 @@ v2.0.0 (2014-12-02)
 - [#20] Add checspec matchers
 - [#33] Add test to verify chefspec matcher
 
-v1.3.2 (2014-04-23)
--------------------
+## v1.3.2 (2014-04-23)
+
 - [COOK-4579] - Do not use ssh-keyscan stderr
 
+## v1.3.0 (2014-04-09)
 
-v1.3.0 (2014-04-09)
--------------------
 - [COOK-4489] Updated ssh-keyscan to include -t type
 
+## v1.2.0 (2014-02-18)
 
-v1.2.0 (2014-02-18)
--------------------
 ### Bug
-- **[COOK-3453](https://tickets.opscode.com/browse/COOK-3453)** - ssh_known_hosts cookbook ruby block executes on every chef run
 
+- **[COOK-3453](https://tickets.chef.io/browse/COOK-3453)** - ssh_known_hosts cookbook ruby block executes on every chef run
 
-v1.1.0
-------
+## v1.1.0
+
 [COOK-3765] - support ssh-keyscan using an alternative port number
 
+## v1.0.2
 
-v1.0.2
-------
 ### Bug
-- **[COOK-3113](https://tickets.opscode.com/browse/COOK-3113)** - Use empty string when result is `nil`
 
-v1.0.0
-------
+- **[COOK-3113](https://tickets.chef.io/browse/COOK-3113)** - Use empty string when result is `nil`
+
+## v1.0.0
+
 This is a major release because it requires a server that supports the partial search feature.
 
-- Opscode Hosted Chef
-- Opscode Private Chef
+- Chef Software Hosted Chef
+- Chef Software Private Chef
 - Open Source Chef 11
 
 ### Improvement
 
 - [COOK-830]: uses an inordinate amount of RAM when running exception handlers
 
-v0.7.4
-------
+## v0.7.4
+
 - [COOK-2440] - `ssh_known_hosts` fails to use data bag entries, doesn't grab items
 
-v0.7.2
-------
+## v0.7.2
+
 - [COOK-2364] - Wrong LWRP name used in recipe
 
-v0.7.0
-------
+## v0.7.0
+
 - [COOK-2320] - Merge `known_host` LWRP into `ssh_known_hosts`
 
-v0.6.0
-------
+## v0.6.0
+
 - [COOK-2268] - Allow to run with chef-solo
 
-v0.5.0
-------
+## v0.5.0
+
 - [COOK-1077] - allow adding arbitrary host keys from a data bag
 
-v0.4.0
-------
+## v0.4.0
+
 - COOK-493: include fqdn
 - COOK-721: corrected permissions
