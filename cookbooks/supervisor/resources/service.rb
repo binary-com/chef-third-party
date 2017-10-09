@@ -158,6 +158,7 @@ action_class.class_eval do
     file "#{node['supervisor']['dir']}/#{service_name}.conf" do
       action :delete
       notifies :run, 'execute[supervisorctl update]', :immediately
+      only_if { ::File.exist?("#{node['supervisor']['dir']}/#{service_name}.conf") }
     end
   end
 
