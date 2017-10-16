@@ -2,7 +2,7 @@
 # Cookbook Name:: logrotate
 # Library:: CookbookLogrotate
 #
-# Copyright 2013, Opscode
+# Copyright 2013, Chef
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,25 +17,20 @@
 # limitations under the License.
 #
 
-# Helper module for Logrotate configuration
+# Helper module for Logrotate configuration module CookbookLogrotate
 module CookbookLogrotate
-  DIRECTIVES = %w(
-    compress        copy        copytruncate    daily           dateext
-    delaycompress   ifempty     mailfirst       maillast        missingok
-    monthly         nocompress  nocopy          nocopytruncate  nocreate
-    nodelaycompress nodateext   nomail          nomissingok     noolddir
-    nosharedscripts noshred     notifempty      sharedscripts   shred
-    weekly          yearly
-  ) unless const_defined?(:DIRECTIVES)
+  DIRECTIVES = %w{compress copy copytruncate daily dateext
+    dateyesterday delaycompress hourly ifempty mailfirst maillast
+    missingok monthly nocompress nocopy nocopytruncate nocreate nocreateolddir
+    nodelaycompress nodateext nomail nomissingok noolddir
+    nosharedscripts noshred notifempty renamecopy sharedscripts shred weekly
+    yearly} unless const_defined?(:DIRECTIVES)
 
-  VALUES = %w(
-    compresscmd    uncompresscmd  compressext    compressoptions
-    create         dateformat     include        mail
-    maxage         minsize        rotate         size
-    shredcycles    start          tabooext
-  ) unless const_defined?(:VALUES)
+  VALUES = %w{compresscmd uncompresscmd compressext compressoptions
+    create createolddir dateformat include mail extension maxage minsize maxsize
+    rotate size shredcycles start tabooext su olddir} unless const_defined?(:VALUES)
 
-  SCRIPTS = %w(firstaction  prerotate  postrotate  lastaction) unless const_defined?(:SCRIPTS)
+  SCRIPTS = %w{firstaction prerotate postrotate lastaction preremove} unless const_defined?(:SCRIPTS)
 
   DIRECTIVES_AND_VALUES = DIRECTIVES + VALUES unless const_defined?(:DIRECTIVES_AND_VALUES)
 
@@ -57,11 +52,11 @@ module CookbookLogrotate
       end
 
       def paths_from(hash)
-        hash.select { |k| !(DIRECTIVES_AND_VALUES.include?(k)) }.reduce({}) do | accum_paths, (path, config) |
+        hash.select { |k| !(DIRECTIVES_AND_VALUES.include?(k)) }.reduce({}) do |accum_paths, (path, config)|
           accum_paths[path] = {
-            'directives' => directives_from(config),
-            'values' => values_from(config),
-            'scripts' => scripts_from(config)
+            "directives" => directives_from(config),
+            "values" => values_from(config),
+            "scripts" => scripts_from(config),
           }
 
           accum_paths
@@ -70,7 +65,7 @@ module CookbookLogrotate
 
       def scripts_from(hash)
         defined_scripts = hash.select { |k| SCRIPTS.include?(k) }
-        defined_scripts.reduce({}) do | accum_scripts, (script, lines) |
+        defined_scripts.reduce({}) do |accum_scripts, (script, lines)|
           if lines.respond_to?(:join)
             accum_scripts[script] = lines.join("\n")
           else

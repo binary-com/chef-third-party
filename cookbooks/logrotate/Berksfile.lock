@@ -1,0 +1,13 @@
+DEPENDENCIES
+  fake
+    path: test/fixtures/cookbooks/fake
+  logrotate
+    path: .
+    metadata: true
+
+GRAPH
+  compat_resource (12.9.1)
+  fake (1.0.0)
+    logrotate (>= 0.0.0)
+  logrotate (2.0.0)
+    compat_resource (>= 0.0.0)
