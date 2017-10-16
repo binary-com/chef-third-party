@@ -1,5 +1,54 @@
 # Changelog
 
+## v2.1.1
+
+* Fix the SCL repository enable command for RHEL.
+* Internal refactoring of the system package installer.
+
+## v2.1.0
+
+* Allow customizing properties on the system package install resource via a block
+
+## v2.0.5
+
+* Fixes to work with the latest Chef (again).
+
+## v2.0.4
+
+* Fixes to work with the latest Chef.
+
+## v2.0.3
+
+* Correct the subscription repository name used for SCLs on RedHat.
+
+## v2.0.2
+
+* Don't try to use SCL providers on Amazon Linux.
+
+## v2.0.1
+
+* Don't error on `Chef::Decorator::Lazy` proxy objects for `candidate_version`.
+* Retry system and SCL package installs because transient network failures.
+
+## v2.0.0
+
+* Backwards-incompatible change to SCL management to comply with their new repo
+  packages and layout. Uses `centos-release-scl-rh` repo package or the
+  `rhel-variant-rhscl` RedHat subscription.
+
+## v1.4.0
+
+* Use `poise-archive` to unpack static binary archives. This should work better
+  on AIX and Solaris, as well as making it easier to add more archive formats in
+  the future.
+
+## v1.3.3
+
+* [#3](https://github.com/poise/poise-languages/pull/3) Fix `static` binary
+  installation on AIX and Solaris.
+* Only run the candidate version check for `system` installs when we aren't
+  passing in package_version.
+
 ## v1.3.2
 
 * Handle static archive unpacking correctly when a single download is shared
@@ -21,7 +70,7 @@
 * Support for installing development headers with SCL providers.
 * Add `PoiseLanguages::Utils.shelljoin` for encoding command arrays with some
   bash metadata characters allowed.
-* [#1](https://github.com/poise/poise-languages/pull/1) – Fix typo in gemspec.
+* [#1](https://github.com/poise/poise-languages/pull/1) Fix typo in gemspec.
 
 ## v1.1.0
 

@@ -1,5 +1,5 @@
 #
-# Copyright 2015, Noah Kantrowitz
+# Copyright 2015-2017, Noah Kantrowitz
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +17,6 @@
 
 module PoiseRuby
   module RubyBuild
-    VERSION = '1.0.1'
+    VERSION = '1.1.0'
   end
 end

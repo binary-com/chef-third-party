@@ -1,5 +1,5 @@
 #
-# Copyright 2015, Noah Kantrowitz
+# Copyright 2015-2017, Noah Kantrowitz
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ module PoiseRuby
           '6' => %w{ruby1.8},
         },
         ubuntu: {
+          '16.04' => %w{ruby2.3},
           '14.04' => %w{ruby2.0 ruby1.9.3},
           '12.04' => %w{ruby1.9.3 ruby1.8},
           '10.04' => %w{ruby1.9.1 ruby1.8},
