@@ -1,12 +1,12 @@
 #
-# Cookbook Name:: chef-client
+# Cookbook::  chef-client
 # Recipe:: service
 #
 # Author:: Joshua Timberman (<joshua@chef.io>)
 # Author:: Seth Chisamore (<schisamo@chef.io>)
 # Author:: Paul Mooring (<paul@chef.io>)
 #
-# Copyright 2009-2013, Chef Software, Inc.
+# Copyright:: 2009-2017, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,10 +21,8 @@
 # limitations under the License.
 #
 
-supported_init_styles = %w{
-  bluepill
+supported_init_styles = %w(
   bsd
-  daemontools
   init
   launchd
   runit
@@ -33,7 +31,7 @@ supported_init_styles = %w{
   systemd
   upstart
   windows
-}
+)
 
 init_style = node['chef_client']['init_style']
 

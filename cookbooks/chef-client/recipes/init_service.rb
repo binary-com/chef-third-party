@@ -7,29 +7,30 @@ end
 client_bin = find_chef_client
 Chef::Log.debug("Found chef-client in #{client_bin}")
 node.default['chef_client']['bin'] = client_bin
-create_directories
+create_chef_directories
 
 dist_dir, conf_dir = value_for_platform_family(
-  ['debian'] => %w{ debian default },
-  ['fedora'] => %w{ redhat sysconfig },
-  ['rhel'] => %w{ redhat sysconfig },
-  ['suse'] => %w{ suse sysconfig }
+  ['amazon'] => %w( redhat sysconfig ),
+  ['debian'] => %w( debian default ),
+  ['fedora'] => %w( redhat sysconfig ),
+  ['rhel'] => %w( redhat sysconfig ),
+  ['suse'] => %w( suse sysconfig )
 )
 
 template '/etc/init.d/chef-client' do
   source "#{dist_dir}/init.d/chef-client.erb"
-  mode 0755
-  variables :client_bin => client_bin
+  mode '755'
+  variables client_bin: client_bin
   notifies :restart, 'service[chef-client]', :delayed
 end
 
 template "/etc/#{conf_dir}/chef-client" do
   source "#{dist_dir}/#{conf_dir}/chef-client.erb"
-  mode 0644
+  mode '644'
   notifies :restart, 'service[chef-client]', :delayed
 end
 
 service 'chef-client' do
-  supports :status => true, :restart => true
+  supports status: true, restart: true
   action [:enable, :start]
 end

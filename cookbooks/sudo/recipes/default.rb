@@ -1,8 +1,8 @@
 #
-# Cookbook Name:: sudo
+# Cookbook:: sudo
 # Recipe:: default
 #
-# Copyright 2008-2013, Opscode, Inc.
+# Copyright:: 2008-2016, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,31 +25,35 @@ end
 
 if node['authorization']['sudo']['include_sudoers_d']
   directory "#{prefix}/sudoers.d" do
-    mode    '0755'
-    owner   'root'
-    group   node['root_group']
+    mode '0755'
+    owner 'root'
+    group node['root_group']
   end
 
   cookbook_file "#{prefix}/sudoers.d/README" do
-    source  'README'
-    mode    '0440'
-    owner   'root'
-    group   node['root_group']
+    mode '0440'
+    owner 'root'
+    group node['root_group']
   end
 end
 
 template "#{prefix}/sudoers" do
   source 'sudoers.erb'
-  mode   '0440'
-  owner  'root'
-  group  node['root_group']
+  mode '0440'
+  owner 'root'
+  group node['root_group']
   variables(
-    :sudoers_groups    => node['authorization']['sudo']['groups'],
-    :sudoers_users     => node['authorization']['sudo']['users'],
-    :passwordless      => node['authorization']['sudo']['passwordless'],
-    :include_sudoers_d => node['authorization']['sudo']['include_sudoers_d'],
-    :agent_forwarding  => node['authorization']['sudo']['agent_forwarding'],
-    :sudoers_defaults  => node['authorization']['sudo']['sudoers_defaults'],
-    :command_aliases   => node['authorization']['sudo']['command_aliases']
+    sudoers_groups: node['authorization']['sudo']['groups'],
+    sudoers_users: node['authorization']['sudo']['users'],
+    passwordless: node['authorization']['sudo']['passwordless'],
+    setenv: node['authorization']['sudo']['setenv'],
+    include_sudoers_d: node['authorization']['sudo']['include_sudoers_d'],
+    agent_forwarding: node['authorization']['sudo']['agent_forwarding'],
+    sudoers_defaults: node['authorization']['sudo']['sudoers_defaults'],
+    command_aliases: node['authorization']['sudo']['command_aliases'],
+    env_keep_add: node['authorization']['sudo']['env_keep_add'],
+    env_keep_subtract: node['authorization']['sudo']['env_keep_subtract'],
+    custom_commands_users: node['authorization']['sudo']['custom_commands']['users'],
+    custom_commands_groups: node['authorization']['sudo']['custom_commands']['groups']
   )
 end

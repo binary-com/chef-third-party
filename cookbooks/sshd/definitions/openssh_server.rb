@@ -22,27 +22,40 @@ class Chef::Recipe
   include Sshd::Helpers
 end
 
-
-define :openssh_server, :action => :create, :cookbook => 'sshd', :source => 'sshd_config.erb' do
-  # remove attributes that are not sshd configuration
-  filename = params.delete(:name)
-  action   = params.delete(:action)
-  cookbook = params.delete(:cookbook)
-  source   = params.delete(:source)
+define :openssh_server, action: :create, cookbook: 'sshd', source: 'sshd_config.erb' do
+  # Remove attributes that are not sshd configuration
+  filename        = params.delete(:name)
+  template_action = params.delete(:action)
+  cookbook        = params.delete(:cookbook)
+  source          = params.delete(:source)
 
   # generate sshd_config according to attributes
   # use default values, overwrite them with the ones in the definition
   settings = merge_settings(node['sshd']['sshd_config'], params)
   sshd_config = generate_sshd_config(settings)
 
+  # Check sshd_config
+  execute 'check_sshd_config' do
+    command "#{node['sshd']['sshd_path']} -t -f #{filename}"
+    action :nothing
+  end
+
+  service node['sshd']['service_name'] do
+    supports status: true, restart: true, reload: true
+    action :nothing
+  end
+
   template filename do
     owner     'root'
-    group     'root'
-    mode      '0644'
+    group     node['root_group']
+    mode      0o644
     cookbook  cookbook
     source    source
-    variables :config => sshd_config
-    notifies  :restart, resources(:service => node['sshd']['service_name'])
-    action    action
+    variables config: sshd_config
+    action    template_action
+
+    # Test sshd_config before actually restarting
+    notifies :run, 'execute[check_sshd_config]', :immediately
+    notifies :restart, "service[#{node['sshd']['service_name']}]", :delayed
   end
 end

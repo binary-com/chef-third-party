@@ -1,9 +1,8 @@
-# encoding: utf-8
 # Author:: Joshua Timberman(<joshua@chef.io>)
-# Cookbook Name:: common
+# Cookbook:: common
 # Recipe:: default
 #
-# Copyright 2009-2014, Chef Software, Inc.
+# Copyright:: 2009-2017, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -87,7 +86,7 @@ unless node['postfix']['sender_canonical_map_entries'].empty?
   end
 
   unless node['postfix']['main'].key?('sender_canonical_maps')
-    node.set['postfix']['main']['sender_canonical_maps'] = "hash:#{node['postfix']['conf_dir']}/sender_canonical"
+    node.normal['postfix']['main']['sender_canonical_maps'] = "hash:#{node['postfix']['conf_dir']}/sender_canonical"
   end
 end
 
@@ -100,13 +99,13 @@ unless node['postfix']['smtp_generic_map_entries'].empty?
   template "#{node['postfix']['conf_dir']}/smtp_generic" do
     owner 'root'
     group node['root_group']
-    mode  '0644'
+    mode '0644'
     notifies :run, 'execute[update-postfix-smtp_generic]'
     notifies :reload, 'service[postfix]'
   end
 
   unless node['postfix']['main'].key?('smtp_generic_maps')
-    node.set['postfix']['main']['smtp_generic_maps'] = "hash:#{node['postfix']['conf_dir']}/smtp_generic"
+    node.normal['postfix']['main']['smtp_generic_maps'] = "hash:#{node['postfix']['conf_dir']}/smtp_generic"
   end
 end
 

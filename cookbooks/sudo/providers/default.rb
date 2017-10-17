@@ -1,11 +1,11 @@
 #
 # Author:: Bryan W. Berry (<bryan.berry@gmail.com>)
 # Author:: Seth Vargo (<sethvargo@gmail.com>)
-# Cookbook Name:: sudo
+# Cookbook:: sudo
 # Provider:: default
 #
-# Copyright 2011, Bryan w. Berry
-# Copyright 2012, Seth Vargo
+# Copyright:: 2011-2016, Bryan w. Berry
+# Copyright:: 2012-2016, Seth Vargo
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,18 +20,20 @@
 # limitations under the License.
 #
 
+use_inline_resources
+
 # This LWRP supports whyrun mode
 def whyrun_supported?
   true
 end
 
 # Ensure that the inputs are valid (we cannot just use the resource for this)
-def check_inputs(user, group, foreign_template, foreign_vars)
+def check_inputs(user, group, foreign_template, _foreign_vars)
   # if group, user, and template are nil, throw an exception
   if user.nil? && group.nil? && foreign_template.nil?
-    fail 'You must provide a user, group, or template!'
+    raise 'You must provide a user, group, or template!'
   elsif !user.nil? && !group.nil? && !template.nil?
-    fail 'You cannot specify user, group, and template!'
+    raise 'You cannot specify user, group, and template!'
   end
 end
 
@@ -66,31 +68,35 @@ def render_sudoer
   if new_resource.template
     Chef::Log.debug('Template attribute provided, all other attributes ignored.')
 
-    resource = template "#{node['authorization']['sudo']['prefix']}/sudoers.d/#{new_resource.name}" do
-      source        new_resource.template
-      owner         'root'
-      group         node['root_group']
-      mode          '0440'
-      variables     new_resource.variables
-      action        :nothing
+    resource = template "#{node['authorization']['sudo']['prefix']}/sudoers.d/#{sudo_filename}" do
+      source new_resource.template
+      owner 'root'
+      group node['root_group']
+      mode '0440'
+      variables new_resource.variables
+      action :nothing
     end
   else
-    sudoer = new_resource.user || "%#{new_resource.group}".squeeze('%')
+    sudoer = new_resource.user || ("%#{new_resource.group}".squeeze('%') if new_resource.group)
 
-    resource = template "#{node['authorization']['sudo']['prefix']}/sudoers.d/#{new_resource.name}" do
-      source        'sudoer.erb'
-      cookbook      'sudo'
-      owner         'root'
-      group         node['root_group']
-      mode          '0440'
-      variables     :sudoer => sudoer,
-                    :host => new_resource.host,
-                    :runas => new_resource.runas,
-                    :nopasswd => new_resource.nopasswd,
-                    :commands => new_resource.commands,
-                    :command_aliases => new_resource.command_aliases,
-                    :defaults => new_resource.defaults
-      action        :nothing
+    resource = template "#{node['authorization']['sudo']['prefix']}/sudoers.d/#{sudo_filename}" do
+      source 'sudoer.erb'
+      cookbook 'sudo'
+      owner 'root'
+      group node['root_group']
+      mode '0440'
+      variables sudoer:             sudoer,
+                host:               new_resource.host,
+                runas:              new_resource.runas,
+                nopasswd:           new_resource.nopasswd,
+                noexec:             new_resource.noexec,
+                commands:           new_resource.commands,
+                command_aliases:    new_resource.command_aliases,
+                defaults:           new_resource.defaults,
+                setenv:             new_resource.setenv,
+                env_keep_add:       new_resource.env_keep_add,
+                env_keep_subtract:  new_resource.env_keep_subtract
+      action :nothing
     end
   end
 
@@ -107,17 +113,22 @@ end
 action :install do
   target = "#{node['authorization']['sudo']['prefix']}/sudoers.d/"
 
-  unless ::File.exists?(target)
+  package 'sudo' do
+    not_if 'which sudo'
+  end
+
+  unless ::File.exist?(target)
     sudoers_dir = directory target
     sudoers_dir.run_action(:create)
   end
 
+  Chef::Log.warn("#{sudo_filename} will be rendered, but will not take effect because node['authorization']['sudo']['include_sudoers_d'] is set to false!") unless node['authorization']['sudo']['include_sudoers_d']
   new_resource.updated_by_last_action(true) if render_sudoer
 end
 
 # Removes a user from the sudoers group
 action :remove do
-  resource = file "#{node['authorization']['sudo']['prefix']}/sudoers.d/#{new_resource.name}" do
+  resource = file "#{node['authorization']['sudo']['prefix']}/sudoers.d/#{sudo_filename}" do
     action :nothing
   end
   resource.run_action(:delete)
@@ -125,6 +136,12 @@ action :remove do
 end
 
 private
+
+# acording to the sudo man pages sudo will ignore files in an include dir that have a `.` or `~`
+# We convert either to `__`
+def sudo_filename
+  new_resource.name.gsub(/[\.~]/, '__')
+end
 
 # Capture a template to a string
 def capture(template)

@@ -1,8 +1,8 @@
 #
-# Cookbook Name:: chef-client
+# Cookbook::  chef-client
 # Recipe:: _unit_test_cloning_resource
 #
-# Copyright 2010, Chef Software, Inc.
+# Copyright:: 2010-2017, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,4 +28,4 @@ directory node['chef_client']['conf_dir'] do
   group 'fake'
 end
 
-create_directories
+create_chef_directories

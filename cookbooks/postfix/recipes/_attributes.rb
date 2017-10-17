@@ -1,5 +1,4 @@
-# encoding: utf-8
-# Copyright:: Copyright 2012-2014, Chef Software, Inc.
+# Copyright:: 2012-2017, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -57,4 +56,16 @@ end
 
 if node['postfix']['use_virtual_aliases_domains']
   node.default_unless['postfix']['main']['virtual_alias_domains'] = ["#{node['postfix']['virtual_alias_domains_db_type']}:#{node['postfix']['virtual_alias_domains_db']}"]
+end
+
+if node['postfix']['use_relay_restrictions_maps']
+  default['postfix']['main']['smtpd_relay_restrictions'] = "hash:#{node['postfix']['relay_restrictions_db']}, reject"
+end
+
+if node['postfix']['master']['maildrop']['active']
+  node.default_unless['postfix']['main']['maildrop_destination_recipient_limit'] = 1
+end
+
+if node['postfix']['master']['cyrus']['active']
+  node.default_unless['postfix']['main']['cyrus_destination_recipient_limit'] = 1
 end
