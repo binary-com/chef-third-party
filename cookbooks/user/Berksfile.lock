@@ -1,0 +1,11 @@
+DEPENDENCIES
+  user
+    path: .
+    metadata: true
+  user_test
+    path: test/cookbooks/user_test
+
+GRAPH
+  user (0.6.0)
+  user_test (1.0.0)
+    user (>= 0.0.0)
