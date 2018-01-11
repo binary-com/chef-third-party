@@ -51,6 +51,7 @@ property :environment, kind_of: Hash, default: {}
 property :directory, kind_of: [String, NilClass], default: nil
 property :umask, kind_of: [NilClass, String], default: nil
 property :serverurl, kind_of: String, default: 'AUTO'
+property :minfds, kind_of: Integer, default: 1024
 
 property :eventlistener, kind_of: [TrueClass, FalseClass], default: false
 property :eventlistener_buffer_size, kind_of: Integer, default: nil
