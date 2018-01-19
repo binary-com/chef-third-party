@@ -42,9 +42,24 @@ when 'debian'
     action :add
   end
 
-when 'rhel', 'fedora'
-  include_recipe 'yum'
-
+  apt_repository 'datadog-beta' do
+    keyserver 'hkp://keyserver.ubuntu.com:80'
+    key 'C7A7DA52'
+    uri node['datadog']['agent6_aptrepo']
+    distribution node['datadog']['agent6_aptrepo_dist']
+    components ['main']
+    if node['datadog']['agent6'] &&
+       (node['datadog']['agent6_aptrepo'] != node['datadog']['aptrepo'] ||
+       node['datadog']['agent6_aptrepo_dist'] != node['datadog']['aptrepo_dist'])
+      # add the beta repo iff:
+      # * agent6 is selected (avoid automatic upgrades to agent6 if it's not), and
+      # * the node is configured to use a different repo than the agent5 (avoid duplicate repos)
+      action :add
+    else
+      action :remove
+    end
+  end
+when 'rhel', 'fedora', 'amazon'
   # Import new RPM key
   if node['datadog']['yumrepo_gpgkey_new']
     # gnupg is required to check the downloaded key's fingerprint
@@ -73,11 +88,16 @@ when 'rhel', 'fedora'
   yum_repository 'datadog' do
     name 'datadog'
     description 'datadog'
-    baseurl node['datadog']['yumrepo']
+    if node['datadog']['agent6']
+      baseurl node['datadog']['agent6_yumrepo']
+    else
+      baseurl node['datadog']['yumrepo']
+    end
     proxy node['datadog']['yumrepo_proxy']
     proxy_username node['datadog']['yumrepo_proxy_username']
     proxy_password node['datadog']['yumrepo_proxy_password']
     gpgkey node['datadog']['yumrepo_gpgkey']
+    gpgcheck true
     action :create
   end
 end

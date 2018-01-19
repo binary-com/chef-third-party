@@ -13,9 +13,11 @@ include_recipe 'datadog::dd-agent'
 #       "user" => "guest",
 #       "pass" => "guest",
 #       "ssl_verify" => "true"
+#       "tag_families" => "false"
 #     }
 #   ]
 
 datadog_monitor 'rabbitmq' do
   instances node['datadog']['rabbitmq']['instances']
+  logs node['datadog']['rabbitmq']['logs']
 end
