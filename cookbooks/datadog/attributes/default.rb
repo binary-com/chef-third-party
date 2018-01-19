@@ -28,6 +28,45 @@ default['datadog']['api_key'] = nil
 # Set it as an attribute, or on your node `run_state` under the key `['datadog']['application_key']`
 default['datadog']['application_key'] = nil
 
+########################################################################
+###            Beta-Agent6-only attributes, experimental             ###
+### These attributes are not part of the stable API of the cookbook  ###
+###   Subject to breaking changes between bugfix/minor versions      ###
+###              Only works on Linux (DEB/RPM) for now               ###
+
+# Set to true to install an agent6 instead of agent5.
+# To upgrade from agent5 to agent6, you need to:
+# * set node['datadog']['agent6'] to true, and
+# * either set node['datadog']['agent6_version'] to an existing agent6 version (recommended), or
+#   set node['datadog']['agent6_package_action'] to 'upgrade'
+# To downgrade from agent6 to agent5, you need to:
+# * set node['datadog']['agent6'] to false, and
+# * pin node['datadog']['agent_version'] to an existing agent5 version, and
+# * set node['datadog']['agent_allow_downgrade'] to true
+default['datadog']['agent6'] = false
+# Default of `nil` will install latest version, applies to agent6 only.
+# See documentation of `agent_version` attribute for allowed configuration format.
+default['datadog']['agent6_version'] = nil
+default['datadog']['agent6_package_action'] = 'install' # set to `upgrade` to always upgrade to latest
+
+# beta repos where datadog-agent v6 packages are available
+default['datadog']['agent6_aptrepo'] = 'http://apt.datadoghq.com'
+default['datadog']['agent6_aptrepo_dist'] = 'beta'
+# RPMs are only available for RHEL >= 6 (-> use https protocol) and x86_64 arch
+default['datadog']['agent6_yumrepo'] = 'https://yum.datadoghq.com/beta/x86_64/'
+
+# Values that differ on Windows
+# The location of the config folder (containing conf.d)
+default['datadog']['agent6_config_dir'] = '/etc/datadog-agent'
+
+# Set a key to true to make the agent6 use the v2 api on that endpoint, false otherwise.
+# Leave key value to nil to use agent6 default for that endpoint.
+# Supported keys: "series", "events", "service checks"
+default['datadog']['use_v2_api'] = {}
+
+###           End of Beta-Agent6-only experimental attributes        ###
+########################################################################
+
 # Use this attribute to send data to additional accounts
 # (agent and handler if enabled)
 # The key can be anything you want, 'prod' is used there as an example
@@ -93,6 +132,8 @@ yum_protocol =
     'https'
   end
 
+# NB: if you're not using the default repos and/or distributions, make sure
+# to pin the version you're installing with node['datadog']['agent_version']
 default['datadog']['installrepo'] = true
 default['datadog']['aptrepo'] = 'http://apt.datadoghq.com'
 default['datadog']['aptrepo_dist'] = 'stable'
@@ -121,6 +162,7 @@ default['datadog']['windows_agent_use_exe'] = false
 # Values that differ on Windows
 # The location of the config folder (containing conf.d)
 # The name of the dd agent service
+# The log file directory (see logging section below)
 if node['platform_family'] == 'windows'
   default['datadog']['config_dir'] = "#{ENV['ProgramData']}/Datadog"
   default['datadog']['agent_name'] = 'DatadogAgent'
@@ -145,7 +187,7 @@ end
 # Agent Version
 # Default of `nil` will install latest version. On Windows, this will also upgrade to latest
 # This attribute accepts either a `string` or `hash` with the key as platform_name and value of package version
-# In the case of fedora use platform_name of rhel
+# In the case of fedora and amazon linux, use platform_name of rhel
 # Example:
 # default['datadog']['agent_version'] = {
 #  'rhel' => '5.9.0-1',
@@ -223,7 +265,12 @@ default['datadog']['syslog']['active'] = false
 default['datadog']['syslog']['udp'] = false
 default['datadog']['syslog']['host'] = nil
 default['datadog']['syslog']['port'] = nil
-default['datadog']['log_file_directory'] = '/var/log/datadog'
+default['datadog']['log_file_directory'] =
+  if node['platform_family'] == 'windows'
+    nil # let the agent use a default log file dir
+  else
+    '/var/log/datadog'
+  end
 
 # Web proxy configuration
 default['datadog']['web_proxy']['host'] = nil
@@ -288,6 +335,45 @@ default['datadog']['ddtrace_python_version'] = nil
 
 # ddtrace ruby gem version
 default['datadog']['ddtrace_gem_version'] = nil
+
+# Live processes functionality settings
+# Set `enable_process_agent` to:
+# * `true` to explicitly enable the process agent
+# * `false` to explicitly disable it
+# Leave it to `nil` to let the agent's default behavior decide whether to run the process-agent
+default['datadog']['enable_process_agent'] = nil
+
+# Comma-separated list of regex patterns matching process commands to blacklist.
+# Example: 'my-secret-app,dbpass'
+default['datadog']['process_agent']['blacklist'] = nil
+
+# Comma-separated list of regex patterns of containers to include or skip.
+# Each pattern should be in the form of "field:pattern" where 'field' is either
+# 'image' or 'name'.
+# Example: 'image:redis,image:nginx'
+default['datadog']['process_agent']['container_blacklist'] = nil
+# Whitelist is applied after the blacklist.
+default['datadog']['process_agent']['container_whitelist'] = nil
+
+# Full path to store process-agent logs to override the default.
+default['datadog']['process_agent']['log_file'] = nil
+
+# If running in full process collection mode ('enable_process_agent' is true)
+# overrides the collection intervals for the full and real-time checks in seconds.
+default['datadog']['process_agent']['process_interval'] = nil
+default['datadog']['process_agent']['rtprocess_interval'] = nil
+
+# If only collecting containers ('enable_process_agent' is false but docker is available)
+# overrides the collection intervals for the full and real-time check.
+default['datadog']['process_agent']['container_interval'] = nil
+default['datadog']['process_agent']['rtcontainer_interval'] = nil
+
+# Logs functionality settings
+# Set `enable_log_agent` to:
+# * `true` to explicitly enable the log agent
+# * `false` to explicitly disable it
+# Leave it to `nil` to let the agent's default behavior decide whether to run the log-agent
+default['datadog']['enable_logs_agent'] = nil
 
 # For custom gem servers on restricted networks
 # This attribute only works on Chef >= 12.3

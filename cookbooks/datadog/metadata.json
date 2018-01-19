@@ -1,0 +1,58 @@
+{
+  "name": "datadog",
+  "description": "Installs/Configures datadog components",
+  "long_description": "Where to Find the Code\n======================\nTo submit issues and patches please visit https://github.com/DataDog/chef-datadog.\nThe code is licensed under the Apache License 2.0 (see  LICENSE for details).\n\n[![Chef cookbook](https://img.shields.io/cookbook/v/datadog.svg?style=flat)](https://github.com/DataDog/chef-datadog)\n[![Build Status](https://travis-ci.org/DataDog/chef-datadog.svg?branch=master)](https://travis-ci.org/DataDog/chef-datadog)\n[![Circle CI](https://circleci.com/gh/DataDog/chef-datadog.svg?style=shield)](https://circleci.com/gh/DataDog/chef-datadog)\n[![Coverage Status](https://coveralls.io/repos/DataDog/chef-datadog/badge.svg?branch=master)](https://coveralls.io/r/DataDog/chef-datadog?branch=master)\n[![GitHub forks](https://img.shields.io/github/forks/DataDog/chef-datadog.svg)](https://github.com/DataDog/chef-datadog/network)\n[![GitHub stars](https://img.shields.io/github/stars/DataDog/chef-datadog.svg)](https://github.com/DataDog/chef-datadog/stargazers)\n[![Build Status](https://jenkins-01.eastus.cloudapp.azure.com/job/datadog-cookbook/badge/icon)](https://jenkins-01.eastus.cloudapp.azure.com/job/datadog-cookbook/)\n\nDatadog Cookbook\n================\n\nChef recipes to deploy Datadog's components and configuration automatically.\n\nThis cookbook includes experimental support of the beta version of the Datadog Agent 6.0, please refer to\nthe [inline docs](https://github.com/DataDog/chef-datadog/blob/v2.12.0/attributes/default.rb#L31-L66)\nfor more details on the supported platforms and how to use it.\n\nFor general information on the Datadog Agent 6, please refer to the [datadog-agent](https://github.com/DataDog/datadog-agent/) repo.\n\n**NB: This README may refer to features that are not released yet. Please check the README of the\ngit tag/the gem version you're using for your version's documentation**\n\nRequirements\n============\n- chef >= 10.14\n\nPlatforms\n---------\n\n* Amazon Linux\n* CentOS\n* Debian\n* RedHat\n* Scientific Linux\n* Ubuntu\n* Windows (requires chef >= 12.0)\n\nCookbooks\n---------\n\nThe following Opscode cookbooks are dependencies:\n\n* `apt`\n* `chef_handler`\n* `windows`\n* `yum`\n\n**Note for Chef 11 users**: please use these additional dependency version contraints for compatibility with Chef 11:\n\n```\ncookbook 'apt', '< 4.0'\ncookbook 'chef_handler', '< 2.0'\ncookbook 'windows', '< 2.0'\ncookbook 'yum', '~> 3.0'\n```\n\n(in Berkshelf/Librarian format)\n\nRecipes\n=======\n\ndefault\n-------\nJust a placeholder for now, when we have more shared components they will probably live there.\n\ndd-agent\n--------\nInstalls the Datadog agent on the target system, sets the API key, and start the service to report on the local system metrics\n\n**Notes for Windows**:\n\n* With Chef >= 12.6 _and_ the `windows` cookbook >= 1.39.0, Agent upgrades are known to fail.\n  For Chef>=12.6 users on Windows, we recommend pinning the `windows` cookbook to a lower version (`~> 1.38.0` for instance).\n\n  If that's not an option, a known workaround is to use the `remove-dd-agent` recipe (since the `2.5.0` version of the present cookbook) to uninstall the Agent\n  prior to any Agent upgrade.\n\n* Because of changes in the Windows Agent packaging and install in version 5.12.0, when upgrading the Agent from versions <= 5.10.1 to versions >= 5.12.0,\n  please set the `windows_agent_use_exe` attribute to `true`.\n\n  Once the upgrade is complete, you can leave the attribute to its default value (`false`).\n\n  For more information on these Windows packaging changes, see the related [docs on the dd-agent wiki](https://github.com/DataDog/dd-agent/wiki/Windows-Agent-Installation).\n\ndd-handler\n----------\nInstalls the [chef-handler-datadog](https://rubygems.org/gems/chef-handler-datadog) gem and invokes the handler at the end of a Chef run to report the details back to the newsfeed.\n\ndogstatsd-(python|ruby)\n-----------------------\nInstalls the language-specific libraries to interact with `dogstatsd`.\n\nddtrace-(python|ruby)\n---------------------\nInstalls the language-specific libraries for application Traces (APM).\n\nother\n-----\nThere are many other integration-specific recipes, that are meant to assist in deploying the correct agent configuration files and dependencies for a given integration.\n\n\nUsage\n=====\n\n1. Add this cookbook to your Chef Server, either by installing with knife or by adding it to your Berksfile:\n  ```\n  cookbook 'datadog', '~> 2.7.0'\n  ```\n2. Add your API Key either:\n  * as a node attribute via an `environment` or `role`, or\n  * as a node attribute by declaring it in another cookbook at a higher precedence level, or\n  * in the node `run_state` by setting `node.run_state['datadog']['api_key']` in another cookbook preceding `datadog`'s recipes in the run_list. This approach has the benefit of not storing the credential in clear text on the Chef Server.\n3. Create an 'application key' for `chef_handler` [here](https://app.datadoghq.com/account/settings#api), and add it as a node attribute or in the run state, as in Step #2.\n\n   NB: if you're using the run state to store the api and app keys you need to set them at compile time before `datadog::dd-handler` in the run list.\n\n4. Associate the recipes with the desired `roles`, i.e. \"role:chef-client\" should contain \"datadog::dd-handler\" and a \"role:base\" should start the agent with \"datadog::dd-agent\".  Here's an example role with both recipes:\n  ```\n  name 'example'\n  description 'Example role using DataDog'\n\n  default_attributes(\n    'datadog' => {\n      'api_key' => 'api_key',\n      'application_key' => 'app_key'\n    }\n  )\n\n  run_list %w(\n    recipe[datadog::dd-agent]\n    recipe[datadog::dd-handler]\n  )\n  ```\n5. Wait until `chef-client` runs on the target node (or trigger chef-client manually if you're impatient)\n\nWe are not making use of data_bags in this recipe at this time, as it is unlikely that you will have more than one API key and one application key.\n\nFor more deployment details, visit the [Datadog Documentation site](http://docs.datadoghq.com/).\n",
+  "maintainer": "Datadog",
+  "maintainer_email": "package@datadoghq.com",
+  "license": "Apache-2.0",
+  "platforms": {
+    "amazon": ">= 0.0.0",
+    "centos": ">= 0.0.0",
+    "debian": ">= 0.0.0",
+    "fedora": ">= 0.0.0",
+    "redhat": ">= 0.0.0",
+    "scientific": ">= 0.0.0",
+    "ubuntu": ">= 0.0.0",
+    "windows": ">= 0.0.0"
+  },
+  "dependencies": {
+    "apt": ">= 0.0.0",
+    "chef_handler": ">= 1.1",
+    "windows": ">= 0.0.0",
+    "yum": ">= 3.0"
+  },
+  "providing": {
+
+  },
+  "attributes": {
+
+  },
+  "recipes": {
+    "datadog::default": "Default",
+    "datadog::dd-agent": "Installs the Datadog Agent",
+    "datadog::dd-handler": "Installs a Chef handler for Datadog",
+    "datadog::repository": "Installs the Datadog package repository",
+    "datadog::dogstatsd-python": "Installs the Python dogstatsd package for custom metrics",
+    "datadog::dogstatsd-ruby": "Installs the Ruby dogstatsd package for custom metrics",
+    "datadog::ddtrace-python": "Installs the Python ddtrace package for APM",
+    "datadog::ddtrace-ruby": "Installs the Ruby ddtrace package for APM",
+    "datadog::cassandra": "Installs and configures the Cassandra integration",
+    "datadog::couchdb": "Installs and configures the CouchDB integration",
+    "datadog::postfix": "Installs and configures the Postfix integration"
+  },
+  "version": "2.13.0",
+  "source_url": "https://github.com/DataDog/chef-datadog",
+  "issues_url": "https://github.com/DataDog/chef-datadog/issues",
+  "privacy": false,
+  "chef_versions": [
+    [
+      ">= 10.14"
+    ]
+  ],
+  "ohai_versions": [
+
+  ],
+  "gems": [
+
+  ]
+}
