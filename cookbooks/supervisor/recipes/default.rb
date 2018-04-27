@@ -17,8 +17,6 @@
 # limitations under the License.
 #
 
-include_recipe 'poise-python'
-python_runtime '2'
 
 # foodcritic FC023: we prefer not having the resource on non-smartos
 if platform_family?('smartos')
@@ -27,18 +25,8 @@ if platform_family?('smartos')
   end
 end
 
-python_package 'meld3' do
-  action :upgrade
-  version '1.0.0'
-end
-
-python_package 'supervisor' do
-  action :upgrade
-  version '3.3.1'
-end
-
-python_package 'setuptools' do
-    action :upgrade
+execute 'pip install supervisor' do
+   command 'pip install supervisor --index=https://pypi.python.org/simple/'
 end
 
 directory node['supervisor']['dir'] do
