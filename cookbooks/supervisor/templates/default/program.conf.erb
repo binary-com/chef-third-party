@@ -11,6 +11,7 @@ startretries=<%= @prog.startretries %>
 exitcodes=<%= @prog.exitcodes.join(',') %>
 stopsignal=<%= @prog.stopsignal %>
 stopwaitsecs=<%= @prog.stopwaitsecs %>
+minfds=<%= @prog.minfds %>
 <% unless @prog.stopasgroup.nil? %>
 stopasgroup=<%= @prog.stopasgroup %>
 <% end %>
