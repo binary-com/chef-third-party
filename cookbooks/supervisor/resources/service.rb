@@ -135,7 +135,7 @@ action_class.class_eval do
       user 'root'
     end
 
-    t = template "#{node['supervisor']['dir']}/#{service_name}.conf" do
+    t = template "#{node['supervisor']['dir']}/#{new_resource.service_name}.conf" do
       source 'program.conf.erb'
       cookbook 'supervisor'
       owner 'root'
@@ -155,10 +155,10 @@ action_class.class_eval do
       user 'root'
     end
 
-    file "#{node['supervisor']['dir']}/#{service_name}.conf" do
+    file "#{node['supervisor']['dir']}/#{new_resource.service_name}.conf" do
       action :delete
       notifies :run, 'execute[supervisorctl update]', :immediately
-      only_if { ::File.exist?("#{node['supervisor']['dir']}/#{service_name}.conf") }
+      only_if { ::File.exist?("#{node['supervisor']['dir']}/#{new_resource.service_name}.conf") }
     end
   end
 
@@ -172,8 +172,8 @@ action_class.class_eval do
   end
 
   def cmd_line_args
-    name = service_name
-    name += ':*' if process_name != '%(program_name)s'
+    name = new_resource.service_name
+    name += ':*' if new_resource.process_name != '%(program_name)s'
     name
   end
 
@@ -188,7 +188,7 @@ action_class.class_eval do
   end
 
   def wait_til_state(state, max_tries = 20)
-    service = service_name
+    service = new_resource.service_name
 
     max_tries.times do
       return if get_current_state(service) == state
