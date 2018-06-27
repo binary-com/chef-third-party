@@ -26,25 +26,24 @@ when 'debian'
     action :install
   end
 
-  # Trust new APT key
-  execute 'apt-key import key 382E94DE' do
-    command 'apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 A2923DFF56EDA6E76E55E492D3A80E30382E94DE'
-    not_if 'apt-key list | grep 382E94DE'
-  end
-
+  uri = node['datadog']['agent6'] ? node['datadog']['agent6_aptrepo'] : node['datadog']['aptrepo']
+  distribution = node['datadog']['agent6'] ? node['datadog']['agent6_aptrepo_dist'] : node['datadog']['aptrepo_dist']
+  components = node['datadog']['agent6'] ? ['main', '6'] : ['main']
   # Add APT repository
   apt_repository 'datadog' do
     keyserver 'hkp://keyserver.ubuntu.com:80'
-    key 'C7A7DA52'
-    uri node['datadog']['aptrepo']
-    distribution node['datadog']['aptrepo_dist']
-    components ['main']
+    key 'A2923DFF56EDA6E76E55E492D3A80E30382E94DE'
+    uri uri
+    distribution distribution
+    components components
     action :add
   end
 
-when 'rhel', 'fedora'
-  include_recipe 'yum'
-
+  # Previous versions of the cookbook could create this repo file, make sure we remove it now
+  apt_repository 'datadog-beta' do
+    action :remove
+  end
+when 'rhel', 'fedora', 'amazon'
   # Import new RPM key
   if node['datadog']['yumrepo_gpgkey_new']
     # gnupg is required to check the downloaded key's fingerprint
@@ -73,11 +72,16 @@ when 'rhel', 'fedora'
   yum_repository 'datadog' do
     name 'datadog'
     description 'datadog'
-    baseurl node['datadog']['yumrepo']
+    if node['datadog']['agent6']
+      baseurl node['datadog']['agent6_yumrepo']
+    else
+      baseurl node['datadog']['yumrepo']
+    end
     proxy node['datadog']['yumrepo_proxy']
     proxy_username node['datadog']['yumrepo_proxy_username']
     proxy_password node['datadog']['yumrepo_proxy_password']
     gpgkey node['datadog']['yumrepo_gpgkey']
+    gpgcheck true
     action :create
   end
 end

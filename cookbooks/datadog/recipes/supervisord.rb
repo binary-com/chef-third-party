@@ -19,9 +19,9 @@
 include_recipe 'datadog::dd-agent'
 
 # Build a data structure with configuration.
-# @see https://github.com/DataDog/dd-agent/blob/master/conf.d/supervisord.yaml.example Supervisord Example
+# @see https://github.com/DataDog/integrations-core/blob/master/supervisord/conf.yaml.example Supervisord Example
 # @example
-#   node.override['datadog']['supervisord']['instances'] =
+#   node.override['datadog']['supervisord']['instances'] = [
 #     {
 #       name: 'server0',
 #       socket: 'unix:///var/run/default-supervisor.sock'
@@ -37,7 +37,9 @@ include_recipe 'datadog::dd-agent'
 #         'webapp'
 #       ]
 #     }
+#   ]
 
 datadog_monitor 'supervisord' do
   instances node['datadog']['supervisord']['instances']
+  logs node['datadog']['supervisord']['logs']
 end
