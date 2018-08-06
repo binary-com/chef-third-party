@@ -2,10 +2,10 @@
 # Author:: Joshua Timberman (<joshua@chef.io>)
 # Author:: Seth Chisamore (<schisamo@chef.io>)
 # Author:: Bryan Berry (<bryan.berry@gmail.com>)
-# Cookbook Name:: chef-client
+# Cookbook::  chef-client
 # Recipe:: cron
 #
-# Copyright 2009-2011, Chef Software, Inc.
+# Copyright:: 2009-2017, Chef Software Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,48 +30,66 @@ end
 # libraries/helpers.rb method to DRY directory creation resources
 client_bin = find_chef_client
 node.default['chef_client']['bin'] = client_bin
-create_directories
+create_chef_directories
 
 dist_dir, conf_dir = value_for_platform_family(
-  ['debian'] => %w{ debian default },
-  ['rhel'] => %w{ redhat sysconfig },
-  ['fedora'] => %w{ redhat sysconfig },
-  ['suse'] => %w{ suse sysconfig }
-  )
+  ['amazon'] => %w( redhat sysconfig ),
+  ['debian'] => %w( debian default ),
+  ['rhel'] => %w( redhat sysconfig ),
+  ['fedora'] => %w( redhat sysconfig ),
+  ['suse'] => %w( suse sysconfig )
+)
 
 # let's create the service file so the :disable action doesn't fail
 case node['platform_family']
-when 'arch', 'debian', 'rhel', 'fedora', 'suse', 'openbsd', 'freebsd'
+when 'debian', 'amazon', 'rhel', 'fedora', 'suse'
   template '/etc/init.d/chef-client' do
     source "#{dist_dir}/init.d/chef-client.erb"
-    mode 0755
-    variables(:client_bin => client_bin)
+    mode '755'
+    variables(client_bin: client_bin)
   end
 
   template "/etc/#{conf_dir}/chef-client" do
     source "#{dist_dir}/#{conf_dir}/chef-client.erb"
-    mode 0644
+    mode '644'
   end
 
   service 'chef-client' do
-    supports :status => true, :restart => true
+    supports status: true, restart: true
     provider Chef::Provider::Service::Upstart if node['chef_client']['init_style'] == 'upstart'
     action [:disable, :stop]
   end
 
 when 'openindiana', 'opensolaris', 'nexentacore', 'solaris2', 'smartos', 'omnios'
   service 'chef-client' do
-    supports :status => true, :restart => true
+    supports status: true, restart: true
     action [:disable, :stop]
     provider Chef::Provider::Service::Solaris
     ignore_failure true
+  end
+
+when 'freebsd'
+  template '/etc/rc.d/chef-client' do
+    owner 'root'
+    group 'wheel'
+    variables client_bin: client_bin
+    mode '755'
+  end
+
+  file '/etc/rc.conf.d/chef' do
+    action :delete
+  end
+
+  service 'chef-client' do
+    supports status: true, restart: true
+    action [:stop]
   end
 end
 
 # Generate a uniformly distributed unique number to sleep.
 if node['chef_client']['splay'].to_i > 0
-  checksum   = Digest::MD5.hexdigest(node['fqdn'] || 'unknown-hostname')
-  sleep_time = checksum.to_s.hex % node['chef_client']['splay'].to_i
+  seed = node['shard_seed'] || Digest::MD5.hexdigest(node.name).to_s.hex
+  sleep_time = seed % node['chef_client']['splay'].to_i
 else
   sleep_time = nil
 end
@@ -80,7 +98,7 @@ log_file   = node['chef_client']['cron']['log_file']
 append_log = node['chef_client']['cron']['append_log'] ? '>>' : '>'
 
 # Use daemon_options in cron.
-client_bin << " #{node["chef_client"]["daemon_options"].join(' ')}" if node["chef_client"]["daemon_options"].any?
+client_bin << " #{node['chef_client']['daemon_options'].join(' ')}" if node['chef_client']['daemon_options'].any?
 
 # If "use_cron_d" is set to true, delete the cron entry that uses the cron
 # resource built in to Chef and instead use the cron_d LWRP.

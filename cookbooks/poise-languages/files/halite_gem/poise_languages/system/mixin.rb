@@ -1,5 +1,5 @@
 #
-# Copyright 2015, Noah Kantrowitz
+# Copyright 2015-2017, Noah Kantrowitz
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ module PoiseLanguages
       #
       # @api public
       # @return [PoiseLanguages::System::Resource]
-      def install_system_packages
+      def install_system_packages(&block)
         dev_package_overrides = system_dev_package_overrides
-        poise_languages_system options['package_name'] || system_package_name do
+        poise_languages_system system_package_name do
           # Otherwise use the default install action.
           action(:upgrade) if options['package_upgrade']
           parent new_resource
@@ -38,6 +38,7 @@ module PoiseLanguages
           dev_package_overrides dev_package_overrides
           package_version options['package_version'] if options['package_version']
           version options['version']
+          instance_exec(&block) if block
         end
       end
 
@@ -45,9 +46,10 @@ module PoiseLanguages
       #
       # @api public
       # @return [PoiseLanguages::System::Resource]
-      def uninstall_system_packages
+      def uninstall_system_packages(&block)
         install_system_packages.tap do |r|
           r.action(:uninstall)
+          r.instance_exec(&block) if block
         end
       end
 
@@ -68,6 +70,8 @@ module PoiseLanguages
       # @api public
       # @return [String]
       def system_package_name
+        # If we have an override, just use that.
+        return options['package_name'] if options['package_name']
         # Look up all packages for this language on this platform.
         system_packages = self.class.packages && node.value_for_platform(self.class.packages)
         if !system_packages && self.class.default_package

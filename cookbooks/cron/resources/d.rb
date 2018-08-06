@@ -1,8 +1,8 @@
 #
-# Cookbook Name:: cron
+# Cookbook:: cron
 # Resource:: d
 #
-# Copyright 2008-2014, Chef Software, Inc.
+# Copyright:: 2008-2017, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,87 +17,105 @@
 # limitations under the License.
 #
 
-actions :create, :delete
+require 'shellwords'
 
-attribute :name, :kind_of => String, :name_attribute => true
-attribute :cookbook, :kind_of => String, :default => 'cron'
+property :name, String, name_property: true
+property :cookbook, String, default: 'cron'
 
-attribute :predefined_value, :kind_of => [String], :default => nil, :callbacks => { 'should be a valid predefined value' => lambda { |spec| validate_predefined_value(spec) } }
-attribute :minute, :kind_of => [Integer, String], :default => '*', :callbacks => { 'should be a valid minute spec' => lambda { |spec| validate_numeric(spec, 0, 59) } }
-attribute :hour, :kind_of => [Integer, String], :default => '*', :callbacks => { 'should be a valid hour spec' => lambda { |spec| validate_numeric(spec, 0, 23) } }
-attribute :day, :kind_of => [Integer, String], :default => '*', :callbacks => { 'should be a valid day spec' => lambda { |spec| validate_numeric(spec, 1, 31) } }
-attribute :month, :kind_of => [Integer, String], :default => '*', :callbacks => { 'should be a valid month spec' => lambda { |spec| validate_month(spec) } }
-attribute :weekday, :kind_of => [Integer, String], :default => '*', :callbacks => { 'should be a valid weekday spec' => lambda { |spec| validate_dow(spec) } }
+property :predefined_value, [String], callbacks: {
+  'should be a valid predefined value' => lambda do |spec|
+    ::Cron::Helpers.validate_predefined_value(spec)
+  end,
+}
+property :minute, [Integer, String], default: '*', callbacks: {
+  'should be a valid minute spec' => lambda do |spec|
+    ::Cron::Helpers.validate_numeric(spec, 0, 59)
+  end,
+}
+property :hour, [Integer, String], default: '*', callbacks: {
+  'should be a valid hour spec' => ->(spec) { ::Cron::Helpers.validate_numeric(spec, 0, 23) },
+}
+property :day, [Integer, String], default: '*', callbacks: {
+  'should be a valid day spec' => ->(spec) { ::Cron::Helpers.validate_numeric(spec, 1, 31) },
+}
+property :month, [Integer, String], default: '*', callbacks: {
+  'should be a valid month spec' => ->(spec) { ::Cron::Helpers.validate_month(spec) },
+}
+property :weekday, [Integer, String], default: '*', callbacks: {
+  'should be a valid weekday spec' => ->(spec) { ::Cron::Helpers.validate_dow(spec) },
+}
 
-attribute :command, :kind_of => String, :required => true
-attribute :user, :kind_of => String, :default => 'root'
-attribute :mailto, :kind_of => [String, NilClass]
-attribute :path, :kind_of => [String, NilClass]
-attribute :home, :kind_of => [String, NilClass]
-attribute :shell, :kind_of => [String, NilClass]
-attribute :comment, :kind_of => [String, NilClass]
-attribute :environment, :kind_of => Hash, :default => {}
-attribute :mode, :kind_of => [String, Integer], :default => '0644'
+property :command, String, required: true
+property :user, String, default: 'root'
+property :mailto, [String, NilClass]
+property :path, [String, NilClass]
+property :home, [String, NilClass]
+property :shell, [String, NilClass]
+property :comment, [String, NilClass]
+property :environment, Hash, default: {}
+property :mode, [String, Integer], default: '0644'
 
-def initialize(*args)
-  super
-  @action = :create
+action :create do
+  # We should be able to switch emulate_cron.d on for Solaris, but I don't have a Solaris box to verify
+  raise 'Solaris does not support cron jobs in /etc/cron.d' if node['platform_family'] == 'solaris2'
+  create_template(:create)
 end
 
-def self.validate_predefined_value(spec)
-  return true if spec.nil?
-  # Several special predefined values can substitute in the cron expression
-  if ['@reboot', '@yearly', '@annually', '@monthly', '@weekly', '@daily', '@midnight', '@hourly'].include? spec.downcase
-    return true
-  else
-    return false
+action :create_if_missing do
+  create_template(:create_if_missing)
+end
+
+action :delete do
+  # cleanup the legacy named job if it exists
+  file 'legacy named cron.d file' do
+    path "/etc/cron.d/#{new_resource.name}"
+    action :delete
+    notifies :create, 'template[/etc/crontab]', :delayed if node['cron']['emulate_cron.d']
+  end
+
+  file "/etc/cron.d/#{sanitized_name}" do
+    action :delete
+    notifies :create, 'template[/etc/crontab]', :delayed if node['cron']['emulate_cron.d']
   end
 end
 
-def self.validate_numeric(spec, min, max)
-  #  binding.pry
-  if spec.is_a? Fixnum
-    return false unless spec >= min && spec <= max
-    return true
+action_class.class_eval do
+  def sanitized_name
+    new_resource.name.tr('.', '-')
   end
 
-  # Lists of invidual values, ranges, and step values all share the validity range for type
-  spec.split(/\/|-|,/).each do |x|
-    next if x == '*'
-    if x =~ /^\d+$/
-      x = x.to_i
-      return false unless x >= min && x <= max
-    else
-      return false
+  def create_template(create_action)
+    # cleanup the legacy named job if it exists
+    file "#{new_resource.name} legacy named cron.d file" do
+      path "/etc/cron.d/#{new_resource.name}"
+      action :delete
+      notifies :create, 'template[/etc/crontab]', :delayed if node['cron']['emulate_cron.d']
+      only_if { new_resource.name != sanitized_name }
     end
-  end
-  true
-end
 
-def self.validate_month(spec)
-  if spec.class == Fixnum
-    return validate_numeric(spec, 1, 12)
-  elsif spec.class == String
-    return true if spec == '*'
-    # Named abbreviations are permitted but not as part of a range or with stepping
-    return true if %w(jan feb mar apr may jun jul aug sep oct nov dec).include? spec.downcase
-    # 1-12 are legal for months
-    return validate_numeric(spec, 1, 12)
-  else
-    return false
-  end
-end
-
-def self.validate_dow(spec)
-  if spec.class == Fixnum
-    return validate_numeric(spec, 0, 7)
-  elsif spec.class == String
-    return true if spec == '*'
-    # Named abbreviations are permitted but not as part of a range or with stepping
-    return true if %w(sun mon tue wed thu fri sat).include? spec.downcase
-    # 0-7 are legal for days of week
-    return validate_numeric(spec, 0, 7)
-  else
-    return false
+    template "/etc/cron.d/#{sanitized_name}" do
+      cookbook new_resource.cookbook
+      source 'cron.d.erb'
+      mode new_resource.mode
+      variables(
+        name: sanitized_name,
+        predefined_value: new_resource.predefined_value,
+        minute: new_resource.minute,
+        hour: new_resource.hour,
+        day: new_resource.day,
+        month: new_resource.month,
+        weekday: new_resource.weekday,
+        command: new_resource.command,
+        user: new_resource.user,
+        mailto: new_resource.mailto,
+        path: new_resource.path,
+        home: new_resource.home,
+        shell: new_resource.shell,
+        comment: new_resource.comment,
+        environment: new_resource.environment
+      )
+      action create_action
+      notifies :create, 'template[/etc/crontab]', :delayed if node['cron']['emulate_cron.d']
+    end
   end
 end

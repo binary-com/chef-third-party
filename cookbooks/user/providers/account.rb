@@ -18,56 +18,74 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+require "chef/resource"
+
+use_inline_resources
+
+def whyrun_supported?
+  true
+end
 
 def load_current_resource
-  @my_home = new_resource.home ||
-    "#{node['user']['home_root']}/#{new_resource.username}"
+  @my_home = user_home
   @my_shell = new_resource.shell || node['user']['default_shell']
   @manage_home = bool(new_resource.manage_home, node['user']['manage_home'])
+  @non_unique = bool(new_resource.non_unique, node['user']['non_unique'])
   @create_group = bool(new_resource.create_group, node['user']['create_group'])
   @ssh_keygen = bool(new_resource.ssh_keygen, node['user']['ssh_keygen'])
+  @group_add = bool(new_resource.groups, node['user']['groups'])
 end
 
-action :create do
+action :create do # ~FC017: LWRP does not notify when updated
   user_resource             :create
-  dir_resource              :create
+  home_dir_resource         :create
+  home_ssh_dir_resource     :create if @ssh_keygen || !new_resource.ssh_keys.empty?
   authorized_keys_resource  :create
   keygen_resource           :create
+  group_resource            :create
+  keypair_resource          :create
 end
 
-action :remove do
-  keygen_resource           :delete
-  authorized_keys_resource  :delete
-  dir_resource              :delete
+action :remove do # ~FC017: LWRP does not notify when updated
+  # Removing a user will also remove all the other file based resources.
+  # By only removing the user it will make this action idempotent.
   user_resource             :remove
 end
 
-action :modify do
+action :modify do # ~FC017: LWRP does not notify when updated
   user_resource             :modify
-  dir_resource              :create
+  home_dir_resource         :create
+  home_ssh_dir_resource     :create if @ssh_keygen || !new_resource.ssh_keys.empty?
   authorized_keys_resource  :create
   keygen_resource           :create
+  keypair_resource          :create
 end
 
-action :manage do
+action :manage do # ~FC017: LWRP does not notify when updated
   user_resource             :manage
-  dir_resource              :create
+  home_dir_resource         :create
+  home_ssh_dir_resource     :create if @ssh_keygen || !new_resource.ssh_keys.empty?
   authorized_keys_resource  :create
   keygen_resource           :create
+  keypair_resource          :create
 end
 
-action :lock do
+action :lock do # ~FC017: LWRP does not notify when updated
   user_resource             :lock
-  dir_resource              :create
+  home_dir_resource         :create
+  home_ssh_dir_resource     :create if @ssh_keygen || !new_resource.ssh_keys.empty?
   authorized_keys_resource  :create
   keygen_resource           :create
+  keypair_resource          :create
 end
 
-action :unlock do
+action :unlock do # ~FC017: LWRP does not notify when updated
   user_resource             :unlock
-  dir_resource              :create
+  home_dir_resource         :create
+  home_ssh_dir_resource     :create if @ssh_keygen || !new_resource.ssh_keys.empty?
   authorized_keys_resource  :create
   keygen_resource           :create
+  keypair_resource          :create
 end
 
 private
@@ -82,14 +100,45 @@ end
 
 def normalize_bool(val)
   case val
-  when 'no','false',false then false
+  when nil, 'no', 'false', false then false
   else true
   end
 end
 
+def user_gid
+  # this check is needed as the new user won't exist yet,
+  # in why_run mode, causing an uncaught ArgumentError exception
+  Etc.getpwnam(new_resource.username).gid
+rescue ArgumentError
+  nil
+end
+
+def user_home
+  # this check is needed as the new user won't exit yet
+  # in why_run mode, causing an uncaught ArgumentError exception
+  new_resource.home || Etc.getpwnam(new_resource.username).dir
+rescue ArgumentError
+  nil
+end
+
+
 def user_resource(exec_action)
   # avoid variable scoping issues in resource block
-  my_home, my_shell, manage_home = @my_home, @my_shell, @manage_home
+  my_home, my_shell, manage_home, non_unique = @my_home, @my_shell, @manage_home, @non_unique
+
+  # Only create parent home directory if home directory was manually specified.
+  # The user (and its home directory) might not exist yet.
+  if my_home
+    my_dir = ::File.dirname(my_home)
+
+    r = directory "#{my_home} parent directory" do
+      path my_dir
+      recursive true
+      action    :nothing
+    end
+    r.run_action(:create) unless exec_action == :remove
+    new_resource.updated_by_last_action(true) if r.updated_by_last_action?
+  end
 
   r = user new_resource.username do
     comment   new_resource.comment  if new_resource.comment
@@ -98,47 +147,73 @@ def user_resource(exec_action)
     home      my_home               if my_home
     shell     my_shell              if my_shell
     password  new_resource.password if new_resource.password
-    system    new_resource.system_user
-    supports  :manage_home => manage_home
+    system    new_resource.system_user # ~FC048: Prefer Mixlib::ShellOut
+    non_unique non_unique
+    manage_home true
     action    :nothing
   end
   r.run_action(exec_action)
   new_resource.updated_by_last_action(true) if r.updated_by_last_action?
 
+  # Update @my_home variable, as the home dir might just have been created
+  @my_home = user_home
+
   # fixes CHEF-1699
   Etc.endgrent
 end
 
-def dir_resource(exec_action)
-  ["#{@my_home}/.ssh", @my_home].each do |dir|
-    r = directory dir do
-      owner       new_resource.username
-      group       Etc.getpwnam(new_resource.username).gid
-      mode        dir =~ %r{/\.ssh$} ? '0700' : '2755'
-      recursive   true
-      action      :nothing
-    end
-    r.run_action(exec_action)
-    new_resource.updated_by_last_action(true) if r.updated_by_last_action?
+def home_dir_resource(exec_action)
+  # avoid variable scoping issues in resource block
+  my_home = @my_home
+  resource_gid = user_gid
+  r = directory my_home do
+    path        my_home
+    owner       new_resource.username
+    group       resource_gid
+    mode        node['user']['home_dir_mode']
+    recursive   true
+    action      :nothing
   end
+  r.run_action(exec_action)
+  new_resource.updated_by_last_action(true) if r.updated_by_last_action?
+end
+
+def home_ssh_dir_resource(exec_action)
+  # avoid variable scoping issues in resource block
+  my_home = @my_home
+  resource_gid = user_gid
+  r = directory "#{my_home}/.ssh" do
+    path        "#{my_home}/.ssh"
+    owner       new_resource.username
+    group       resource_gid
+    mode        '0700'
+    recursive   true
+    action      :nothing
+  end
+  r.run_action(exec_action)
+  new_resource.updated_by_last_action(true) if r.updated_by_last_action?
 end
 
 def authorized_keys_resource(exec_action)
   # avoid variable scoping issues in resource block
   ssh_keys = Array(new_resource.ssh_keys)
+  unless ssh_keys.empty?
+    resource_gid = user_gid
+    r = template "#{@my_home}/.ssh/authorized_keys" do
+      cookbook    'user'
+      source      'authorized_keys.erb'
+      owner       new_resource.username
+      group       resource_gid
+      mode        '0600'
+      variables   :user     => new_resource.username,
+        :ssh_keys => ssh_keys,
+        :fqdn     => node['fqdn']
+      action      :nothing
+    end
 
-  r = template "#{@my_home}/.ssh/authorized_keys" do
-    cookbook    'user'
-    source      'authorized_keys.erb'
-    owner       new_resource.username
-    group       Etc.getpwnam(new_resource.username).gid
-    mode        '0600'
-    variables   :user     => new_resource.username,
-                :ssh_keys => ssh_keys
-    action      :nothing
+    r.run_action(exec_action)
+    new_resource.updated_by_last_action(true) if r.updated_by_last_action?
   end
-  r.run_action(exec_action)
-  new_resource.updated_by_last_action(true) if r.updated_by_last_action?
 end
 
 def keygen_resource(exec_action)
@@ -149,25 +224,58 @@ def keygen_resource(exec_action)
     cwd       my_home
     user      new_resource.username
     command   <<-KEYGEN.gsub(/^ +/, '')
-      ssh-keygen -t dsa -f #{my_home}/.ssh/id_dsa -N '' \
+      ssh-keygen -t rsa -f #{my_home}/.ssh/id_rsa -N '' \
         -C '#{new_resource.username}@#{fqdn}-#{Time.now.strftime('%FT%T%z')}'
-      chmod 0600 #{my_home}/.ssh/id_dsa
-      chmod 0644 #{my_home}/.ssh/id_dsa.pub
+      chmod 0600 #{my_home}/.ssh/id_rsa
+      chmod 0644 #{my_home}/.ssh/id_rsa.pub
     KEYGEN
     action    :nothing
 
-    creates   "#{my_home}/.ssh/id_dsa"
+    creates   "#{my_home}/.ssh/id_rsa"
   end
   e.run_action(:run) if @ssh_keygen && exec_action == :create
   new_resource.updated_by_last_action(true) if e.updated_by_last_action?
 
   if exec_action == :delete then
-    ["#{@my_home}/.ssh/id_dsa", "#{@my_home}/.ssh/id_dsa.pub"].each do |keyfile|
+    ["#{@my_home}/.ssh/id_rsa", "#{@my_home}/.ssh/id_rsa.pub"].each do |keyfile|
       r = file keyfile do
         backup  false
         action :delete
       end
       new_resource.updated_by_last_action(true) if r.updated_by_last_action?
     end
+  end
+end
+
+def group_resource(exec_action)
+  new_resource.groups.each do |grp|
+      r = group grp  do
+            action :nothing
+            members new_resource.username
+            append true
+          end
+      r.run_action(:create) unless exec_action == :delete
+      new_resource.updated_by_last_action(true) if r.updated_by_last_action?
+  end
+end
+
+def keypair_resource(exec_action)
+  new_resource.ssh_keypair.each do |name, key|
+    # avoid variable scoping issues in resource block
+    key_name, key_content = name, key
+
+    home = user_home
+    resource_gid = user_gid
+    r = file ::File.join(home, '.ssh', name) do
+      content   key_content + "\n"
+      owner     new_resource.username
+      group     resource_gid
+      mode      '0600' unless key_name =~ /.pub$/
+      sensitive true
+      action    :nothing
+    end
+
+    r.run_action(exec_action)
+    new_resource.updated_by_last_action(true) if r.updated_by_last_action?
   end
 end

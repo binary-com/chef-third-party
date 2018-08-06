@@ -1,5 +1,5 @@
 #
-# Copyright 2015, Noah Kantrowitz
+# Copyright 2015-2016, Noah Kantrowitz
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,5 +31,6 @@ module Poise
     autoload :ResourceSubclass, 'poise/helpers/resource_subclass'
     autoload :Subresources, 'poise/helpers/subresources'
     autoload :TemplateContent, 'poise/helpers/template_content'
+    autoload :Win32User, 'poise/helpers/win32_user'
   end
 end

@@ -22,9 +22,8 @@ require 'net/http'
 require 'net/https'
 
 module Logentries
+  LURL = 'http://api.logentries.com/'.freeze
 
-  LURL = "http://api.logentries.com/"
-  
   def self.get_response(url)
     uri = URI(URI.escape(url))
     response = Net::HTTP.get_response(uri)
@@ -37,7 +36,7 @@ module Logentries
 
     response = get_response(url)
     logset = JSON.parse(response.body)
-    
+
     hostkey = ''
     hostkey = logset['key']
 
@@ -57,7 +56,7 @@ module Logentries
     logs = get_logs(account_key, host_key)
 
     log = nil
-    
+
     logs.each do |l|
       if l['name'] == log_name
         log = l
@@ -73,16 +72,16 @@ module Logentries
 
     log['token']
   end
-  
+
   def self.log_exist?(account_key, host_key, log_name)
     log = get_log(account_key, host_key, log_name)
 
     log ? true : false
   end
 
-  def self.add_log(account_key,host_key,log_name)
-    if log_exist?(account_key,host_key,log_name)
-      return get_log_token(account_key,host_key,log_name)
+  def self.add_log(account_key, host_key, log_name)
+    if log_exist?(account_key, host_key, log_name)
+      return get_log_token(account_key, host_key, log_name)
     end
     params = {
       'request' => 'new_log',
@@ -92,11 +91,11 @@ module Logentries
       'type' => '',
       'filename' => '',
       'retention' => '-1',
-      'source' => 'token'
+      'source' => 'token',
     }
 
     uri = URI.parse(LURL)
-    http = Net::HTTP.new(uri.host,uri.port)
+    http = Net::HTTP.new(uri.host, uri.port)
     req = Net::HTTP::Post.new(uri.path)
 
     req.set_form_data(params)
@@ -108,5 +107,4 @@ module Logentries
 
   def self.remove_log
   end
-
 end

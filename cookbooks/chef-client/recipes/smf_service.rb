@@ -7,7 +7,7 @@ end
 client_bin = find_chef_client
 Chef::Log.debug("Found chef-client in #{client_bin}")
 node.default['chef_client']['bin'] = client_bin
-create_directories
+create_chef_directories
 
 directory node['chef_client']['method_dir'] do
   action :create
@@ -27,7 +27,11 @@ template "#{node['chef_client']['method_dir']}/chef-client" do
 end
 
 template(local_path + 'chef-client.xml') do
-  source 'solaris/manifest.xml.erb'
+  if node['platform_version'].to_f >= 5.11 && node['platform'] != 'smartos'
+    source 'solaris/manifest-5.11.xml.erb'
+  else
+    source 'solaris/manifest.xml.erb'
+  end
   owner 'root'
   group 'root'
   mode '0644'

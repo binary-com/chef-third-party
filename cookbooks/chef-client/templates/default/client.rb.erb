@@ -9,13 +9,13 @@ end
 
 <% end -%>
 <% @chef_config.keys.sort.each do |option| -%>
-  <% next if %w{ node_name exception_handlers report_handlers start_handlers }.include?(option) -%>
+  <% next if %w{ node_name exception_handlers report_handlers start_handlers http_proxy https_proxy no_proxy }.include?(option) -%>
   <% case option -%>
   <% when 'log_level', 'ssl_verify_mode', 'audit_mode' -%>
 <%= option %> <%= @chef_config[option].gsub(/^:/, '').to_sym.inspect %>
   <% when 'log_location' -%>
   <%   if @chef_config[option].instance_of? String -%>
-<%= option %> <%= @chef_config[option].inspect %>
+<%= option %> <%= @chef_config[option] == 'STDOUT' ? 'STDOUT' : @chef_config[option].inspect %>
   <%   else -%>
 <%= option %> <%= @chef_config[option] -%>
   <%   end -%>
@@ -40,16 +40,14 @@ https_proxy "<%= node["chef_client"]["config"]["https_proxy"] %>"
 no_proxy "<%= node["chef_client"]["config"]["no_proxy"] %>"
 <% end -%>
 
-<% if node.attribute?("ohai") && node["ohai"].attribute?("plugin_path") -%>
-
-Ohai::Config[:plugin_path] << "<%= node["ohai"]["plugin_path"] %>"
+<% unless node["ohai"]["plugin_path"].nil? -%>
+<%= @ohai_new_config_syntax? 'ohai.plugin_path' : 'Ohai::Config[:plugin_path]' %> << "<%= node["ohai"]["plugin_path"] %>"
 <% end -%>
 <% unless @ohai_disabled_plugins.empty? -%>
-Ohai::Config[:disabled_plugins] = [<%= @ohai_disabled_plugins.map { |k| k.match(/:/) ? k.gsub(/^:/, '').to_sym.inspect : k.inspect }.join(",") %>]
-
+<%= @ohai_new_config_syntax? 'ohai.disabled_plugins' : 'Ohai::Config[:disabled_plugins]' %> = [<%= @ohai_disabled_plugins.map { |k| k.match(/:/) ? k.gsub(/^:/, '').to_sym.inspect : k.inspect }.join(",") %>]
 <% end -%>
 
-# Do no crash if a handler is missing / not installed yet
+# Do not crash if a handler is missing / not installed yet
 begin
 <% unless @start_handlers.nil? || @start_handlers.empty?-%>
   <% @start_handlers.each do |handler| -%>
@@ -70,6 +68,12 @@ rescue NameError => e
   Chef::Log.error e
 end
 
+<% if Gem::Version.new(Chef::VERSION) < Gem::Version.new('12.8') -%>
 Dir.glob(File.join(<%= node['chef_client']['conf_dir'].inspect %>, "client.d", "*.rb")).each do |conf|
+  <% if Gem::Version.new(Chef::VERSION) < Gem::Version.new('12.4.0') -%>
   Chef::Config.from_file(conf)
+  <% else -%>
+  ChefConfig::Config.from_file(conf)
+  <% end -%>
 end
+<% end -%>

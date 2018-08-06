@@ -1,30 +1,41 @@
-sudo cookbook
-=============
-[![Build Status](https://secure.travis-ci.org/opscode-cookbooks/sudo.png?branch=master)](http://travis-ci.org/opscode-cookbooks/sudo)
+# sudo cookbook
 
-The Chef `sudo` cookbook installs the `sudo` package and configures the `/etc/sudoers` file.
+[![Build Status](https://travis-ci.org/chef-cookbooks/sudo.svg?branch=master)](http://travis-ci.org/chef-cookbooks/sudo) [![Cookbook Version](https://img.shields.io/cookbook/v/sudo.svg)](https://supermarket.chef.io/cookbooks/sudo)
 
-It also exposes an LWRP for adding and managing sudoers.
+The default recipe installs the `sudo` package and configures the `/etc/sudoers` file. The cookbook also includes a sudo resource to adding and removing individual sudo entries.
 
+## Requirements
 
-Requirements
-------------
-The platform has a package named `sudo` and the `sudoers` file is `/etc/sudoers`.
+### Platforms
 
+- Debian/Ubuntu
+- RHEL/CentOS/Scientific/Amazon/Oracle
+- FreeBSD
+- Mac OS X
+- openSUSE / Suse
 
-Attributes
-----------
-- `node['authorization']['sudo']['groups']` - groups to enable sudo access (default: `[]`)
+### Chef
+
+- Chef 12.1+
+
+### Cookbooks
+
+- None
+
+## Attributes
+
+- `node['authorization']['sudo']['groups']` - groups to enable sudo access (default: `[ "sysadmin" ]`)
 - `node['authorization']['sudo']['users']` - users to enable sudo access (default: `[]`)
 - `node['authorization']['sudo']['passwordless']` - use passwordless sudo (default: `false`)
-- `node['authorization']['sudo']['include_sudoers_d']` - include and manager `/etc/sudoers.d` (default: `false`)
+- `node['authorization']['sudo']['include_sudoers_d']` - include and manage `/etc/sudoers.d` (default: `false`)
 - `node['authorization']['sudo']['agent_forwarding']` - preserve `SSH_AUTH_SOCK` when sudoing (default: `false`)
 - `node['authorization']['sudo']['sudoers_defaults']` - Array of `Defaults` entries to configure in `/etc/sudoers`
+- `node['authorization']['sudo']['setenv']` - Whether to permit preserving of environment with `sudo -E` (default: `false`)
 
+## Usage
 
-Usage
------
-#### Attributes
+### Attributes
+
 To use attributes for defining sudoers, set the attributes above on the node (or role) itself:
 
 ```json
@@ -35,6 +46,44 @@ To use attributes for defining sudoers, set the attributes above on the node (or
         "groups": ["admin", "wheel", "sysadmin"],
         "users": ["jerry", "greg"],
         "passwordless": "true"
+      }
+    }
+  }
+}
+```
+
+```json
+{
+  "default_attributes": {
+    "authorization": {
+      "sudo": {
+        "command_aliases": [{
+          "name": "TEST",
+          "command_list": [
+            "/usr/bin/ls",
+            "/usr/bin/cat"
+          ]
+        }],
+        "custom_commands": {
+          "users": [
+            {
+              "user": "test_user",
+              "passwordless": true,
+              "command_list": [
+                "TEST"
+              ]
+            }
+          ],
+          "groups": [
+            {
+              "group": "test_group",
+              "passwordless": false,
+              "command_list": [
+                "TEST"
+              ]
+            }
+          ]
+        }
       }
     }
   }
@@ -56,24 +105,18 @@ default_attributes(
 
 **Note that the template for the sudoers file has the group "sysadmin" with ALL:ALL permission, though the group by default does not exist.**
 
-#### Sudoers Defaults
+### Sudoers Defaults
 
-Configure a node attribute,
-`node['authorization']['sudo']['sudoers_defaults']` as an array of
-`Defaults` entries to configure in `/etc/sudoers`. A list of examples
-for common platforms is listed below:
+Configure a node attribute, `node['authorization']['sudo']['sudoers_defaults']` as an array of `Defaults` entries to configure in `/etc/sudoers`. A list of examples for common platforms is listed below:
 
-*Debian*
+_Debian_
+
 ```ruby
 node.default['authorization']['sudo']['sudoers_defaults'] = ['env_reset']
 ```
 
-*Ubuntu 10.04*
-```ruby
-node.default['authorization']['sudo']['sudoers_defaults'] = ['env_reset']
-```
+_Ubuntu 12.04_
 
-*Ubuntu 12.04*
 ```ruby
 node.default['authorization']['sudo']['sudoers_defaults'] = [
   'env_reset',
@@ -81,7 +124,8 @@ node.default['authorization']['sudo']['sudoers_defaults'] = [
 ]
 ```
 
-*FreeBSD*
+_FreeBSD_
+
 ```ruby
 node.default['authorization']['sudo']['sudoers_defaults'] = [
   'env_reset',
@@ -89,8 +133,7 @@ node.default['authorization']['sudo']['sudoers_defaults'] = [
 ]
 ```
 
-*RHEL family 5.x*
-The version of sudo in RHEL 5 may not support `+=`, as used in `env_keep`, so its a single string.
+_RHEL family 5.x_ The version of sudo in RHEL 5 may not support `+=`, as used in `env_keep`, so its a single string.
 
 ```ruby
 node.default['authorization']['sudo']['sudoers_defaults'] = [
@@ -105,7 +148,8 @@ node.default['authorization']['sudo']['sudoers_defaults'] = [
 ]
 ```
 
-*RHEL family 6.x*
+_RHEL family 6.x_
+
 ```ruby
 node.default['authorization']['sudo']['sudoers_defaults'] = [
   '!visiblepw',
@@ -121,7 +165,8 @@ node.default['authorization']['sudo']['sudoers_defaults'] = [
 ]
 ```
 
-*Mac OS X*
+_Mac OS X_
+
 ```ruby
 node.default['authorization']['sudo']['sudoers_defaults'] = [
   'env_reset',
@@ -139,15 +184,15 @@ node.default['authorization']['sudo']['sudoers_defaults'] = [
 ]
 ```
 
-#### LWRP
+### Sudo Resource
+
 **Note** Sudo version 1.7.2 or newer is required to use the sudo LWRP as it relies on the "#includedir" directive introduced in version 1.7.2. The recipe does not enforce installing the version. To use this LWRP, set `node['authorization']['sudo']['include_sudoers_d']` to `true`.
 
 There are two ways for rendering a sudoer-fragment using this LWRP:
+1. Using the built-in template
+2. Using a custom, cookbook-level template
 
-  1. Using the built-in template
-  2. Using a custom, cookbook-level template
-
-Both methods will create the `/etc/sudoers.d/#{username}` file with the correct permissions.
+Both methods will create the `/etc/sudoers.d/#{resourcename}` file with the correct permissions.
 
 The LWRP also performs **fragment validation**. If a sudoer-fragment is not valid, the Chef run will throw an exception and fail. This ensures that your sudoers file is always valid and cannot become corrupt (from this cookbook).
 
@@ -177,7 +222,8 @@ In either case, the following file would be generated in `/etc/sudoers.d/tomcat`
 %tomcat ALL=(app_user) /etc/init.d/tomcat restart
 ```
 
-##### LWRP Attributes
+#### Resource Properties
+
 <table>
   <thead>
     <tr>
@@ -215,6 +261,12 @@ case it is not already</td>
       <td><tt>false</tt></td>
     </tr>
     <tr>
+      <td>noexec</td>
+      <td>prevents commands from shelling out</td>
+      <td><tt>true</tt></td>
+      <td><tt>false</tt></td>
+    </tr>
+    <tr>
       <td>runas</td>
       <td>User the command(s) can be run as</td>
       <td><tt>root</tt></td>
@@ -239,6 +291,24 @@ case it is not already</td>
       <td></td>
     </tr>
     <tr>
+      <td>setenv</td>
+      <td>whether to permit the preserving of environment with `sudo -E`</td>
+      <td><tt>true</tt></td>
+      <td><tt><false></tt></td>
+    </tr>
+    <tr>
+      <td>env_keep_add</td>
+      <td>array of strings to add to env_keep</td>
+      <td><tt>['HOME', 'MY_ENV_VAR MY_OTHER_ENV_VAR']</tt></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>env_keep_subtract</td>
+      <td>array of strings to remove from env_keep</td>
+      <td><tt>['DISPLAY', 'MY_SECURE_ENV_VAR']</tt></td>
+      <td></td>
+    </tr>
+    <tr>
       <td>variables</td>
       <td>the variables to pass to the custom template</td>
       <td><tt>:commands => ['/etc/init.d/tomcat restart']</tt></td>
@@ -249,50 +319,15 @@ case it is not already</td>
 
 **If you use the template attribute, all other attributes will be ignored except for the variables attribute.**
 
+## License & Authors
 
-Development
------------
-This section details "quick development" steps. For a detailed explanation, see [[Contributing.md]].
+**Author:** Bryan W. Berry [bryan.berry@gmail.com](mailto:bryan.berry@gmail.com)
 
-1. Clone this repository from GitHub:
+**Author:** Cookbook Engineering Team ([cookbooks@chef.io](mailto:cookbooks@chef.io))
 
-        $ git clone git@github.com:opscode-cookbooks/sudo.git
+**Copyright:** 2008-2016, Chef Software, Inc.
 
-2. Create a git branch
-
-        $ git checkout -b my_bug_fix
-
-3. Install dependencies:
-
-        $ bundle install
-
-4. Make your changes/patches/fixes, committing appropiately
-5. **Write tests**
-6. Run the tests:
-    - `bundle exec foodcritic -f any .`
-    - `bundle exec rspec`
-    - `bundle exec rubocop`
-    - `bundle exec kitchen test`
-
-    In detail:
-    - Foodcritic will catch any Chef-specific style errors
-    - RSpec will run the unit tests
-    - Rubocop will check for Ruby-specific style errors
-    - Test Kitchen will run and converge the recipes
-
-
-
-
-License and Authors
--------------------
-- Author:: Bryan W. Berry <bryan.berry@gmail.com>
-- Author:: Adam Jacob <adam@opscode.com>
-- Author:: Seth Chisamore <schisamo@opscode.com>
-- Author:: Seth Vargo <sethvargo@gmail.com>
-
-```text
-Copyright 2009-2012, Opscode, Inc.
-
+```
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at

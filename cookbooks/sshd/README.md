@@ -18,14 +18,15 @@ You can specify the package that installs sshd, using the following attribute.
 There's  defaults for most linux distributions.
 
 ```ruby
-node['sshd']['package']      # package to install openssh-server
+node['sshd']['package']      # Package to install openssh-server
 ```
 
 The following settings will be filled in using the defaults of the distribution you're using, unless you overwrite it in your node configuration / definition
 
 ```ruby
-node['sshd']['config_file']  # path to sshd_config
-node['sshd']['service_name'] # sshd service name
+node['sshd']['sshd_path']    # Path to sshd executable
+node['sshd']['config_file']  # Path to sshd_config
+node['sshd']['service_name'] # OpenSSH service name
 ```
 
 You can specify every configuration option that openssh-server supports in the
@@ -54,7 +55,7 @@ Some configuration options can be specified multiple times. You can reflect this
 using an array
 
 ```ruby
-node['sshd']['sshd_config']['HostKey'] = %w{key1 key2}
+node['sshd']['sshd_config']['HostKey'] = %w(key1 key2)
 ```
 
 
@@ -80,7 +81,7 @@ To use the definition, make sure your metadata.rb includes
 depends 'sshd'
 ```
 
-### openssh_server
+### openssh\_server
 
 To install and configure openssh-server from other recipes, use the following definition:
 
@@ -97,7 +98,7 @@ openssh_server '/etc/sshd_config' do
 end
 ```
 
-The definition accepts all configuration options sshd_config supports.
+The definition accepts all configuration options `sshd_config` supports.
 
 ```ruby
 openssh_server node['sshd']['config_file'] do
@@ -105,7 +106,7 @@ openssh_server node['sshd']['config_file'] do
   X11Forward  'yes'
 
   # To specify an option multiple times, use an array
-  HostKey     %w{/etc/ssh/ssh_host_dsa_key /etc/ssh/ssh_host_rsa_key}
+  HostKey     %w(/etc/ssh/ssh_host_dsa_key /etc/ssh/ssh_host_rsa_key)
 
   # For conditional blocks, use a hash
   Match       'User fred' => { 'X11Forwarding' => 'no' },
@@ -128,7 +129,7 @@ end
 ```
 
 
-## Default sshd_config settings
+## Default sshd\_config settings
 
 The following options are set by default
 
@@ -136,9 +137,10 @@ The following options are set by default
 Port 22
 Protocol 2
 AcceptEnv LANG LC_*
+HostKey /etc/ssh/ssh_host_ed25519_key
+HostKey /etc/ssh/ssh_host_rsa_key
 HostKey /etc/ssh/ssh_host_dsa_key
 HostKey /etc/ssh/ssh_host_ecdsa_key
-HostKey /etc/ssh/ssh_host_rsa_key
 PasswordAuthentication yes
 ChallengeResponseAuthentication no
 X11Forwarding yes
@@ -160,3 +162,21 @@ SyslogFacility AUTHPRIV
 GSSAPIAuthentication yes
 Subsystem sftp /usr/libexec/openssh/sftp-server
 ```
+
+# Contributing
+
+You fixed a bug, or added a new feature? Yippie!
+
+1. Fork the repository on Github
+2. Create a named feature branch (like `add\_component\_x`)
+3. Write you change
+4. Write tests for your change (if applicable)
+5. Run the tests, ensuring they all pass
+6. Submit a Pull Request using Github
+
+Contributions of any sort are very welcome!
+
+# License and Authors
+
+Authors: Chris Aumann <me@chr4.org>
+Contributors: Jeremy Olliver, Andy Thompson, Peter Walz, Kevin Olbrich
