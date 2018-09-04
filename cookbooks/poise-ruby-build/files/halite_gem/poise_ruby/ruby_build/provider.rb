@@ -1,5 +1,5 @@
 #
-# Copyright 2015, Noah Kantrowitz
+# Copyright 2015-2017, Noah Kantrowitz
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -96,7 +96,8 @@ module PoiseRuby
             install_ruby_build
             install_dependencies
             # Possible failed install or a version change. Wipe the existing build.
-            remove_ruby if ::File.exists?(::File.join(options['prefix'], 'builds', new_resource.name))
+            # If we weren't going to rebuild, we would have bailed out already.
+            uninstall_ruby
           end
           # Second converge has ruby-build installed so using #ruby_definition
           # is safe.
@@ -145,8 +146,7 @@ module PoiseRuby
       #
       # @return [Chef::Resource::Git]
       def install_ruby_build
-        include_recipe 'git' unless options['no_dependencies']
-        git ::File.join(options['prefix'], 'install', options['install_rev']) do
+        poise_git ::File.join(options['prefix'], 'install', options['install_rev']) do
           repository options['install_repo']
           revision options['install_rev']
           user 'root'
@@ -159,11 +159,11 @@ module PoiseRuby
       # @return [Chef::Resource::Package]
       def install_dependencies
         return if options['no_dependencies']
-        include_recipe 'build-essential'
+        poise_build_essential 'build_essential'
         unless options['version'].start_with?('jruby')
           pkgs = node.value_for_platform_family(
             debian: %w{libreadline6-dev zlib1g-dev libssl-dev libyaml-dev libsqlite3-dev libxml2-dev libxslt1-dev},
-            rhel: %w{tar readline-devel zlib-devel libffi-devel openssl-devel libxml2-devel libxslt-devel},
+            rhel: %w{tar bzip2 readline-devel zlib-devel libffi-devel openssl-devel libxml2-devel libxslt-devel},
             suse: %w{zlib-devel libffi-devel sqlite3-devel libxml2-devel libxslt-devel},
           )
           package pkgs if pkgs

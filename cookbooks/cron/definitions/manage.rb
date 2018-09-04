@@ -1,10 +1,10 @@
 #
-# Cookbook Name:: cron
+# Cookbook:: cron
 # Definition:: manage
 #
 # Author:: Sander Botman. <sbotman@schubergphilis.com>
 #
-# Copyright:: 2014, Sander Botman.
+# Copyright:: 2014-2017, Sander Botman
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,24 +19,23 @@
 # limitations under the License.
 #
 
-define :cron_manage, :user => nil, :action => :deny do
-
-  if params[:action] == :allow
-    file = '/etc/cron.allow'
-  else
-    file = '/etc/cron.deny'
-  end
+define :cron_manage, user: nil, action: :deny do
+  file = if params[:action] == :allow
+           '/etc/cron.allow'
+         else
+           '/etc/cron.deny'
+         end
 
   t = nil
   begin
-    t = resources(:template => file)
+    t = resources(template: file)
   rescue Chef::Exceptions::ResourceNotFound
     t = template file do
       source 'cron_manage.erb'
       cookbook 'cron'
-      variables :users         => [],
-                :recipe_file   => (__FILE__).to_s.split('cookbooks/').last,
-                :template_file => source.to_s
+      variables users: [],
+                recipe_file: __FILE__.to_s.split('cookbooks/').last,
+                template_file: source.to_s
     end
   end
 

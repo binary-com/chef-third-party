@@ -5,78 +5,15 @@
 <%- if @frequency %>
   <%= @frequency %>
 <%- end %>
-<%- if @dateformat %> 
-  dateformat <%= @dateformat %>
+<%- @configurables.each do |name, value| %>
+  <%= "#{name} #{value}" %>
 <%- end %>
-<%- if @size %>
-  size <%= @size %>
-<%- end %>
-<%- if @minsize %>
-  minsize <%= @minsize %>
-<%- end %>
-<%- if @maxsize %>
-  maxsize <%= @maxsize %>
-<%- end %>
-<%- if @maxage %>
-  maxage <%= @maxage %>
-<%- end %>
-<%- if @su %>
-  su <%= @su %>
-<%- end %>
-<%- if @rotate %>
-  rotate <%= @rotate %>
-<%- end %>
-<%- if @create %>
-  create <%= @create %>
-<%- end %>
-<%- if @olddir %>
-  olddir <%= @olddir %>
-<%- end %>
-<%- if @compresscmd %>
-  compresscmd <%= @compresscmd %>
-<%- end %>
-<%- if @compressoptions %>
-  compressoptions <%= @compressoptions %>
-<%- end %>
-<%- if @uncompresscmd %>
-  uncompresscmd <%= @uncompresscmd %>
-<%- end %>
-<%- if @compressext %>
-  compressext <%= @compressext %>
-<%- end %>
-<%- if @extension %>
-  extension <%= @extension %>
-<%- end %>
-<%- if @tabooext %>
-  tabooext <%= @tabooext %>
-<%- end %>
-<%- if @shredcycles %>
-  shredcycles <%= @shredcycles %>
-<%- end %>
-<% @options.each do |o| -%>
+<% @directives.each do |o| -%>
   <%= o %>
 <% end -%>
-<%- if @sharedscripts %>
-  sharedscripts
-<%- end %>
-<%- unless @postrotate.empty? %>
-  postrotate
-<%= @postrotate %>
-  endscript
-<%- end %>
-<%- unless @prerotate.empty? %>
-  prerotate
-<%= @prerotate %>
-  endscript
-<%- end %>
-<%- unless @firstaction.empty? %>
-  firstaction
-<%= @firstaction %>
-  endscript
-<%- end %>
-<%- unless @lastaction.empty? %>
-  lastaction
-<%= @lastaction %>
+<%- @scripts.each do |script_name, script| %>
+  <%= script_name %>
+    <%= script %>
   endscript
 <%- end %>
 }

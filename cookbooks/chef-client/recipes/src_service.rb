@@ -1,10 +1,10 @@
 #
-# Cookbook Name:: chef-client
+# Cookbook::  chef-client
 # Recipe:: src_service
 #
 # Author:: Julian C. Dunn (<jdunn@chef.io>)
 #
-# Copyright 2014, Chef Software, Inc.
+# Copyright:: 2014-2017, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ end
 client_bin = find_chef_client
 Chef::Log.debug("Found chef-client in #{client_bin}")
 node.default['chef_client']['bin'] = client_bin
-create_directories
+create_chef_directories
 
 execute "install #{node['chef_client']['svc_name']} in SRC" do
   command "mkssys -s #{node['chef_client']['svc_name']} -p #{node['chef_client']['bin']} -u root -S -n 15 -f 9 -o #{node['chef_client']['log_dir']}/client.log -e #{node['chef_client']['log_dir']}/client.log -a '-i #{node['chef_client']['interval']} -s #{node['chef_client']['splay']}'"

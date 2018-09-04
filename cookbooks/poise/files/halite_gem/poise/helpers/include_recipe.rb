@@ -1,5 +1,5 @@
 #
-# Copyright 2013-2015, Noah Kantrowitz
+# Copyright 2013-2016, Noah Kantrowitz
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ module Poise
       def include_recipe(*recipes)
         loaded_recipes = []
         subcontext = subcontext_block do
-          recipes.each do |recipe|
+          recipes.flatten.each do |recipe|
             case recipe
             when String
               # Process normally

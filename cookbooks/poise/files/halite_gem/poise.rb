@@ -1,5 +1,5 @@
 #
-# Copyright 2013-2015, Noah Kantrowitz
+# Copyright 2013-2016, Noah Kantrowitz
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 require 'chef/provider'
 require 'chef/resource'
+require 'chef/run_context'
 
 require 'poise/utils/resource_provider_mixin'
 
@@ -68,7 +69,7 @@ end
 #   include Poise(container: true)
 def Poise(options={})
   # Allow passing a class as a shortcut
-  if options.is_a?(Class)
+  if options.is_a?(Class) || options.is_a?(Symbol)
     options = {parent: options}
   end
 

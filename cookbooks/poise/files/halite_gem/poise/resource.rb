@@ -1,5 +1,5 @@
 #
-# Copyright 2013-2015, Noah Kantrowitz
+# Copyright 2013-2016, Noah Kantrowitz
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ module Poise
     include Poise::Helpers::ResourceName
     include Poise::Helpers::ResourceSubclass
     include Poise::Helpers::TemplateContent
+    include Poise::Helpers::Win32User # Must be after LazyDefault.
     include Poise::Utils::ShellOut
 
     # @!classmethods

@@ -24,13 +24,20 @@ module Sshd
       sshd_config = ''
       conditional_blocks = ''
 
-      # generate the configuration file
-      # sort the hash, so chef doesn't restart if nothing changed but the order
+      # It's necessary to specify the Port option before the ListenAddress. The relevant section from the sshd_config manpage:
+      #   If port is not specified, sshd will listen on the address and all prior Port options specified. The default is to listen on all local
+      #   addresses. Multiple ListenAddress options are permitted. Additionally, any Port options must precede this option for non-port qualified
+      #   addresses.
+      Array(config.delete('Port')).each do |port|
+        sshd_config << "Port #{port}\n"
+      end
+
+      # Generate the configuration file.
+      # Sort the hash, so Chef doesn't restart if nothing changed but the order
       config.sort.each do |e|
         key, value = e[0], e[1]
 
-        # hashes are conditional blocks
-        # which have to be placed at the end of the file
+        # Hashes are conditional blocks, which have to be placed at the end of the file
         if value.is_a? Hash
           value.sort.each do |se|
             k, v = se[0], se[1]
@@ -39,20 +46,20 @@ module Sshd
           end
 
         else
-          Array(value).each do |value|
-            # if HostKey is not present, don't set it
-            next unless File.exists?(value) if key == 'HostKey'
+          Array(value).each do |v|
+            # If HostKey is not present, don't set it
+            next if key == 'HostKey' && File.exist?(v) == false
 
-            sshd_config << "#{key} #{value}\n"
+            sshd_config << "#{key} #{v}\n"
           end
         end
       end
 
-      # append conditional blocks
+      # Append conditional blocks
       sshd_config << conditional_blocks
     end
 
-    # merge d (defaults) with new hash (n)
+    # Merge d (defaults) with new hash (n)
     def merge_settings(d, n)
       r = d.to_hash
       n.each { |k, v| r[k.to_s] = v }

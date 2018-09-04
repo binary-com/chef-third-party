@@ -2,6 +2,34 @@
 
 This file is used to list changes made in each version of the postfix cookbook.
 
+## 5.0.2 (2017-05-17)
+
+- Fix use_relay_restrictions_maps attribute misspelling in attributes file
+
+## 5.0.1 (2017-03-03)
+
+- Fix documentation error on inet-interfaces
+- Test with Local Delivery instead of Rake
+- Fix master.cf attributes types on README
+
+## 5.0.0 (2017-01-17)
+
+- Manage any hash: tables for postfix with hash_maps recipe
+- Fully customizable master.cf file
+- Support for any kind of postfix lookup tables
+- Remove old minitest files
+- Update chef requirement in the readme
+- Update tests for new config comment blocks
+- fixing /etc/aliases syntax for full-mailaddresses
+
+## 4.0.0 (2016-09-07)
+
+- Update supported platforms in metadata
+- Remove node name from config file
+- Testing updates
+- Use node.normal vs. node.set to avoid deprecation warnings
+- Require Chef 12+
+
 ## v3.8.0 (2016-04-01)
 
 - Updated attributes to use  node.default_unless instead of node.default to be more wrapper friendly
