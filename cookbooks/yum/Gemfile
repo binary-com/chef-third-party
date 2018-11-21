@@ -6,21 +6,21 @@ group :rake do
 end
 
 group :lint do
-  gem 'foodcritic', '~> 5.0'
-  gem 'rubocop', '~> 0.34'
+  gem 'foodcritic'
+  gem 'rubocop'
 end
 
 group :unit do
-  gem 'berkshelf',  '~> 4.0'
-  gem 'chefspec',   '~> 4.4'
+  gem 'berkshelf'
+  gem 'chefspec'
 end
 
 group :kitchen_common do
-  gem 'test-kitchen', '~> 1.4'
+  gem 'test-kitchen'
 end
 
 group :kitchen_vagrant do
-  gem 'kitchen-vagrant', '~> 0.19'
+  gem 'kitchen-vagrant'
 end
 
 group :kitchen_cloud do
@@ -32,7 +32,7 @@ group :development do
   gem 'ruby_gntp'
   gem 'growl'
   gem 'rb-fsevent'
-  gem 'guard', '~> 2.4'
+  gem 'guard'
   gem 'guard-kitchen'
   gem 'guard-foodcritic'
   gem 'guard-rspec'
