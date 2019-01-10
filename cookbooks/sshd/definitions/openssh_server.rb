@@ -41,6 +41,7 @@ define :openssh_server, action: :create, cookbook: 'sshd', source: 'sshd_config.
   end
 
   service node['sshd']['service_name'] do
+    provider Chef::Provider::Service::Insserv
     supports status: true, restart: true, reload: true
     action :nothing
   end
