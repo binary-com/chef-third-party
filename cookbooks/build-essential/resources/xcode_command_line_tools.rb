@@ -2,7 +2,7 @@
 # Cookbook:: build-essential
 # Resource:: xcode_command_line_tools
 #
-# Copyright:: 2014-2017, Chef Software, Inc.
+# Copyright:: 2014-2018, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,13 +32,12 @@ action :install do
           # in Apple's SUS catalog
           touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
           # find the CLI Tools update
-          PROD=$(softwareupdate -l | grep "\*.*Command Line" | head -n 1 | awk -F"*" '{print $2}' | sed -e 's/^ *//' | tr -d '\n')
+          PROD=$(softwareupdate -l | grep "\*.*Command Line" | tail -n 1 | awk -F"*" '{print $2}' | sed -e 's/^ *//' | tr -d '\n')
           # install it
           softwareupdate -i "$PROD" --verbose
           # Remove the placeholder to prevent perpetual appearance in the update utility
           rm -f /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
         EOH
-        # rubocop:enable Metrics/LineLength
       end
     end
   end
@@ -53,9 +52,6 @@ action_class do
   def installed?
     cmd = Mixlib::ShellOut.new('pkgutil --pkgs=com.apple.pkg.CLTools_Executables')
     cmd.run_command
-    cmd.error!
-    true
-  rescue Mixlib::ShellOut::ShellCommandFailed
-    false
+    cmd.error? ? false : true
   end
 end
