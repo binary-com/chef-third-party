@@ -22,7 +22,10 @@
 
 require 'resolv'
 
-property :device_id, String, name_property: true, required: true
+chef_version_for_provides '< 14.0' if respond_to?(:chef_version_for_provides)
+resource_name :windows_printer
+
+property :device_id, String, name_property: true
 property :comment, String
 property :default, [true, false], default: false
 property :driver_name, String, required: true
@@ -66,7 +69,7 @@ action :delete do
   end
 end
 
-action_class.class_eval do
+action_class do
   def create_printer
     # Create the printer port first
     windows_printer_port new_resource.ipv4_address do
