@@ -3,7 +3,7 @@
 # Cookbook:: windows
 # Resource:: printer_port
 #
-# Copyright:: 2012-2017, Nordstrom, Inc.
+# Copyright:: 2012-2018, Nordstrom, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,10 @@
 
 require 'resolv'
 
-property :ipv4_address, String, name_attribute: true, required: true, regex: Resolv::IPv4::Regex
+chef_version_for_provides '< 14.0' if respond_to?(:chef_version_for_provides)
+resource_name :windows_printer_port
+
+property :ipv4_address, String, name_property: true, regex: Resolv::IPv4::Regex
 property :port_name, String
 property :port_number, Integer, default: 9100
 property :port_description, String
@@ -36,15 +39,15 @@ def port_exists?(name)
   port_reg_key = PORTS_REG_KEY + name
 
   Chef::Log.debug "Checking to see if this reg key exists: '#{port_reg_key}'"
-  Registry.key_exists?(port_reg_key)
+  registry_key_exists?(port_reg_key)
 end
 
+# @todo Set @current_resource port properties from registry
 load_current_value do |desired|
   name desired.name
   ipv4_address desired.ipv4_address
-  port_name desired.port_name || "IP_#{@new_resource.ipv4_address}"
-  exists port_exists?(desired.port_name)
-  # TODO: Set @current_resource port properties from registry
+  port_name desired.port_name || "IP_#{desired.ipv4_address}"
+  exists port_exists?(desired.port_name || "IP_#{desired.ipv4_address}")
 end
 
 action :create do
@@ -67,7 +70,7 @@ action :delete do
   end
 end
 
-action_class.class_eval do
+action_class do
   def create_printer_port
     port_name = new_resource.port_name || "IP_#{new_resource.ipv4_address}"
 
