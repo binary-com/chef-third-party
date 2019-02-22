@@ -16,6 +16,25 @@
 
 class Chef
   module Sugar
-    VERSION = '5.0.0'
+    module Kitchen
+      extend self
+
+      #
+      # Returns true if the current node is provisioned by Test Kitchen.
+      #
+      # @param [Chef::Node] node
+      #   the node to check
+      #
+      # @return [Boolean]
+      #
+      def kitchen?(node)
+        !ENV['TEST_KITCHEN'].nil?
+      end
+    end
+
+    module DSL
+      # @see Chef::Sugar::Kitchen#kitchen?
+      def kitchen?; Chef::Sugar::Kitchen.kitchen?(node); end
+    end
   end
 end
