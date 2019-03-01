@@ -1,7 +1,5 @@
-# Cookbook Name:: curl
-# Recipe:: libcurl
 #
-# Copyright 2012-2018, John Dewey
+# Copyright 2013-2015, Seth Vargo <sethvargo@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,8 +14,27 @@
 # limitations under the License.
 #
 
-node['curl']['libcurl_packages'].each do |pkg|
-  package pkg do
-    action :upgrade
+class Chef
+  module Sugar
+    module Kitchen
+      extend self
+
+      #
+      # Returns true if the current node is provisioned by Test Kitchen.
+      #
+      # @param [Chef::Node] node
+      #   the node to check
+      #
+      # @return [Boolean]
+      #
+      def kitchen?(node)
+        !ENV['TEST_KITCHEN'].nil?
+      end
+    end
+
+    module DSL
+      # @see Chef::Sugar::Kitchen#kitchen?
+      def kitchen?; Chef::Sugar::Kitchen.kitchen?(node); end
+    end
   end
 end

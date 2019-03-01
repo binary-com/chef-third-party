@@ -26,8 +26,12 @@ class Chef
           'squeeze' => '6',
           'wheezy'  => '7',
           'jessie'  => '8',
+          'stretch' => '9',
+          'buster'  => '10',
         },
         'linuxmint' => {
+          'tara'   => '19',
+          'sarah'  => '18',
           'qiana'  => '17',
           'petra'  => '16',
           'olivia' => '15',
@@ -40,6 +44,24 @@ class Chef
           'mountain_lion' => '10.8',
           'mavericks'     => '10.9',
           'yosemite'      => '10.10',
+          'el_capitan'    => '10.11',
+          'sierra'        => '10.12',
+          'high_sierra'   => '10.13',
+          'mojave'        => '10.14',
+        },
+        'redhat' => {
+          'santiago' => '6',
+          '6'        => '6',
+          'maipo'    => '7',
+          '7'        => '7',
+          'oompa'    => '8',
+          '8'        => '8'
+        },
+        'centos' => {
+          'final' => '6',
+          '6'     => '6',
+          'core'  => '7',
+          '7'     => '7'
         },
         'solaris' => {
           '7'  => '5.7',
@@ -62,6 +84,10 @@ class Chef
           'vivid'    => '15.04',
           'wily'     => '15.10',
           'xenial'   => '16.04',
+          'zesty'    => '17.04',
+          'artful'   => '17.10',
+          'bionic'   => '18.04',
+          'cosmic'   => '18.10',
         },
       }
 
