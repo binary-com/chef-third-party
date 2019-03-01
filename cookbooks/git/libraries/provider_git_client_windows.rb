@@ -3,8 +3,6 @@ class Chef
   class Provider
     class GitClient
       class Windows < Chef::Provider::GitClient
-        include Chef::DSL::IncludeRecipe
-
         provides :git_client, os: 'windows'
 
         action :install do
@@ -22,7 +20,7 @@ class Chef
                           else
                             ENV['ProgramW6432'] || ENV['ProgramFiles']
                           end
-          GIT_PATH = "#{PROGRAM_FILES}\\Git\\Cmd".freeze
+          GIT_PATH = "#{PROGRAM_FILES}\\Git\\Cmd"
 
           # COOK-3482 - windows_path resource doesn't change the current process
           # environment variables. Therefore, git won't actually be on the PATH
@@ -36,7 +34,7 @@ class Chef
           end
 
           windows_path GIT_PATH do
-            notifies :create, 'ruby_block[Add Git Path]', :immediately
+            notifies :run, 'ruby_block[Add Git Path]', :immediately
             action :add
           end
         end

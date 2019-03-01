@@ -3,7 +3,6 @@ module GitCookbook
     # linux packages default to distro offering
     def parsed_package_name
       return new_resource.package_name if new_resource.package_name
-      return 'git-core' if node['platform'] == 'ubuntu' && node['platform_version'].to_f < 10.10
       return 'developer/versioning/git' if node['platform'] == 'omnios'
       return 'scmgit' if node['platform'] == 'smartos'
       'git'
@@ -21,7 +20,7 @@ module GitCookbook
 
     def parsed_source_checksum
       return new_resource.source_checksum if new_resource.source_checksum
-      '8d53703d75890c03e26a915c7af3b7b98d8cfb94382f685a9bcbee1eeaec47b4' # 2.7.4 tarball
+      '690f12cc5691e5adaf2dd390eae6f5acce68ae0d9bd9403814f8a1433833f02a' # 2.17.1 tarball
     end
 
     # windows
