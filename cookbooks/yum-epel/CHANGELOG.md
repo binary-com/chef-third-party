@@ -2,6 +2,30 @@
 
 This file is used to list changes made in each version of the yum-epel cookbook.
 
+## 3.3.0 (2018-10-09)
+
+- Fix cookbook to work on all releases of Amazon Linux 2
+- Test on Amazon Linux 2 in specs and in Travis
+
+## 3.2.0 (2018-07-24)
+
+- Support EPEL on ARM32.
+
+## 3.1.0 (2018-02-26)
+
+- Add support for Amazon Linux 2.0
+
+## 3.0.0 (2018-02-16)
+
+- Require Chef 12.14+ and remove the compat_resource dependency
+
+## 2.1.2 (2017-06-15)
+
+- Switch from Rake testing to Local Delivery
+- Update apache2 license string to be a SPDX compliant string
+- Change yum repo location of gpgkey to download.fedoraproject.org instead of dl.fedoraproject.org
+- Avoid chefspec deprecations and speed up specs
+
 ## 2.1.1 (2017-01-05)
 
 - Revert how mirror list strings are generated to fix RHEL 7
