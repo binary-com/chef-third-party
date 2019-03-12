@@ -1,8 +1,11 @@
 require 'spec_helper'
 
 describe 'apt::default' do
-  let(:runner) { ChefSpec::ServerRunner.new(platform: 'ubuntu', version: '16.04') }
-  let(:chef_run) { runner.converge('apt::default') }
+  let(:chef_run) do
+    ChefSpec::ServerRunner.new(platform: 'ubuntu', version: '14.04') do |node|
+      node.automatic[:lsb][:codename] = 'trusty'
+    end.converge('apt::default')
+  end
 
   before do
     allow(::File).to receive(:executable?).and_return(true)
@@ -14,8 +17,8 @@ describe 'apt::default' do
     expect(chef_run).to render_file('/etc/apt/apt.conf.d/10recommends').with_content('APT::Install-Suggests "0";')
   end
 
-  it 'installs apt-transport-https, gnupg and dirmngr' do
-    expect(chef_run).to install_package(['apt-transport-https', 'gnupg', 'dirmngr'])
+  it 'installs apt-transport-https' do
+    expect(chef_run).to install_package('apt-transport-https')
   end
 
   it 'creates preseeding directory' do
