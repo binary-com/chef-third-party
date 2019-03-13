@@ -1,0 +1,131 @@
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_zero
+  deprecations_as_errors: true
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: amazonlinux
+    driver_config:
+      box: mvbcoding/awslinux
+  - name: centos-6
+  - name: centos-7
+  - name: debian-8
+  - name: debian-9
+  - name: fedora-28
+  - name: freebsd-11
+  - name: opensuse-leap-42
+  - name: sles-11-sp2
+    driver:
+      box: chef/sles-11-sp2-x86_64 # private box
+  - name: sles-12-sp1
+    driver:
+      box: chef/sles-12-sp1-x86_64 # private box
+  - name: solaris-11.3
+    driver:
+      box: chef/solaris-11.3 # private box
+  - name: ubuntu-16.04
+  - name: ubuntu-18.04
+  - name: windows-2016
+    provisioner:
+      product_name: chef
+    transport:
+      name: winrm
+      elevated: true
+    driver:
+      box: chef/windows-server-2016-standard # private box
+    transport:
+      name: winrm
+      elevated: true
+  - name: windows-2016
+    provisioner:
+      product_name: chef
+    transport:
+      name: winrm
+      elevated: true
+    driver:
+      box: tas50/windows-server-2016-standard # private box
+    transport:
+      name: winrm
+      elevated: true
+  - name: windows-2012r2-13
+    provisioner:
+      product_name: chef
+      product_version: 13
+    driver:
+      box: tas50/windows_2012r2
+    transport:
+      name: winrm
+      elevated: true
+  - name: windows-2012r2-14
+    provisioner:
+      product_name: chef
+      product_version: 14
+    driver:
+      box: tas50/windows_2012r2
+    transport:
+      name: winrm
+      elevated: true
+
+suites:
+- name: service_bsd
+  run_list:
+    - recipe[test::service]
+  includes: ["freebsd-11.0"]
+
+- name: service_init
+  run_list:
+    - recipe[test::service]
+  includes: ["centos-6", "amazon-linux", "sles-11-sp2", "sles-12-sp1"]
+
+- name: service_systemd
+  run_list:
+    - recipe[test::service]
+  includes: ["centos-7", "debian-8", "debian-9", "fedora-28", "ubuntu-16.04", "opensuse-leap-42"]
+
+- name: service_smf
+  run_list:
+    - recipe[test::service]
+  includes: ["solaris-11.3"]
+
+- name: cron
+  run_list:
+  - recipe[test::cron]
+  excludes: ["windows-2012r2-13", "windows-2012r2-14", "windows-2016"]
+
+- name: cron_daemon
+  run_list:
+  - recipe[test::cron]
+  attributes:
+    chef_client:
+      daemon_options: ["--run-lock-timeout 0"]
+  excludes: ["windows-2012r2-13", "windows-2012r2-14", "windows-2016"]
+
+- name: timer_systemd
+  run_list:
+  - recipe[chef-client::systemd_service]
+  attributes:
+    chef_client:
+      systemd:
+        timer: true
+  includes: ["centos-7", "debian-8", "debian-9", "fedora-28", "ubuntu-16.04", "opensuse-leap-42"]
+
+- name: config
+  run_list:
+    - recipe[test::config]
+  excludes: ["windows-2012r2-13", "windows-2012r2-14", "windows-2016"]
+
+# Test that the we can use the cron_d directory
+- name: use_cron_d
+  run_list:
+    - recipe[test::cook-use_cron_d]
+  excludes: ["windows-2012r2-13", "windows-2012r2-14", "windows-2016"]
+
+- name: task
+  run_list:
+    - recipe[test::task]
+  includes: ["windows-2012r2-13", "windows-2012r2-14", "windows-2016"]

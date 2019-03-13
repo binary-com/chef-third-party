@@ -40,18 +40,17 @@ dist_dir, conf_dir = value_for_platform_family(
   ['suse'] => %w( suse sysconfig )
 )
 
-# let's create the service file so the :disable action doesn't fail
-case node['platform_family']
-when 'debian', 'amazon', 'rhel', 'fedora', 'suse'
+# Stop any running chef-client services
+if node['os'] == 'linux'
   template '/etc/init.d/chef-client' do
     source "#{dist_dir}/init.d/chef-client.erb"
-    mode '755'
+    mode '0755'
     variables(client_bin: client_bin)
   end
 
   template "/etc/#{conf_dir}/chef-client" do
     source "#{dist_dir}/#{conf_dir}/chef-client.erb"
-    mode '644'
+    mode '0644'
   end
 
   service 'chef-client' do
@@ -59,7 +58,9 @@ when 'debian', 'amazon', 'rhel', 'fedora', 'suse'
     provider Chef::Provider::Service::Upstart if node['chef_client']['init_style'] == 'upstart'
     action [:disable, :stop]
   end
+end
 
+case node['platform_family']
 when 'openindiana', 'opensolaris', 'nexentacore', 'solaris2', 'smartos', 'omnios'
   service 'chef-client' do
     supports status: true, restart: true
@@ -73,7 +74,7 @@ when 'freebsd'
     owner 'root'
     group 'wheel'
     variables client_bin: client_bin
-    mode '755'
+    mode '0755'
   end
 
   file '/etc/rc.conf.d/chef' do
@@ -93,12 +94,9 @@ if node['chef_client']['splay'].to_i > 0
 else
   sleep_time = nil
 end
-env        = node['chef_client']['cron']['environment_variables']
 log_file   = node['chef_client']['cron']['log_file']
 append_log = node['chef_client']['cron']['append_log'] ? '>>' : '>'
-
-# Use daemon_options in cron.
-client_bin << " #{node['chef_client']['daemon_options'].join(' ')}" if node['chef_client']['daemon_options'].any?
+daemon_options = " #{node['chef_client']['daemon_options'].join(' ')} " if node['chef_client']['daemon_options'].any?
 
 # If "use_cron_d" is set to true, delete the cron entry that uses the cron
 # resource built in to Chef and instead use the cron_d LWRP.
@@ -116,12 +114,18 @@ if node['chef_client']['cron']['use_cron_d']
     user    'root'
     cmd = ''
     cmd << "/bin/sleep #{sleep_time}; " if sleep_time
-    cmd << "#{env} #{client_bin} #{append_log} #{log_file} 2>&1"
+    cmd << "#{env_vars} " if env_vars?
+    cmd << "/bin/nice -n #{process_priority} " if process_priority
+    cmd << "#{client_bin} #{daemon_options}#{append_log} #{log_file} 2>&1 "
+    cmd << '|| echo "Chef client execution failed"' if node['chef_client']['cron']['mailto']
     command cmd
   end
 else
-  cron_d 'chef-client' do
-    action :delete
+  # AIX does not support cron.d so we won't try to remove a cron_d resource.
+  unless node['platform_family'] == 'aix'
+    cron_d 'chef-client' do
+      action :delete
+    end
   end
 
   cron 'chef-client' do
@@ -133,7 +137,10 @@ else
     user    'root'
     cmd = ''
     cmd << "/bin/sleep #{sleep_time}; " if sleep_time
-    cmd << "#{env} #{client_bin} #{append_log} #{log_file} 2>&1"
+    cmd << "#{env_vars} " if env_vars?
+    cmd << "/bin/nice -n #{process_priority} " if process_priority
+    cmd << "#{client_bin} #{daemon_options}#{append_log} #{log_file} 2>&1 "
+    cmd << '|| echo "Chef client execution failed"' if node['chef_client']['cron']['mailto']
     command cmd
   end
 end

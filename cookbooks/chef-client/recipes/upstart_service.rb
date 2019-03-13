@@ -5,19 +5,23 @@ end
 
 # libraries/helpers.rb method to DRY directory creation resources
 client_bin = find_chef_client
-Chef::Log.debug("Found chef-client in #{client_bin}")
+Chef::Log.debug("Using chef-client binary at #{client_bin}")
 node.default['chef_client']['bin'] = client_bin
 create_chef_directories
 
-upstart_job_dir = '/etc/init'
-upstart_job_suffix = '.conf'
+# reload the upstart services
+execute 'initctl-reload-configuration' do
+  command 'initctl reload-configuration'
+  action :nothing
+end
 
-template "#{upstart_job_dir}/chef-client#{upstart_job_suffix}" do
+template '/etc/init/chef-client.conf' do
   source 'debian/init/chef-client.conf.erb'
-  mode '644'
+  mode '0644'
   variables(
     client_bin: client_bin
   )
+  notifies :run, 'execute[initctl-reload-configuration]', :immediate
   notifies :restart, 'service[chef-client]', :delayed
 end
 

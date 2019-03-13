@@ -5,7 +5,7 @@ end
 
 # libraries/helpers.rb method to DRY directory creation resources
 client_bin = find_chef_client
-Chef::Log.debug("Found chef-client in #{client_bin}")
+Chef::Log.debug("Using chef-client binary at #{client_bin}")
 node.default['chef_client']['bin'] = client_bin
 create_chef_directories
 
@@ -35,16 +35,16 @@ template(local_path + 'chef-client.xml') do
   owner 'root'
   group 'root'
   mode '0644'
-  notifies :run, 'execute[load chef-client manifest]', :immediately
 end
 
 execute 'load chef-client manifest' do
   action :nothing
-  command "svccfg import #{local_path}chef-client.xml"
+  command "/usr/sbin/svccfg import #{local_path}chef-client.xml"
   notifies :restart, 'service[chef-client]'
 end
 
 service 'chef-client' do
   action [:enable, :start]
   provider Chef::Provider::Service::Solaris
+  notifies :run, 'execute[load chef-client manifest]', :before
 end

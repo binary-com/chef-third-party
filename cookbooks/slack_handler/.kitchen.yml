@@ -1,0 +1,36 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_zero
+
+platforms:
+  - name: centos-6.9
+  - name: ubuntu-14.04
+
+
+suites:
+  - name: default
+    run_list:
+      - recipe[slack_handler]
+    attributes:
+      chef_client:
+        handler:
+          slack:
+            team: foo
+            api_key: bar
+  - name: webhook
+    run_list:
+      - recipe[slack_handler]
+    attributes:
+      chef_client:
+        handler:
+          slack:
+            team: foo
+            api_key: bar
+            webhooks:
+              name:
+                - test
+              test:
+                url: https://hooks.slack.local/1/2/3

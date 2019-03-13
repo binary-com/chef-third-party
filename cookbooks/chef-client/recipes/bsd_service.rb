@@ -8,7 +8,7 @@ end
 
 # libraries/helpers.rb method to DRY directory creation resources
 client_bin = find_chef_client
-Chef::Log.debug("Found chef-client in #{client_bin}")
+Chef::Log.debug("Using chef-client binary at #{client_bin}")
 node.default['chef_client']['bin'] = client_bin
 create_chef_directories
 
@@ -26,7 +26,7 @@ when 'freebsd'
     owner 'root'
     group 'wheel'
     variables client_bin: client_bin
-    mode '755'
+    mode '0755'
   end
 
   # Remove wrong rc.d script created by an older version of cookbook
@@ -35,7 +35,7 @@ when 'freebsd'
   end
 
   template '/etc/rc.conf.d/chef' do
-    mode '644'
+    mode '0644'
     notifies :start, 'service[chef-client]', :delayed
   end
 
@@ -45,6 +45,5 @@ when 'freebsd'
   end
 
 else
-  log "You specified service style 'bsd'. You will need to set up your rc.local file."
-  log "Hint: chef-client -i #{node['chef_client']['client_interval']} -s #{node['chef_client']['client_splay']}"
+  log "You specified service style 'bsd'. You will need to set up your rc.local file. Hint: chef-client -i #{node['chef_client']['client_interval']} -s #{node['chef_client']['client_splay']}"
 end
