@@ -2,7 +2,7 @@
 # Cookbook:: cron
 # Resource:: d
 #
-# Copyright:: 2008-2017, Chef Software, Inc.
+# Copyright:: 2008-2018, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,14 +19,9 @@
 
 require 'shellwords'
 
-property :name, String, name_property: true
+property :cron_name, String, name_property: true
 property :cookbook, String, default: 'cron'
-
-property :predefined_value, [String], callbacks: {
-  'should be a valid predefined value' => lambda do |spec|
-    ::Cron::Helpers.validate_predefined_value(spec)
-  end,
-}
+property :predefined_value, String, equal_to: %w( @reboot @yearly @annually @monthly @weekly @daily @midnight @hourly )
 property :minute, [Integer, String], default: '*', callbacks: {
   'should be a valid minute spec' => lambda do |spec|
     ::Cron::Helpers.validate_numeric(spec, 0, 59)
@@ -53,11 +48,14 @@ property :home, [String, NilClass]
 property :shell, [String, NilClass]
 property :comment, [String, NilClass]
 property :environment, Hash, default: {}
-property :mode, [String, Integer], default: '0644'
+property :mode, [String, Integer], default: '0600'
+property :random_delay, [Integer, NilClass]
+
+def after_created
+  raise 'The cron_d resource requires Linux as it needs support for the cron.d directory functionality.' unless node['os'] == 'linux'
+end
 
 action :create do
-  # We should be able to switch emulate_cron.d on for Solaris, but I don't have a Solaris box to verify
-  raise 'Solaris does not support cron jobs in /etc/cron.d' if node['platform_family'] == 'solaris2'
   create_template(:create)
 end
 
@@ -68,29 +66,26 @@ end
 action :delete do
   # cleanup the legacy named job if it exists
   file 'legacy named cron.d file' do
-    path "/etc/cron.d/#{new_resource.name}"
+    path "/etc/cron.d/#{new_resource.cron_name}"
     action :delete
-    notifies :create, 'template[/etc/crontab]', :delayed if node['cron']['emulate_cron.d']
   end
 
   file "/etc/cron.d/#{sanitized_name}" do
     action :delete
-    notifies :create, 'template[/etc/crontab]', :delayed if node['cron']['emulate_cron.d']
   end
 end
 
-action_class.class_eval do
+action_class do
   def sanitized_name
-    new_resource.name.tr('.', '-')
+    new_resource.cron_name.tr('.', '-')
   end
 
   def create_template(create_action)
     # cleanup the legacy named job if it exists
-    file "#{new_resource.name} legacy named cron.d file" do
-      path "/etc/cron.d/#{new_resource.name}"
+    file "#{new_resource.cron_name} legacy named cron.d file" do
+      path "/etc/cron.d/#{new_resource.cron_name}"
       action :delete
-      notifies :create, 'template[/etc/crontab]', :delayed if node['cron']['emulate_cron.d']
-      only_if { new_resource.name != sanitized_name }
+      only_if { new_resource.cron_name != sanitized_name }
     end
 
     template "/etc/cron.d/#{sanitized_name}" do
@@ -112,10 +107,10 @@ action_class.class_eval do
         home: new_resource.home,
         shell: new_resource.shell,
         comment: new_resource.comment,
+        random_delay: new_resource.random_delay,
         environment: new_resource.environment
       )
       action create_action
-      notifies :create, 'template[/etc/crontab]', :delayed if node['cron']['emulate_cron.d']
     end
   end
 end
