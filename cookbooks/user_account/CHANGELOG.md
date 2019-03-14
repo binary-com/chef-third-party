@@ -1,6 +1,10 @@
 user_account CHANGELOG
 ======================
 
+1.1.1
+-----
+- [rearview] - Updated Cookbook to work with Chef 13
+
 1.1.0
 -----
 - [jarosser06] - Home attr no longer has /home prepended to it

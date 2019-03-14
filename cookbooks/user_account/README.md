@@ -36,7 +36,7 @@ another way.
 
 #### Actions
 - **create** - creates a user
-- **delete** - deletes a user
+- **remove** - deletes a user
 
 #### Attributes
 - **username** - name of user account

@@ -49,9 +49,10 @@ action :create do
       case node['platform_family']
       when 'debian', 'fedora', 'suse', 'rhel'
         new_resource.groups.each do |grp|
-          group grp do
+          group grp + new_resource.username do
             append true
             members new_resource.username
+            group_name grp
           end
         end
       # Chef doesn't handle groups properly for these systems
