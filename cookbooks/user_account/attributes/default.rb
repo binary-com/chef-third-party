@@ -1,4 +1,4 @@
-case platform_family
+case node['platform_family']
 when 'debian', 'rhel', 'suse'
   default['user_account']['home_root'] = '/home'
   default['user_account']['default_shell'] = '/bin/bash'

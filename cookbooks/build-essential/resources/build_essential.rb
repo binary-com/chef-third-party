@@ -2,7 +2,7 @@
 # Cookbook:: build-essential
 # resource:: build_essential
 #
-# Copyright:: 2008-2017, Chef Software, Inc.
+# Copyright:: 2008-2018, Chef Software Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 # limitations under the License.
 #
 
+chef_version_for_provides '< 14.0' if respond_to?(:chef_version_for_provides)
 provides :build_essential
 resource_name :build_essential
 
@@ -30,14 +31,12 @@ action :install do
     package %w( autoconf bison flex gcc gcc-c++ gettext kernel-devel make m4 ncurses-devel patch )
 
     # Ensure GCC 4 is available on older pre-6 EL
-    package %w( gcc44 gcc44-c++ ) if node['platform_version'].to_i < 6
+    package %w( gcc44 gcc44-c++ ) if !platform?('amazon') && node['platform_version'].to_i < 6
   when 'freebsd'
     package 'devel/gmake'
     package 'devel/autoconf'
     package 'devel/m4'
     package 'devel/gettext'
-    # Only install gcc on freebsd 9.x - 10 uses clang
-    package 'lang/gcc49' if node['platform_version'].to_i <= 9
   when 'mac_os_x'
     xcode_command_line_tools 'install'
   when 'omnios'
@@ -62,11 +61,13 @@ action :install do
       package 'bison'
       package 'gnu-coreutils'
       package 'flex'
-      package 'gcc' do
-        # lock because we don't use 5 yet
-        version '4.8.2'
+      # lock gcc versions because we don't use 5 yet
+      %w(gcc gcc-c gcc-c++).each do |pkg|
+        package pkg do # ~FC009
+          accept_license true
+          version '4.8.2'
+        end
       end
-      package 'gcc-3'
       package 'gnu-grep'
       package 'gnu-make'
       package 'gnu-patch'
@@ -84,6 +85,7 @@ action :install do
     package 'pkg-config'
   when 'suse'
     package %w( autoconf bison flex gcc gcc-c++ kernel-default-devel make m4 )
+    package 'insserv-compat' if node['platform_version'].to_i >= 15
     package %w( gcc48 gcc48-c++ ) if node['platform_version'].to_i < 12
   when 'windows'
     include_recipe 'build-essential::_windows'

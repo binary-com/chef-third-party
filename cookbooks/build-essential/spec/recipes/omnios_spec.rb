@@ -1,9 +1,9 @@
 require 'spec_helper'
 
 describe 'build-essential::default' do
-  context 'omnios 151014' do
+  context 'omnios 151018' do
     let(:chef_run) do
-      ChefSpec::ServerRunner.new(platform: 'omnios', version: '151014',
+      ChefSpec::ServerRunner.new(platform: 'omnios', version: '151018',
                                  step_into: ['build_essential']).converge(described_recipe)
     end
 
