@@ -1,0 +1,56 @@
+---
+# TAS50: THIS IS NOT A TYPICAL STANDARD DOKKEN KITCHEN FILE
+driver:
+  name: dokken
+  privileged: true # because Docker and SystemD/Upstart
+  chef_version: latest
+
+transport:
+  name: dokken
+
+provisioner:
+  name: chef_zero
+  root_path: /opt/kitchen
+  require_chef_omnibus: '<%= ENV["OMNIBUS_CHEF_VERSION"] || "11.18.12" %>'
+  chef_omnibus_url: "https://omnitruck.chef.io/install.sh"
+  data_path: test/fixtures
+  retry_on_exit_code:
+    - 213
+  max_retries: 1
+  wait_for_retry: 1
+  client_rb:
+    exit_status: :enabled
+    client_fork: false
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: ubuntu-16.04
+    driver:
+      image: dokken/ubuntu-16.04
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - RUN /usr/bin/apt-get update
+        - RUN /usr/bin/apt-get install sudo cron -y
+
+suites:
+  - name: default
+    run_list:
+      - recipe[test::default]
+  - name: kill
+    run_list:
+      - recipe[test::kill]
+  - name: direct_url
+    run_list:
+      - recipe[test::direct_url]
+    includes: centos-6
+  - name: constrained
+    run_list:
+      - recipe[test::constrained]
+  - name: noop
+    run_list:
+      - recipe[test::default]
+    attributes:
+      chef_client_updater:
+        version: '<%= ENV["OMNIBUS_CHEF_VERSION"] || "11.18.12" %>'
