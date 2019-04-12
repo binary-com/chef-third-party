@@ -4,7 +4,7 @@ maintainer_email 'package@datadoghq.com'
 license          'Apache-2.0'
 description      'Installs/Configures datadog components'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '2.17.0'
+version          '2.18.0'
 chef_version     '>= 10.14' if respond_to? :chef_version
 source_url       'https://github.com/DataDog/chef-datadog' if respond_to? :source_url
 issues_url       'https://github.com/DataDog/chef-datadog/issues' if respond_to? :issues_url
@@ -34,9 +34,7 @@ recipe 'datadog::default', 'Default'
 recipe 'datadog::dd-agent', 'Installs the Datadog Agent'
 recipe 'datadog::dd-handler', 'Installs a Chef handler for Datadog'
 recipe 'datadog::repository', 'Installs the Datadog package repository'
-recipe 'datadog::dogstatsd-python', 'Installs the Python dogstatsd package for custom metrics'
 recipe 'datadog::dogstatsd-ruby', 'Installs the Ruby dogstatsd package for custom metrics'
-recipe 'datadog::ddtrace-python', 'Installs the Python ddtrace package for APM'
 recipe 'datadog::ddtrace-ruby', 'Installs the Ruby ddtrace package for APM'
 
 # integration-specific
