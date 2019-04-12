@@ -12,11 +12,12 @@ platforms:
   - name: amazonlinux
     driver_config:
       box: mvbcoding/awslinux
+  - name: amazonlinux-2
   - name: centos-6
   - name: centos-7
   - name: debian-8
   - name: debian-9
-  - name: fedora-28
+  - name: fedora-29
   - name: freebsd-11
   - name: opensuse-leap-42
   - name: sles-11-sp2
@@ -37,21 +38,10 @@ platforms:
       name: winrm
       elevated: true
     driver:
-      box: chef/windows-server-2016-standard # private box
-    transport:
-      name: winrm
-      elevated: true
-  - name: windows-2016
-    provisioner:
-      product_name: chef
-    transport:
-      name: winrm
-      elevated: true
-    driver:
-      box: tas50/windows-server-2016-standard # private box
-    transport:
-      name: winrm
-      elevated: true
+      box: tas50/windows_2016
+      gui: false
+      customize:
+        memory: 2048
   - name: windows-2012r2-13
     provisioner:
       product_name: chef

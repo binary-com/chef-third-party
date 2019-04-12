@@ -2,6 +2,27 @@
 
 This file is used to list changes made in each version of the chef-client cookbook.
 
+## 11.1.3 (2019-04-08)
+
+- Replace :reload with :restart - [@americanhanko](https://github.com/americanhanko)
+- Update the macos launchd plist to use instance vars - [@americanhanko](https://github.com/americanhanko)
+- Unit tests for launchd_service recipe - [@americanhanko](https://github.com/americanhanko)
+
+## 11.1.2 (2019-04-02)
+
+- Restart daemon on macOS if configuration is changed - [@pludi](https://github.com/pludi)
+- Skip managing cron.d on any non-Linux platform not just non-AIX platforms - [@jjustice6](https://github.com/jjustice6)
+
+## 11.1.1 (2019-03-18)
+
+- fix systemd timer activation - [@nathwill](https://github.com/nathwill)
+
+## 11.1.0 (2019-03-18)
+
+- Add windows 2016 vagrant testing to the kitchen config - [@tas50](https://github.com/tas50)
+- Added `onstart` scheduled task to test recipe and updated `chef_client_scheduled_task` resource - [@gdavison](https://github.com/gdavison)
+- Update Kitchen testing to include our new amazonlinux-2 box - [@tas50](https://github.com/tas50)
+
 ## 11.0.5 (2019-01-25)
 
 - Changes systemd timer to trigger on OnActiveSec - [@ngharo](https://github.com/ngharo)
