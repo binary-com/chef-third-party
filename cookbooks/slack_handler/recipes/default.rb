@@ -16,10 +16,13 @@
 # limitations under the License.
 #
 
-include_recipe "chef_handler"
-
-handler_file = ''
-handler_source = ''
+# Disable Slack handler in why-run mode
+# See also: https://github.com/rackspace-cookbooks/chef-slack_handler/issues/48
+# Inspired by https://github.com/DataDog/chef-datadog/pull/231/files
+if Chef::Config[:why_run]
+  Chef::Log.warn('Running in why-run mode, skipping slack_handler')
+  return
+end
 
 # if webhook attribute set, use webhook handler, otherwise use slackr gem handler
 if node['chef_client']['handler']['slack']['webhooks']['name'].empty?
@@ -27,14 +30,14 @@ if node['chef_client']['handler']['slack']['webhooks']['name'].empty?
   chef_gem 'slackr' do
     compile_time false if respond_to?(:compile_time)
   end
-  handler_file = "#{node['chef_handler']['handler_path']}/slack_handler.rb"
+  handler_file = "#{Chef::Config[:file_cache_path]}/slack_handler.rb"
   handler_source = "slack_handler.rb"
 else
-  handler_file = "#{node['chef_handler']['handler_path']}/slack_handler_webhook.rb"
+  handler_file = "#{Chef::Config[:file_cache_path]}/slack_handler_webhook.rb"
   handler_source = "slack_handler_webhook.rb"
 end
 
-cookbook_file "#{node['chef_handler']['handler_path']}/slack_handler_util.rb" do
+cookbook_file "#{Chef::Config[:file_cache_path]}/slack_handler_util.rb" do
   source 'slack_handler_util.rb'
   mode "0600"
   action :nothing

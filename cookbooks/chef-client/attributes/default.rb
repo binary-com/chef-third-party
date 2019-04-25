@@ -26,14 +26,13 @@
 default['chef_client']['config'] = {
   'chef_server_url' => Chef::Config[:chef_server_url],
   'validation_client_name' => Chef::Config[:validation_client_name],
-  'node_name' => Chef::Config[:node_name] == node['fqdn'] ? false : Chef::Config[:node_name],
+  'node_name' => Chef::Config[:node_name],
   'verify_api_cert' => true,
 }
 
 # should the client fork on runs
 default['chef_client']['config']['client_fork'] = true
 
-# log_file has no effect when using runit
 default['chef_client']['log_file']    = 'client.log'
 default['chef_client']['interval']    = '1800'
 default['chef_client']['splay']       = '300'
@@ -62,6 +61,8 @@ default['chef_client']['cron'] = {
 
 # Configuration for chef-client::systemd_service recipe
 default['chef_client']['systemd']['timer'] = false
+# Systemd timeout. Might be usefull for timer setups to avoid stalled chef runs
+default['chef_client']['systemd']['timeout'] = false
 # Restart mode when not running as a timer
 default['chef_client']['systemd']['restart'] = 'always'
 
@@ -70,8 +71,15 @@ default['chef_client']['task']['frequency'] = 'minute'
 default['chef_client']['task']['frequency_modifier'] = node['chef_client']['interval'].to_i / 60
 default['chef_client']['task']['user'] = 'SYSTEM'
 default['chef_client']['task']['password'] = nil # Password is only required for none system users
+default['chef_client']['task']['start_time'] = nil
+default['chef_client']['task']['start_date'] = nil
+default['chef_client']['task']['name'] = 'chef-client'
 
 default['chef_client']['load_gems'] = {}
+
+default['chef_client']['config']['start_handlers'] = []
+default['chef_client']['config']['report_handlers'] = []
+default['chef_client']['config']['exception_handlers'] = []
 
 # If set to false, changes in the `client.rb` template won't trigger a reload
 # of those configs in the current Chef run.
@@ -103,26 +111,13 @@ when 'aix'
   default['chef_client']['cache_path']  = '/var/spool/chef'
   default['chef_client']['backup_path'] = '/var/lib/chef'
   default['chef_client']['log_dir']     = '/var/adm/chef'
-when 'debian'
+when 'amazon', 'rhel', 'fedora', 'debian', 'suse', 'clearlinux'
   default['chef_client']['init_style']  = node['init_package']
   default['chef_client']['run_path']    = '/var/run/chef'
   default['chef_client']['cache_path']  = '/var/cache/chef'
   default['chef_client']['backup_path'] = '/var/lib/chef'
-when 'suse'
-  default['chef_client']['init_style']  = node['init_package']
-  default['chef_client']['run_path']    = '/var/run/chef'
-  default['chef_client']['cache_path']  = '/var/cache/chef'
-  default['chef_client']['backup_path'] = '/var/lib/chef'
-when 'amazon', 'rhel'
-  default['chef_client']['init_style']  = node['init_package']
-  default['chef_client']['run_path']    = '/var/run/chef'
-  default['chef_client']['cache_path']  = '/var/cache/chef'
-  default['chef_client']['backup_path'] = '/var/lib/chef'
-when 'fedora'
-  default['chef_client']['init_style']  = 'systemd'
-  default['chef_client']['run_path']    = '/var/run/chef'
-  default['chef_client']['cache_path']  = '/var/cache/chef'
-  default['chef_client']['backup_path'] = '/var/lib/chef'
+  default['chef_client']['chkconfig']['start_order'] = 98
+  default['chef_client']['chkconfig']['stop_order']  = 02
 when 'freebsd'
   default['chef_client']['init_style']  = 'bsd'
   default['chef_client']['run_path']    = '/var/run'

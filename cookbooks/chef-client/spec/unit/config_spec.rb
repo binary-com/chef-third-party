@@ -15,46 +15,6 @@ describe 'chef-client::config' do
       .with_content(/validation_client_name/)
   end
 
-  context 'when Chef::VERSION is 12.4.0 or greater' do
-    ## chef-config was introduced in 12.4.0
-    ## ohai supports config files in 8.6.0
-    before(:each) do
-      @chef = ChefSpec.const_get(:Chef)
-      @chef_version = @chef.const_get(:VERSION)
-      @chef.send(:remove_const, :VERSION)
-      @chef.const_set(:VERSION, '12.4.0')
-    end
-
-    after(:each) do
-      @chef.send(:remove_const, :VERSION)
-      @chef.const_set(:VERSION, @chef_version)
-    end
-
-    it 'loads config files via ChefConfig::Config.from_file' do
-      expect(chef_run).to render_file('/etc/chef/client.rb') \
-        .with_content(/ChefConfig::Config.from_file/)
-    end
-  end
-
-  context 'when Chef::VERSION is 12.3.0 or earlier' do
-    before(:each) do
-      @chef = ChefSpec.const_get(:Chef)
-      @chef_version = @chef.const_get(:VERSION)
-      @chef.send(:remove_const, :VERSION)
-      @chef.const_set(:VERSION, '12.3.0')
-    end
-
-    after(:each) do
-      @chef.send(:remove_const, :VERSION)
-      @chef.const_set(:VERSION, @chef_version)
-    end
-
-    it 'loads config files via Chef::Config.from_file' do
-      expect(chef_run).to render_file('/etc/chef/client.rb') \
-        .with_content(/Chef::Config.from_file/)
-    end
-  end
-
   [
     '/var/run/chef',
     '/var/cache/chef',
@@ -84,6 +44,7 @@ describe 'chef-client::config' do
         node.normal['ohai']['disabled_plugins'] = [:passwd, 'dmi']
         node.normal['ohai']['plugin_path'] = '/etc/chef/ohai_plugins'
         node.normal['chef_client']['config']['log_level'] = ':debug'
+        node.normal['chef_client']['config']['log_location'] = '/dev/null'
         node.normal['chef_client']['config']['ssl_verify_mode'] = ':verify_none'
         node.normal['chef_client']['config']['exception_handlers'] = [{ class: 'SimpleReport::UpdatedResources', arguments: [] }]
         node.normal['chef_client']['config']['report_handlers'] = [{ class: 'SimpleReport::UpdatedResources', arguments: [] }]
@@ -109,6 +70,11 @@ describe 'chef-client::config' do
     it 'converts log_level to a symbol' do
       expect(chef_run).to render_file('/etc/chef/client.rb') \
         .with_content(/^log_level :debug/)
+    end
+
+    it 'renders log_location with quotes' do
+      expect(chef_run).to render_file('/etc/chef/client.rb') \
+        .with_content(%r{^log_location "/dev/null"$})
     end
 
     it 'converts ssl_verify_mode to a symbol' do
@@ -140,6 +106,36 @@ describe 'chef-client::config' do
     it 'configures no_proxy' do
       expect(chef_run).to render_file('/etc/chef/client.rb') \
         .with_content(/^no_proxy "\*.vmware.com,10.\*"/)
+    end
+  end
+
+  context 'STDOUT Log Location' do
+    cached(:chef_run) do
+      ChefSpec::ServerRunner.new(platform: 'ubuntu', version: '16.04') do |node|
+        node.normal['chef_client']['config']['log_level'] = ':debug'
+        node.normal['chef_client']['config']['log_location'] = 'STDOUT'
+        node.normal['chef_client']['config']['ssl_verify_mode'] = ':verify_none'
+      end.converge(described_recipe)
+    end
+
+    it 'renders log_location without quotes' do
+      expect(chef_run).to render_file('/etc/chef/client.rb') \
+        .with_content(/^log_location STDOUT$/)
+    end
+  end
+
+  context 'Symbol-ized Log Location' do
+    cached(:chef_run) do
+      ChefSpec::ServerRunner.new(platform: 'ubuntu', version: '16.04') do |node|
+        node.normal['chef_client']['config']['log_level'] = ':debug'
+        node.normal['chef_client']['config']['log_location'] = :syslog
+        node.normal['chef_client']['config']['ssl_verify_mode'] = ':verify_none'
+      end.converge(described_recipe)
+    end
+
+    it 'renders log_location as a symbol' do
+      expect(chef_run).to render_file('/etc/chef/client.rb') \
+        .with_content(/^log_location :syslog$/)
     end
   end
 end

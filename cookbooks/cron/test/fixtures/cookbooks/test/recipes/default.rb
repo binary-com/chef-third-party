@@ -1,8 +1,8 @@
 #
 # Cookbook:: test
-# Recipe:: test
+# Recipe:: default
 #
-# Copyright:: 2008-2017, Chef Software, Inc
+# Copyright:: 2008-2018, Chef Software, Inc
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,9 +17,13 @@
 # limitations under the License.
 #
 
-apt_update 'update'
+apt_update
 
 include_recipe 'cron'
+
+##########################
+# Test the cron_d resource
+##########################
 
 # create a file with periods as if the older version of this cookbook raspbian
 # the provider should clean it up and we'll test that it doesn't exists
@@ -98,6 +102,13 @@ cron_d 'job.with.periods' do
   action :create_if_missing
 end
 
+cron_d 'with_random_delay' do
+  command '/bin/true'
+  user 'appuser'
+  action :create_if_missing
+  random_delay 60
+end
+
 cron_d 'test-weekday-usage-report2' do
   name 'test-weekday-usage-report'
   minute '1'
@@ -114,4 +125,26 @@ end
 
 cron_d 'delete_cron' do
   action :delete
+end
+
+##########################
+# Test the manage resource
+##########################
+
+cron_access 'alice' do
+  action :allow
+end
+
+cron_access 'bob' do
+  action :allow
+end
+
+cron_access 'tom' do
+  action :allow
+end
+
+# legacy resource name
+cron_manage 'Bill breaks things. Take away cron' do
+  user 'bill'
+  action :deny
 end

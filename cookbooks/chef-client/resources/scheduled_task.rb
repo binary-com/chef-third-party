@@ -17,46 +17,70 @@
 # limitations under the License.
 #
 
-provides :chef_client_scheduled_task
+resource_name :chef_client_scheduled_task
 
-property :user, String, required: true
-property :password, String
-property :frequency, String, default: 'minute'
-property :frequency_modifier, Integer, default: 30
-property :start_time, String
+property :user, String, default: 'System', sensitive: true
+property :password, String, sensitive: true
+property :frequency, String, default: 'minute', equal_to: %w(minute hourly daily monthly once on_logon onstart on_idle)
+property :frequency_modifier, [Integer, String], default: 30
+property :start_date, String, regex: [%r{^[0-1][0-9]\/[0-3][0-9]\/\d{4}$}]
+property :start_time, String, regex: [/^\d{2}:\d{2}$/]
 property :splay, [Integer, String], default: 300
 property :config_directory, String, default: 'C:/chef'
 property :log_directory, String, default: lazy { |r| "#{r.config_directory}/log" }
 property :chef_binary_path, String, default: 'C:/opscode/chef/bin/chef-client'
 property :daemon_options, Array, default: []
+property :task_name, String, default: 'chef-client'
 
 action :add do
-  create_chef_directories
-
   # Build command line to pass to cmd.exe
   client_cmd = new_resource.chef_binary_path.dup
-  client_cmd << " -L #{::File.join(new_resource.log_directory, 'client.log')}"
+  client_cmd << " -L #{::File.join(new_resource.log_directory, node['chef_client']['log_file'])}" unless node['chef_client']['log_file'].nil?
   client_cmd << " -c #{::File.join(new_resource.config_directory, 'client.rb')}"
   client_cmd << " -s #{new_resource.splay}"
 
   # Add custom options
   client_cmd << " #{new_resource.daemon_options.join(' ')}" if new_resource.daemon_options.any?
 
-  start_time = new_resource.frequency == 'minute' ? (Time.now + 60 * new_resource.frequency_modifier).strftime('%H:%M') : nil
-  windows_task 'chef-client' do
-    run_level :highest
-    command "cmd /c \"#{client_cmd}\""
+  # Fetch path of cmd.exe through environment variable comspec
+  cmd_path = ENV['COMSPEC']
 
+  # Between Chef Client 13.7 and 14.3 we required the command to be surrounded in single quotes
+  # due to parsing problems with windows_task. Since 14.4 resolved we require double quotes around the command.
+  full_command = if Gem::Requirement.new('< 13.7.0').satisfied_by?(Gem::Version.new(Chef::VERSION)) || Gem::Requirement.new('>= 14.4.0').satisfied_by?(Gem::Version.new(Chef::VERSION))
+                   "#{cmd_path} /c \"#{client_cmd}\""
+                 else
+                   "#{cmd_path} /c \'#{client_cmd}\'"
+                 end
+
+  # According to https://docs.microsoft.com/en-us/windows/desktop/taskschd/schtasks,
+  # the :once, :onstart, :onlogon, and :onidle schedules don't accept schedule modifiers
+  windows_task new_resource.task_name do
+    run_level          :highest
+    command            full_command
     user               new_resource.user
     password           new_resource.password
     frequency          new_resource.frequency.to_sym
-    frequency_modifier new_resource.frequency_modifier
-    start_time         new_resource.start_time || start_time
+    frequency_modifier new_resource.frequency_modifier unless %w(once on_logon onstart on_idle).include?(new_resource.frequency)
+    start_time         start_time_value
+    start_day          new_resource.start_date unless new_resource.start_date.nil?
+    action             [ :create, :enable ]
   end
 end
 
 action :remove do
-  windows_task 'chef-client' do
-    action :remove
+  windows_task new_resource.task_name do
+    action :delete
+  end
+end
+
+action_class do
+  # @todo this can all get removed when we don't support Chef 13.6 anymore
+  def start_time_value
+    if new_resource.start_time
+      new_resource.start_time
+    elsif Gem::Requirement.new('< 13.7.0').satisfied_by?(Gem::Version.new(Chef::VERSION))
+      new_resource.frequency == 'minute' ? (Time.now + 60 * new_resource.frequency_modifier.to_f).strftime('%H:%M') : nil
+    end
   end
 end

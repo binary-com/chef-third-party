@@ -4,7 +4,7 @@ maintainer_email 'cookbooks@chef.io'
 license 'Apache-2.0'
 description 'Installs cron'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version '4.1.1'
+version '6.2.1'
 
 recipe 'cron', 'Installs the cron package and starts the crond service.'
 
@@ -14,6 +14,4 @@ end
 
 source_url 'https://github.com/chef-cookbooks/cron'
 issues_url 'https://github.com/chef-cookbooks/cron/issues'
-chef_version '>= 12.5' if respond_to?(:chef_version)
-
-depends 'compat_resource'
+chef_version '>= 12.7' if respond_to?(:chef_version)

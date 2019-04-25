@@ -2,6 +2,212 @@
 
 This file is used to list changes made in each version of the chef-client cookbook.
 
+## 11.1.3 (2019-04-08)
+
+- Replace :reload with :restart - [@americanhanko](https://github.com/americanhanko)
+- Update the macos launchd plist to use instance vars - [@americanhanko](https://github.com/americanhanko)
+- Unit tests for launchd_service recipe - [@americanhanko](https://github.com/americanhanko)
+
+## 11.1.2 (2019-04-02)
+
+- Restart daemon on macOS if configuration is changed - [@pludi](https://github.com/pludi)
+- Skip managing cron.d on any non-Linux platform not just non-AIX platforms - [@jjustice6](https://github.com/jjustice6)
+
+## 11.1.1 (2019-03-18)
+
+- fix systemd timer activation - [@nathwill](https://github.com/nathwill)
+
+## 11.1.0 (2019-03-18)
+
+- Add windows 2016 vagrant testing to the kitchen config - [@tas50](https://github.com/tas50)
+- Added `onstart` scheduled task to test recipe and updated `chef_client_scheduled_task` resource - [@gdavison](https://github.com/gdavison)
+- Update Kitchen testing to include our new amazonlinux-2 box - [@tas50](https://github.com/tas50)
+
+## 11.0.5 (2019-01-25)
+
+- Changes systemd timer to trigger on OnActiveSec - [@ngharo](https://github.com/ngharo)
+
+## 11.0.4 (2019-01-11)
+
+- Prepend :: to File call - [@jasonwbarnett](https://github.com/jasonwbarnett)
+- Fix missing log_dir attribute in task recipe for windows - [@pschaumburg](https://github.com/pschaumburg)
+- Fix for specifying known path for cmd.exe on a windows system to avoid nefarious PATH settings
+- Fix idempotency in the task resource - [@pschaumburg](https://github.com/pschaumburg)
+
+## 11.0.3 (2018-10-29)
+
+- Fix duplicate daemon options
+- Create the Chef log directory if missing. Otherwise scheduled tasks fail.
+
+## 11.0.2 (2018-10-12)
+
+- Do not attempt to delete a cron_d resource on AIX hosts.
+
+## 11.0.1 (2018-09-14)
+
+- [cron] Be notified of chef-client failure if mailto is defined
+- Chef 14.4.0 requires double quotes around command for scheduled task
+
+## 11.0.0 (2018-07-24)
+
+- Remove windows cookbook dep and require Chef 13.0 instead for the windows_task resource.
+
+## 10.1.2 (2018-07-23)
+
+- scheduled task user and password should be marked as sensitive
+- Renames helper method.
+
+## 10.1.1 (2018-07-13)
+
+- Renames the `env` helper method to `env_vars` to address a Windows bug introduced
+  in `10.1.0`.
+- Addresses issue #579.
+
+## 10.1.0 (2018-07-03)
+
+- Adds support for prioritizing `chef-client` via `nice`.
+
+## 10.0.5 (2018-05-10)
+
+- fix issues with a new instance where `chef-client` service is not found on Upstart systems (Ubuntu 14.04)
+
+## 10.0.4 (2018-04-24)
+
+- [GH-558] Add chef_client_scheduled_task name property
+- Fix FC108: Resource should not define a property named 'name'
+
+## 10.0.3 (2018-04-13)
+
+- Fix the handling of log_locations that aren't strings
+- Use RandomizedDelaySec as it is better suited in systemd
+- Fix failures on Windows with Chef 14
+
+## 10.0.2 (2018-03-18)
+
+- Fix systemd ignoring ca_cert_path on rhel
+
+## 10.0.1 (2018-03-09)
+
+- Update the debug message for the chef-client binary
+- Update the recipe to state we require Chef 12.11 not 12.1
+- Add some specs for the SLES 11 init file
+- Add more specs for SLES 11 init script
+- Fail hard if the specified service type is not valid
+- handle mixed lines if log_location is nil in the config
+- handle empty (but not nil) handlers block in the config
+
+## 10.0.0 (2018-02-14)
+
+- The behavior of when to include the node name in the client.rb has been changed and the node name will now always be included to avoid various errors if we skip it. This is the correct behavior, but the cookbook has received a major version bump so users can properly test the new behavior.
+- Fix a frozen string warning when passing daemon options to a cron job
+- Don't include the daemon options if they don't exist.
+- Chefspec matchers have been removed since Chefspec now autogenerates these
+
+## 9.0.5 (2018-02-05)
+
+- Swap Debian 7 testing for Amazon Linux 2
+- Remove unused windows service helper method
+- Prevent using -L option if no location of log file is provided.
+- update start_date format attribute
+
+## 9.0.4 (2018-01-23)
+
+- Fixes to allow the windows_task resource to work on chef 13.7 while still working on < 13.7
+
+## 9.0.3 (2018-01-22)
+
+- Do not require start, report, or exception handlers to manage `client.rb`. Only write them out if we actually have them
+- remove the rendering of the begin rescue block when no handlers are defined.
+- Fix wrong daemon options at systemd config
+- Fix the SUSE init template to use the correct run_path node attribute
+- in the task resource escape the chef-client path with single quotes since you sometimes end up with double-quote escaped attributes
+- Improve log messages in the path helper
+- Remove code used to support Chef < 12.8, which already wasn't supported by this cookbook
+- Remove test kitchen configs for platforms Chef no longer officially supports
+- Make sure task doesn't fail on chef-client >= 13.7
+
+## 9.0.2 (2017-11-14)
+
+- Resolve foodcritic warning in notification of ruby_block
+- Fix start_date functionality
+
+## 9.0.1 (2017-11-14)
+
+- Require cron cookbook 4.2 which works on SLES 11
+- Use a single log resource to warn in FreeBSD instead of two
+- Add respond_to to the chef_version in metadata for older clients
+- Add a regex to validate start_time passed into the task resource
+- Add ability to specify the start_date in task resource
+
+## 9.0.0 (2017-10-23)
+
+### Breaking changes
+
+We have removed the previously deprecated support for running chef-client as a Windows service and running under the runit init system on Linux. Windows hosts should run chef-client as a scheduled task which resolves many issues with long running chef-client processes as a service. For Linux users we highly recommend using the native init systems within your distribution as they provide a higher level of platform support, reliability, and logging integration. For both of these changes we will not be including an automatic migration solution as doing so can prove to be problematic for many users. We recommend stopping the existing chef client and then manually running chef client to create the new service or scheduled task. That may be accomplished using knife ssh, push-jobs, or other tooling within your environment.
+
+### Other Changes
+
+- Add ability to set daemonized SSL trust store
+- Add attributes for setting chkconfig start and stop time values in sys-v scripts
+- Setup log rotate on any Linux release not just Amazon, RHEL, Debian and Fedora platform families
+- In the cron recipe make sure we cleanup the sys-v script and and stop the service on any Linux platform not just Amazon, RHEL, Debian and Fedora platform families
+- Add ability to set daemonized SSL trust store.
+- Fix exception when log_level is already a symbol when building the client.rb file
+- Initialize handler attributes to empty arrays
+- Add Clear Linux support
+- Fix loading of the solaris service config
+- Provide better error messages if the wrong frequency is provided to the scheduled task resource or recipe
+- Use full file modes in all recipes
+- Add ability to set frequency modifier on the chef-client Windows task as a string instead of just an integer
+- Add Travis CI testing of both Chef 12 and 13
+- Add Windows 2016 and SLES 11 testing to local Test Kitchen
+
+## 8.1.8 (2017-08-06)
+
+- Add testing for Amazon Linux and Debian 9 in Travis and switch all testing to the dokken images
+- Consolidate duplicate attributes to simplify the attributes file
+- Remove leftover template file for Arch Linux
+- Don't use deprecated Ruby exists? method
+- Move testing to a test recipe that looks more like how a user would write a wrapper cookbook
+- Move the resource cloning spec recipe into the test recipe so we don't ship it to clients
+- Remove the metadata for the deprecated windows service
+- Simplify the platform logic in the init service recipe and expand the specs for this logic
+- Use resource_name not provides in the scheduled task resource
+- Remove docs for the pre-Chef 12.4 syslog functionality
+- Point users to chef_client_updater not omnibus_updater in the docs
+
+## 8.1.7 (2017-07-13)
+
+- Add find_chef_client use to the task recipe so that chef_binary_path is defined.
+- Update documentation to reflect the rubygems_url usage.
+
+## 8.1.6 (2017-06-27)
+
+- Use node['chef_client']['log_file'] in all recipes and templates
+- Add new attribute for timing out systemd timer to kill off hung chef-client runs
+
+## 8.1.5 (2017-06-27)
+
+- Multiple improvements to systemd unit behavior of chef-client
+
+  - stop the timer if timer is disabled
+  - de-dupe env-file path referencing
+  - ensure env file exists before service that references it
+  - restart timer if timer changed
+
+## 8.1.4 (2017-06-21)
+
+- Fix removing the chef-client schedule task
+
+## 8.1.3 (2017-06-21)
+
+- Lazily eval the frequency so an update to interval attribute is respected when setting up a windows scheduled task
+
+## 8.1.2 (2017-05-30)
+
+- convert timer unit to hash syntax for readability,
+- use systemd_unit for chef-client.service
+
 ## 8.1.1 (2017-05-10)
 
 - Default the systemd restart behavior to always
@@ -15,7 +221,7 @@ This file is used to list changes made in each version of the chef-client cookbo
 
 ## 8.0.2 (2017-05-02)
 
-- Remove the suggests ‘runit’ from the metadata
+- Remove the suggests 'runit' from the metadata
 - Require a more modern windows and cron cookbook
 - Make sure SLES 11 gets the right init system
 

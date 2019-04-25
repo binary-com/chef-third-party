@@ -28,15 +28,7 @@ default['datadog']['api_key'] = nil
 # Set it as an attribute, or on your node `run_state` under the key `['datadog']['application_key']`
 default['datadog']['application_key'] = nil
 
-########################################################################
-###                  Agent6-only attributes                          ###
-
-# If you're installing a pre-release version of Agent 6 (beta or RC), you need to:
-# * on debian: set node['datadog']['agent6_aptrepo_dist'] to 'beta' instead of 'stable'
-# * on RHEL: set node['datadog']['agent6_yumrepo'] to 'https://yum.datadoghq.com/beta/x86_64/'
-# In all cases, follow the instructions below:
-
-# Set node['datadog']['agent6'] to true to install an agent6 instead of agent5.
+# Set node['datadog']['agent6'] to false to install an agent5 instead of agent6.
 # To upgrade from agent5 to agent6, you need to:
 # * set node['datadog']['agent6'] to true, and
 # * either set node['datadog']['agent6_version'] to an existing agent6 version (recommended), or
@@ -45,7 +37,14 @@ default['datadog']['application_key'] = nil
 # * set node['datadog']['agent6'] to false, and
 # * pin node['datadog']['agent_version'] to an existing agent5 version, and
 # * set node['datadog']['agent_allow_downgrade'] to true
-default['datadog']['agent6'] = false
+# If you're installing a pre-release version of Agent 6 (beta or RC), you need to:
+# * on debian: set node['datadog']['agent6_aptrepo_dist'] to 'beta' instead of 'stable'
+# * on RHEL: set node['datadog']['agent6_yumrepo'] to 'https://yum.datadoghq.com/beta/x86_64/'
+default['datadog']['agent6'] = true
+
+########################################################################
+###                  Agent6-only attributes                          ###
+
 # Default of `nil` will install latest version, applies to agent6 only.
 # See documentation of `agent_version` attribute for allowed configuration format.
 default['datadog']['agent6_version'] = nil
@@ -56,6 +55,7 @@ default['datadog']['agent6_aptrepo'] = 'http://apt.datadoghq.com'
 default['datadog']['agent6_aptrepo_dist'] = 'stable'
 # RPMs are only available for RHEL >= 6 (-> use https protocol) and x86_64 arch
 default['datadog']['agent6_yumrepo'] = 'https://yum.datadoghq.com/stable/6/x86_64/'
+default['datadog']['agent6_yumrepo_suse'] = 'https://yum.datadoghq.com/suse/stable/6/x86_64/'
 
 # Values that differ on Windows
 # The location of the config folder (containing conf.d)
@@ -93,9 +93,11 @@ default['datadog']['tag_prefix'] = 'tag:'
 default['datadog']['url'] = 'https://app.datadoghq.com'
 
 # Add tags as override attributes in your role
-# This can be a string of comma separated tags or a hash in this format:
+# This can be a string of comma separated tags, a hash in this format:
 # default['datadog']['tags'] = { 'datacenter' => 'us-east' }
-# Thie above outputs a string: 'datacenter:us-east'
+# or an array in this format:
+# default['datadog']['tags'] = ['datacenter:us-east']
+# Examples above output a string: 'datacenter:us-east'
 # When using the Datadog Chef Handler, tags are set on the node with preset prefixes:
 # `env:node.chef_environment`, `role:node.node.run_list.role`, `tag:somecheftag`
 default['datadog']['tags'] = ''
@@ -154,7 +156,12 @@ yum_protocol =
 default['datadog']['installrepo'] = true
 default['datadog']['aptrepo'] = 'http://apt.datadoghq.com'
 default['datadog']['aptrepo_dist'] = 'stable'
+default['datadog']['aptrepo_retries'] = 4
+default['datadog']['aptrepo_use_backup_keyserver'] = false
+default['datadog']['aptrepo_keyserver'] = 'hkp://keyserver.ubuntu.com:80'
+default['datadog']['aptrepo_backup_keyserver'] = 'hkp://pool.sks-keyservers.net:80'
 default['datadog']['yumrepo'] = "#{yum_protocol}://yum.datadoghq.com/rpm/#{architecture_map[node['kernel']['machine']]}/"
+default['datadog']['yumrepo_suse'] = "https://yum.datadoghq.com/suse/rpm/#{architecture_map[node['kernel']['machine']]}/"
 default['datadog']['yumrepo_gpgkey'] = "#{yum_protocol}://yum.datadoghq.com/DATADOG_RPM_KEY.public"
 default['datadog']['yumrepo_proxy'] = nil
 default['datadog']['yumrepo_proxy_username'] = nil
@@ -296,6 +303,7 @@ default['datadog']['web_proxy']['port'] = nil
 default['datadog']['web_proxy']['user'] = nil
 default['datadog']['web_proxy']['password'] = nil
 default['datadog']['web_proxy']['skip_ssl_validation'] = nil # accepted values 'yes' or 'no'
+default['datadog']['web_proxy']['no_proxy'] = nil # only used for agent v6.0+
 
 # dogstatsd
 default['datadog']['dogstatsd'] = true
@@ -334,6 +342,7 @@ default['datadog']['sd_backend_host'] = '127.0.0.1'
 default['datadog']['sd_backend_port'] = 4001
 default['datadog']['sd_config_backend'] = 'etcd'
 default['datadog']['sd_template_dir'] = '/datadog/check_configs'
+default['datadog']['sd_jmx_enable'] = 'no'
 default['datadog']['service_discovery_backend'] = nil
 
 # Trace functionality settings
@@ -390,7 +399,7 @@ default['datadog']['process_agent']['container_interval'] = nil
 default['datadog']['process_agent']['rtcontainer_interval'] = nil
 
 # Logs functionality settings (Agent 6 only)
-# Set `enable_log_agent` to:
+# Set `enable_logs_agent` to:
 # * `true` to explicitly enable the log agent
 # * `false` to explicitly disable it
 # Leave it to `nil` to let the agent's default behavior decide whether to run the log-agent

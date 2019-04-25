@@ -1,6 +1,35 @@
 Changes
 =======
 
+# 2.18.0 / 2019-03-18
+
+**Note for Windows users**: since Agent v6.11, `datadog >= 2.18.0` is
+necessary (see README)
+
+* [FEATURE] Let the Windows installer set the permissions on Agent directories and files. [#588][] [@remeh][]
+* [BUGFIX] Use Upstart service manager for Ubuntu <15.04. See [#551][] [@rposborne][]
+* [MISC] Deprecation log for recipes using easy_install. See [#585][] [@remeh][]
+* [MISC] Add optional NGINX monitor attributes. See [#564][] [@spencermpeterson][]
+* [DOCS] Add an example for the `extra_config` field. See [#586][] [@remeh][]
+
+# 2.17.0 / 2019-03-01
+
+* [FEATURE] Add support for SLES. See [#505][] [@gmmeyer][]
+* [FEATURE] Add `index_stats` parameter for ElasticSearch. See [#568][] [@aymen-chetoui][]
+* [FEATURE] Add configuration flag for JMX service discovery in Agent 5. See [#563][] [@wolf31o2][]
+* [FEATURE] Add support for list of tags in v6 configuration file. See [#557][] [@skarlupka][]
+* [FEATURE] Add vault recipe. See [#555][] [@skarlupka][]
+* [FEATURE] Add `min_collection_interval` to mysql template. See [#548][] [@mhebbar1][]
+* [OPTIMIZE] Retry on failure when pulling the gpg key. See [#561][] [@remicalixte][]
+* [BUGFIX] Fix beans description in tomcat config template. See [#583][] [@remeh][]
+* [MISC] Switch to cookstyle. See [#565][] [@jeffbyrnes][]
+* [MISC] Bump requirement on `chef_handler`. See [#396][] [@olivielpeau][]
+
+# 2.16.1 / 2018-07-16
+
+* [FEATURE] Add support for `no_proxy` Agent v6 option. See [#549][] [@stonith][]
+* [MISC] Fix typo in documentation of `enable_logs_agent` option. See [#544][] [@rsheyd][]
+
 # 2.16.0 / 2018-05-14
 
 * [FEATURE] Support data scrubber config fields for process agent. See [#540][] [@moisesbotarro][]
@@ -589,6 +618,7 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [#388]: https://github.com/DataDog/chef-datadog/issues/388
 [#390]: https://github.com/DataDog/chef-datadog/issues/390
 [#395]: https://github.com/DataDog/chef-datadog/issues/395
+[#396]: https://github.com/DataDog/chef-datadog/issues/396
 [#397]: https://github.com/DataDog/chef-datadog/issues/397
 [#398]: https://github.com/DataDog/chef-datadog/issues/398
 [#400]: https://github.com/DataDog/chef-datadog/issues/400
@@ -635,6 +665,7 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [#498]: https://github.com/DataDog/chef-datadog/issues/498
 [#499]: https://github.com/DataDog/chef-datadog/issues/499
 [#501]: https://github.com/DataDog/chef-datadog/issues/501
+[#505]: https://github.com/DataDog/chef-datadog/issues/505
 [#508]: https://github.com/DataDog/chef-datadog/issues/508
 [#511]: https://github.com/DataDog/chef-datadog/issues/511
 [#513]: https://github.com/DataDog/chef-datadog/issues/513
@@ -653,6 +684,21 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [#532]: https://github.com/DataDog/chef-datadog/issues/532
 [#533]: https://github.com/DataDog/chef-datadog/issues/533
 [#540]: https://github.com/DataDog/chef-datadog/issues/540
+[#544]: https://github.com/DataDog/chef-datadog/issues/544
+[#548]: https://github.com/DataDog/chef-datadog/issues/548
+[#549]: https://github.com/DataDog/chef-datadog/issues/549
+[#551]: https://github.com/DataDog/chef-datadog/issues/551
+[#555]: https://github.com/DataDog/chef-datadog/issues/555
+[#557]: https://github.com/DataDog/chef-datadog/issues/557
+[#561]: https://github.com/DataDog/chef-datadog/issues/561
+[#563]: https://github.com/DataDog/chef-datadog/issues/563
+[#564]: https://github.com/DataDog/chef-datadog/issues/564
+[#565]: https://github.com/DataDog/chef-datadog/issues/565
+[#568]: https://github.com/DataDog/chef-datadog/issues/568
+[#583]: https://github.com/DataDog/chef-datadog/issues/583
+[#585]: https://github.com/DataDog/chef-datadog/issues/585
+[#586]: https://github.com/DataDog/chef-datadog/issues/586
+[#588]: https://github.com/DataDog/chef-datadog/issues/588
 [@ABrehm264]: https://github.com/ABrehm264
 [@AlexBevan]: https://github.com/AlexBevan
 [@BrentOnRails]: https://github.com/BrentOnRails
@@ -671,6 +717,7 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [@alq]: https://github.com/alq
 [@antonio-osorio]: https://github.com/antonio-osorio
 [@arthurnn]: https://github.com/arthurnn
+[@aymen-chetoui]: https://github.com/aymen-chetoui
 [@azuretek]: https://github.com/azuretek
 [@babbottscott]: https://github.com/babbottscott
 [@bai]: https://github.com/bai
@@ -739,6 +786,7 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [@martinisoft]: https://github.com/martinisoft
 [@mattrobenolt]: https://github.com/mattrobenolt
 [@mfischer-zd]: https://github.com/mfischer-zd
+[@mhebbar1]: https://github.com/mhebbar1
 [@miketheman]: https://github.com/miketheman
 [@mirceal]: https://github.com/mirceal
 [@mlcooper]: https://github.com/mlcooper
@@ -754,14 +802,21 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [@phlipper]: https://github.com/phlipper
 [@qqfr2507]: https://github.com/qqfr2507
 [@raycrawford]: https://github.com/raycrawford
+[@remeh]: https://github.com/remeh
 [@remh]: https://github.com/remh
+[@remicalixte]: https://github.com/remicalixte
 [@rlaveycal]: https://github.com/rlaveycal
+[@rposborne]: https://github.com/rposborne
+[@rsheyd]: https://github.com/rsheyd
 [@ryandjurovich]: https://github.com/ryandjurovich
 [@schisamo]: https://github.com/schisamo
 [@sethrosenblum]: https://github.com/sethrosenblum
+[@skarlupka]: https://github.com/skarlupka
+[@spencermpeterson]: https://github.com/spencermpeterson
 [@stefanwb]: https://github.com/stefanwb
 [@stensonb]: https://github.com/stensonb
 [@stolfi]: https://github.com/stolfi
+[@stonith]: https://github.com/stonith
 [@takus]: https://github.com/takus
 [@tejom]: https://github.com/tejom
 [@thisismana]: https://github.com/thisismana
@@ -769,6 +824,7 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [@tmichelet]: https://github.com/tmichelet
 [@uzyexe]: https://github.com/uzyexe
 [@wk8]: https://github.com/wk8
+[@wolf31o2]: https://github.com/wolf31o2
 [@xt99]: https://github.com/xt99
 [@yannmh]: https://github.com/yannmh
 [@zshenker]: https://github.com/zshenker

@@ -20,8 +20,8 @@
 is_windows = node['platform_family'] == 'windows'
 
 agent6_config_file = ::File.join(node['datadog']['agent6_config_dir'], 'datadog.yaml')
-template agent6_config_file do # rubocop:disable Metrics/BlockLength
-  def template_vars # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+template agent6_config_file do
+  def template_vars
     additional_endpoints = {}
     node['datadog']['extra_endpoints'].each do |_, endpoint|
       next unless endpoint['enabled']
@@ -48,11 +48,7 @@ template agent6_config_file do # rubocop:disable Metrics/BlockLength
     }
   end
 
-  if is_windows
-    owner 'Administrators'
-    rights :full_control, 'Administrators'
-    inherits false
-  else
+  unless is_windows
     owner 'dd-agent'
     group 'dd-agent'
     mode '640'
