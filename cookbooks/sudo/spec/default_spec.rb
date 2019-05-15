@@ -6,46 +6,24 @@ describe 'sudo::default' do
   end
 
   context 'usual business' do
-    let(:chef_run) { ChefSpec::SoloRunner.new.converge(described_recipe) }
-
-    it 'installs the sudo package' do
-      expect(chef_run).to install_package('sudo')
-    end
+    cached(:chef_run) { ChefSpec::SoloRunner.new.converge(described_recipe) }
 
     it 'creates the /etc/sudoers file' do
       expect(chef_run).to render_file('/etc/sudoers').with_content(/Defaults      !lecture,tty_tickets,!fqdn/)
     end
-  end
 
-  context 'with custom prefix' do
-    let(:chef_run) do
-      ChefSpec::SoloRunner.new do |node|
-        node.normal['authorization']['sudo']['prefix'] = '/secret/etc'
-      end.converge(described_recipe)
-    end
-
-    it 'creates the sudoers file in the custom location' do
-      expect(chef_run).to render_file('/secret/etc/sudoers').with_content(/Defaults      !lecture,tty_tickets,!fqdn/)
-    end
-  end
-
-  context "node['authorization']['sudo']['users']" do
-    let(:chef_run) do
-      ChefSpec::SoloRunner.new do |node|
-        node.normal['authorization']['sudo']['prefix'] = '/secret/etc'
-        node.normal['authorization']['sudo']['users'] = %w(bacon)
-      end.converge(described_recipe)
-    end
-
-    it 'adds users of the bacon group to the sudoers file' do
-      expect(chef_run).to render_file('/secret/etc/sudoers').with_content(/^bacon/)
+    it 'creates the sudoers.d directory' do
+      expect(chef_run).to create_directory('/etc/sudoers.d').with(
+        owner: 'root',
+        mode: '0755'
+      )
     end
   end
 
   context "node['authorization']['sudo']['groups']" do
     let(:chef_run) do
       ChefSpec::SoloRunner.new do |node|
-        node.normal['authorization']['sudo']['groups'] = %w(bacon)
+        node.override['authorization']['sudo']['groups'] = %w(bacon)
       end.converge(described_recipe)
     end
 
@@ -57,9 +35,9 @@ describe 'sudo::default' do
   context "node['authorization']['sudo']['passwordless']" do
     let(:chef_run) do
       ChefSpec::SoloRunner.new do |node|
-        node.normal['authorization']['sudo']['users'] = %w(bacon)
-        node.normal['authorization']['sudo']['groups'] = %w(bacon-group)
-        node.normal['authorization']['sudo']['passwordless'] = true
+        node.override['authorization']['sudo']['users'] = %w(bacon)
+        node.override['authorization']['sudo']['groups'] = %w(bacon-group)
+        node.override['authorization']['sudo']['passwordless'] = true
       end.converge(described_recipe)
     end
 
@@ -94,9 +72,17 @@ describe 'sudo::default' do
     end
   end
 
-  context "node['authorization']['sudo']['prefix']" do
+  context 'config prefix' do
+    context 'on macOS' do
+      let(:chef_run) { ChefSpec::SoloRunner.new(platform: 'mac_os_x', version: '10.13').converge(described_recipe) }
+
+      it 'uses /private/etc' do
+        expect(chef_run).to create_template('/private/etc/sudoers')
+      end
+    end
+
     context 'on SmartOS' do
-      let(:chef_run) { ChefSpec::SoloRunner.new(platform: 'smartos', version: 'joyent_20130111T180733Z').converge(described_recipe) }
+      let(:chef_run) { ChefSpec::SoloRunner.new(platform: 'smartos', version: '5.11').converge(described_recipe) }
 
       it 'uses /opt/local/etc' do
         expect(chef_run).to create_template('/opt/local/etc/sudoers')
@@ -104,7 +90,7 @@ describe 'sudo::default' do
     end
 
     context 'on Ubuntu' do
-      let(:chef_run) { ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '12.04').converge(described_recipe) }
+      let(:chef_run) { ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '16.04').converge(described_recipe) }
 
       it 'uses /etc' do
         expect(chef_run).to create_template('/etc/sudoers')
@@ -133,9 +119,9 @@ describe 'sudo::default' do
   context "node['authorization']['sudo']['custom_commands']" do
     let(:chef_run) do
       ChefSpec::SoloRunner.new do |node|
-        node.set['authorization']['sudo']['command_aliases'] =
+        node.override['authorization']['sudo']['command_aliases'] =
           [{ name: 'TESTA', command_list: ['/usr/bin/whoami'] }, { name: 'TeSTb', command_list: ['/usr/bin/ruby', '! /usr/bin/perl'] }]
-        node.set['authorization']['sudo']['custom_commands']['users'] =
+        node.override['authorization']['sudo']['custom_commands']['users'] =
           [{ user: 'test_usera', passwordless: true, command_list: ['TESTA'] }, { user: 'test_userb', passwordless: false, command_list: ['TESTB'] }]
       end.converge(described_recipe)
     end
@@ -153,7 +139,7 @@ describe 'sudo::default' do
   context "node['authorization']['sudo']['env_keep_add']" do
     let(:chef_run) do
       ChefSpec::SoloRunner.new do |node|
-        node.set['authorization']['sudo']['env_keep_add'] = ['TEST_ENV_ADD']
+        node.override['authorization']['sudo']['env_keep_add'] = ['TEST_ENV_ADD']
       end.converge(described_recipe)
     end
     it 'adds environment variables to /etc/sudoers' do
@@ -166,7 +152,7 @@ describe 'sudo::default' do
   context "node['authorization']['sudo']['env_keep_subtract']" do
     let(:chef_run) do
       ChefSpec::SoloRunner.new do |node|
-        node.set['authorization']['sudo']['env_keep_subtract'] = ['TEST_ENV_SUB']
+        node.override['authorization']['sudo']['env_keep_subtract'] = ['TEST_ENV_SUB']
       end.converge(described_recipe)
     end
     it 'adds environment variables to /etc/sudoers' do
@@ -176,18 +162,13 @@ describe 'sudo::default' do
     end
   end
 
-  context 'sudoers.d' do
+  context 'Non-Linux distro' do
     let(:chef_run) do
-      ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '12.04') do |node|
-        node.normal['authorization']['sudo']['include_sudoers_d'] = true
-      end.converge(described_recipe)
+      ChefSpec::SoloRunner.new(platform: 'freebsd', version: '11.0').converge(described_recipe)
     end
 
-    it 'creates the sudoers.d directory' do
-      expect(chef_run).to create_directory('/etc/sudoers.d').with(
-        owner: 'root',
-        mode: '0755'
-      )
+    it 'does not create the sudoers.d directory' do
+      expect(chef_run).not_to create_directory('/etc/sudoers.d')
     end
   end
 end
