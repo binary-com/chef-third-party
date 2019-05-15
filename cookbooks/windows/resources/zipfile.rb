@@ -1,11 +1,12 @@
 #
 # Author:: Doug MacEachern (<dougm@vmware.com>)
 # Author:: Seth Chisamore (<schisamo@chef.io>)
+# Author:: Wade Peacock (<wade.peacock@visioncritical.com>)
 # Cookbook:: windows
 # Resource:: zipfile
 #
 # Copyright:: 2010-2017, VMware, Inc.
-# Copyright:: 2011-2017, Chef Software, Inc.
+# Copyright:: 2011-2018, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,20 +21,19 @@
 # limitations under the License.
 #
 
+require 'chef/util/path_helper'
+
 property :path, String, name_property: true
 property :source, String
 property :overwrite, [true, false], default: false
 property :checksum, String
-
-include Windows::Helper
-require 'find'
 
 action :unzip do
   ensure_rubyzip_gem_installed
   Chef::Log.debug("unzip #{new_resource.source} => #{new_resource.path} (overwrite=#{new_resource.overwrite})")
 
   cache_file_path = if new_resource.source =~ %r{^(file|ftp|http|https):\/\/} # http://rubular.com/r/DGoIWjLfGI
-                      uri = as_uri(source)
+                      uri = as_uri(new_resource.source)
                       local_cache_path = "#{Chef::Config[:file_cache_path]}/#{::File.basename(::URI.unescape(uri.path))}"
                       Chef::Log.debug("Caching a copy of file #{new_resource.source} at #{cache_file_path}")
 
@@ -48,7 +48,7 @@ action :unzip do
                       new_resource.source
                     end
 
-  cache_file_path = win_friendly_path(cache_file_path)
+  cache_file_path = Chef::Util::PathHelper.cleanpath(cache_file_path)
 
   converge_by("unzip #{new_resource.source}") do
     ruby_block 'Unzipping' do
@@ -110,13 +110,15 @@ action :zip do
   end
 end
 
-action_class.class_eval do
+action_class do
+  include Windows::Helper
+  require 'find'
+
   def ensure_rubyzip_gem_installed
     require 'zip'
   rescue LoadError
     Chef::Log.info("Missing gem 'rubyzip'...installing now.")
     chef_gem 'rubyzip' do
-      version node['windows']['rubyzipversion']
       action :install
       compile_time true
     end

@@ -1,9 +1,9 @@
 #
-# Author:: Adam Edwards (<adamed@chef.io>)
-# Cookbook:: windows
-# Library:: wmi_helper
+# Author:: Richard Lavey (richard.lavey@calastone.com)
+# Cookbook Name:: windows
+# Resource:: dns
 #
-# Copyright:: 2014-2018, Chef Software, Inc.
+# Copyright:: 2015, Calastone Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,17 +18,13 @@
 # limitations under the License.
 #
 
-if RUBY_PLATFORM =~ /mswin|mingw32|windows/
-  require 'win32ole'
+actions :create, :delete
+default_action :create
 
-  def execute_wmi_query(wmi_query)
-    wmi = ::WIN32OLE.connect('winmgmts://')
-    result = wmi.ExecQuery(wmi_query)
-    return nil unless result.each.count > 0
-    result
-  end
+attribute :host_name, kind_of: String, name_property: true, required: true
+attribute :record_type, kind_of: String, default: 'A', regex: /^(?:A|CNAME)$/
+attribute :dns_server, kind_of: String, default: '.'
+attribute :target, kind_of: [Array, String], required: true
+attribute :ttl, kind_of: Integer, required: false, default: 0
 
-  def wmi_object_property(wmi_object, wmi_property)
-    wmi_object.send(wmi_property)
-  end
-end
+attr_accessor :exists
