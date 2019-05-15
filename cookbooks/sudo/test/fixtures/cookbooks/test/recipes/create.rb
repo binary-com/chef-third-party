@@ -1,5 +1,11 @@
 include_recipe 'test::default'
 
+sudo 'sysadmins' do
+  users 'tas50'
+  groups 'sysadmins, superusers'
+  nopasswd true
+end
+
 sudo 'tomcat' do
   user '%tomcat'
   runas 'app_user'
@@ -17,6 +23,7 @@ end
 
 sudo 'tilde-invalid~user' do
   user 'bob'
+  action :create
 end
 
 # Like above, but ensure the tilde at the front gets munged as well

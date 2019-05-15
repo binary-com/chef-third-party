@@ -1,0 +1,38 @@
+---
+driver:
+  name: proxy
+  host: localhost
+  reset_command: "exit 0"
+  port: 5985
+  username: <%= ENV["machine_user"] %>
+  password: <%= ENV["machine_pass"] %>
+
+transport:
+  name: winrm
+  elevated: true
+
+provisioner:
+  name: chef_zero
+  deprecations_as_errors: true
+  product_name: chef
+  product_version: 13
+
+platforms:
+  - name: windows-2012R2
+
+verifier:
+  name: inspec
+
+suites:
+  - name: http_acl
+    run_list:
+      - recipe[test::http_acl]
+  - name: user_privilege
+    run_list:
+      - recipe[test::user_privilege]
+  - name: certificate
+    run_list:
+      - recipe[test::certificate]
+  - name: share
+    run_list:
+      - recipe[test::share]

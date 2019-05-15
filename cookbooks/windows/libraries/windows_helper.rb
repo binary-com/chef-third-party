@@ -1,9 +1,9 @@
 #
 # Author:: Seth Chisamore (<schisamo@chef.io>)
 # Cookbook:: windows
-# Library:: helper
+# Library:: windows_helper
 #
-# Copyright:: 2011-2017, Chef Software, Inc.
+# Copyright:: 2011-2018, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,18 +18,22 @@
 # limitations under the License.
 
 require 'uri'
-require 'Win32API' if Chef::Platform.windows?
 require 'chef/exceptions'
+require 'openssl'
+require 'chef/mixin/powershell_out'
+require 'chef/mixin/windows_env_helper'
+require 'chef/util/path_helper'
 
 module Windows
   module Helper
     AUTO_RUN_KEY = 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'.freeze unless defined?(AUTO_RUN_KEY)
     ENV_KEY = 'HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment'.freeze unless defined?(ENV_KEY)
-    ExpandEnvironmentStrings = Win32API.new('kernel32', 'ExpandEnvironmentStrings', %w(P P L), 'L') if Chef::Platform.windows? && !defined?(ExpandEnvironmentStrings)
+    include Chef::Mixin::WindowsEnvHelper
 
     # returns windows friendly version of the provided path,
     # ensures backslashes are used everywhere
     def win_friendly_path(path)
+      Chef::Log.warn('The win_friendly_path helper has been deprecated and will be removed from the next major release of the windows cookbook. Please update any cookbooks using this helper to instead require `chef/util/path_helper` and then use `Chef::Util::PathHelper.cleanpath`.')
       path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || '\\') if path
     end
 
@@ -45,16 +49,6 @@ module Windows
       else
         cmd
       end
-    end
-
-    # Create a feature provider dependent value object.
-    # mainly created becasue Windows Feature names are
-    # different based on whether dism.exe or servicemanagercmd.exe
-    # is used for installation
-    def value_for_feature_provider(provider_hash)
-      p = Chef::Platform.find_provider_for_node(node, :windows_feature)
-      key = p.to_s.downcase.split('::').last
-      provider_hash[key] || provider_hash[key.to_sym]
     end
 
     # singleton instance of the Windows Version checker
@@ -88,22 +82,19 @@ module Windows
           cache_file_path = source
         end
 
-        windows_path ? win_friendly_path(cache_file_path) : cache_file_path
+        windows_path ? Chef::Util::PathHelper.cleanpath(cache_file_path) : cache_file_path
       end
     end
 
     # Expands the environment variables
     def expand_env_vars(path)
-      # We pick 32k because that is the largest it could be:
-      # http://msdn.microsoft.com/en-us/library/windows/desktop/ms724265%28v=vs.85%29.aspx
-      buf = 0.chr * 32 * 1024 # 32k
-      if ExpandEnvironmentStrings.call(path.dup, buf, buf.length) == 0
-        raise Chef::Exceptions::Win32APIError, 'Failed calling ExpandEnvironmentStrings (received 0)'
-      end
-      buf.strip
+      # The windows Env provider does not correctly expand variables in
+      # the PATH environment variable. Ruby expects these to be expanded.
+      # Using Chef::Mixin::WindowsEnvHelper
+      expand_path(path)
     end
 
-    def is_package_installed?(package_name) # rubocop:disable Style/PredicateName
+    def is_package_installed?(package_name) # rubocop:disable Naming/PredicateName
       installed_packages.include?(package_name)
     end
 

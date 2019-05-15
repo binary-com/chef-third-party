@@ -12,39 +12,21 @@ Provides a set of Windows-specific resources to aid in the creation of cookbooks
 - Windows Server 2008 R2
 - Windows 8, 8.1
 - Windows Server 2012 (R1, R2)
+- Windows Server 2016
 
 ### Chef
 
-- Chef 12.6+
+- Chef 14+
 
 ## Resources
 
-### windows_auto_run
+### Deprecated Resources Note
 
-#### Actions
-
-- `:create` - Create an item to be run at login
-- `:remove` - Remove an item that was previously setup to run at login
-
-#### Properties
-
-- `name` - Name attribute. The name of the value to be stored in the registry
-- `program` - The program to be run at login
-- `args` - The arguments for the program
-
-#### Examples
-
-Run BGInfo at login
-
-```ruby
-windows_auto_run 'BGINFO' do
-  program 'C:/Sysinternals/bginfo.exe'
-  args    '\'C:/Sysinternals/Config.bgi\' /NOLICPROMPT /TIMER:0'
-  action  :create
-end
-```
+As of Chef 14.7+ the windows_share and windows_certificate resources are now included in the Chef Client. If you are running Chef 14.7+ the resources in Chef client will take precedence over the resources in this cookbook. In November 2019 we will release a new major version of this cookbook that removes these resources.
 
 ### windows_certificate
+
+`Note`: This resource is now included in Chef 14.7 and later. There is no need to depend on the Windows cookbook for this resource.
 
 Installs a certificate into the Windows certificate store from a file, and grants read-only access to the private key for designated accounts. Due to current limitations in WinRM, installing certificated remotely may not work if the operation requires a user profile. Operations on the local machine store should still work.
 
@@ -53,13 +35,27 @@ Installs a certificate into the Windows certificate store from a file, and grant
 - `:create` - creates or updates a certificate.
 - `:delete` - deletes a certificate.
 - `:acl_add` - adds read-only entries to a certificate's private key ACL.
+- `:verify` - logs whether or not a certificate is valid
 
 #### Properties
 
 - `source` - name attribute. The source file (for create and acl_add), thumbprint (for delete and acl_add) or subject (for delete).
 - `pfx_password` - the password to access the source if it is a pfx file.
 - `private_key_acl` - array of 'domain\account' entries to be granted read-only access to the certificate's private key. This is not idempotent.
-- `store_name` - the certificate store to manipulate. One of MY (default : personal store), CA (trusted intermediate store) or ROOT (trusted root store).
+- `store_name` - the certificate store to manipulate. One of:
+  - MY (Personal)
+  - CA (Intermediate Certification Authorities)
+  - ROOT (Trusted Root Certification Authorities)
+  - TRUSTEDPUBLISHER (Trusted Publishers)
+  - CLIENTAUTHISSUER (Client Authentication Issuers)
+  - REMOTE DESKTOP (Remote Desktop)
+  - TRUSTEDDEVICES (Trusted Devices)
+  - WEBHOSTING (Web Hosting)
+  - AUTHROOT (Third-Party Root Certification Authorities)
+  - TRUSTEDPEOPLE (Trusted People)
+  - SMARTCARDROOT (Smart Card Trusted Roots)
+  - TRUST (Enterprise Trust)
+  - DISALLOWED (Untrusted Certificates)
 - `user_store` - if false (default) then use the local machine store; if true then use the current user's store.
 
 #### Examples
@@ -99,10 +95,25 @@ Binds a certificate to an HTTP port in order to enable TLS communication.
 
 - `cert_name` - name attribute. The thumbprint(hash) or subject that identifies the certificate to be bound.
 - `name_kind` - indicates the type of cert_name. One of :subject (default) or :hash.
-- `address` - the address to bind against. Default is 0.0.0.0 (all IP addresses).
+- `address` - the address to bind against. Default is 0.0.0.0 (all IP addresses). One of:
+  - IP v4 address `1.2.3.4`
+  - IP v6 address `[::1]`
+  - Host name `www.foo.com`
 - `port` - the port to bind against. Default is 443.
 - `app_id` - the GUID that defines the application that owns the binding. Default is the values used by IIS.
-- `store_name` - the store to locate the certificate in. One of MY (default : personal store), CA (trusted intermediate store) or ROOT (trusted root store).
+- `store_name` - the store to locate the certificate in. One of:
+  - MY (Personal)
+  - CA (Intermediate Certification Authorities)
+  - ROOT (Trusted Root Certification Authorities)
+  - TRUSTEDPUBLISHER (Trusted Publishers)
+  - CLIENTAUTHISSUER (Client Authentication Issuers)
+  - REMOTE DESKTOP (Remote Desktop)
+  - TRUSTEDDEVICES (Trusted Devices)
+  - WEBHOSTING (Web Hosting)
+  - AUTHROOT (Third-Party Root Certification Authorities)
+  - TRUSTEDPEOPLE (Trusted People)
+  - SMARTCARDROOT (Smart Card Trusted Roots)
+  - TRUST (Enterprise Trust)
 
 #### Examples
 
@@ -122,117 +133,48 @@ windows_certificate_binding "me.acme.com" do
 end
 ```
 
-### windows_feature
+### windows_dns
 
-**BREAKING CHANGE - Version 3.0.0**
-
-This resource has been moved from using LWRPs and multiple providers to using Custom Resources. To maintain functionality, you'll need to change `provider` to `install_method`.
-
-Windows Roles and Features can be thought of as built-in operating system packages that ship with the OS. A server role is a set of software programs that, when they are installed and properly configured, lets a computer perform a specific function for multiple users or other computers within a network. A Role can have multiple Role Services that provide functionality to the Role. Role services are software programs that provide the functionality of a role. Features are software programs that, although they are not directly parts of roles, can support or augment the functionality of one or more roles, or improve the functionality of the server, regardless of which roles are installed. Collectively we refer to all of these attributes as 'features'.
-
-This resource allows you to manage these 'features' in an unattended, idempotent way.
-
-There are three methods for the `windows_feature` which map into Microsoft's three major tools for managing roles/features: [Deployment Image Servicing and Management (DISM)](http://msdn.microsoft.com/en-us/library/dd371719%28v=vs.85%29.aspx), [Servermanagercmd](http://technet.microsoft.com/en-us/library/ee344834%28WS.10%29.aspx) (The CLI for Server Manager), and [PowerShell](https://technet.microsoft.com/en-us/library/cc731774(v=ws.11).aspx). As Servermanagercmd is deprecated, Chef will set the default method to `:windows_feature_dism` if `dism.exe` is present on the system being configured. The default method will fall back to `:windows_feature_servermanagercmd`, and then `:windows_feature_powershell`.
-
-For more information on Roles, Role Services and Features see the [Microsoft TechNet article on the topic](http://technet.microsoft.com/en-us/library/cc754923.aspx). For a complete list of all features that are available on a node type either of the following commands at a command prompt:
-
-For Dism:
-
-```text
-dism /online /Get-Features
-```
-
-For ServerManagerCmd:
-
-```text
-servermanagercmd -query
-```
-
-For PowerShell:
-
-```text
-get-windowsfeature
-```
+Configures A and CNAME records in Windows DNS. This requires the DNSCMD to be installed, which is done by adding the DNS role to the server or installing the Remote Server Admin Tools.
 
 #### Actions
 
-- `:install` - install a Windows role/feature
-- `:remove` - remove a Windows role/feature
-- `:delete` - remove a Windows role/feature from the image (not supported by ServerManagerCmd)
+- :create: creates/updates the DNS entry
+- :delete: deletes the DNS entry
 
 #### Properties
 
-- `feature_name` - name of the feature/role(s) to install. The same feature may have different names depending on the provider used (ie DHCPServer vs DHCP; DNS-Server-Full-Role vs DNS).
-- `all` - Boolean. Optional. Default: false. DISM and Powershell providers only. Forces all dependencies to be installed.
-- `source` - String. Optional. DISM provider only. Uses local repository for feature install.
-- `install_method` - Symbol. Optional. **REPLACEMENT FOR THE PREVIOUS PROVIDER OPTION** If not supplied, Chef will determine which method to use (in the order of `:windows_feature_dism`, `:windows_feature_servercmd`, `:windows_feature_powershell`)
-
-#### Examples
-
-Install the DHCP Server feature
-
-```ruby
-windows_feature 'DHCPServer' do
-  action :install
-end
-```
-
-Install the .Net 3.5.1 feature on Server 2012 using repository files on DVD and install all dependencies
-
-```ruby
-windows_feature "NetFx3" do
-  action :install
-  all true
-  source "d:\sources\sxs"
-end
-```
-
-Remove Telnet Server and Client features
-
-```ruby
-windows_feature ['TelnetServer', 'TelnetClient'] do
-  action :remove
-end
-```
-
-Add the SMTP Server feature using the PowerShell provider
-
-```ruby
-windows_feature "smtp-server" do
-  action :install
-  all true
-  install_method :windows_feature_powershell
-end
-```
-
-Install multiple features using one resource with the PowerShell provider
-
-```ruby
-windows_feature ['Web-Asp-Net45', 'Web-Net-Ext45'] do
-  action :install
-  install_method :windows_feature_powershell
-end
-```
-
-### windows_font
-
-Installs a font.
-
-Font files should be included in the cookbooks
-
-#### Actions
-
-- `:install` - install a font to the system fonts directory.
-
-#### Properties
-
-- `name` - The file name of the font file name to install. The path defaults to the files/default directory of the cookbook you're calling windows_font from. Defaults to the resource name.
-- `source` - Set an alternate path to the font file.
+- host_name: name attribute. FQDN of the entry to act on.
+- dns_server: the DNS server to update. Default is local machine (.)
+- record_type: the type of record to create. One of A (default) or CNAME
+- target: for A records an array of IP addresses to associate with the host; for CNAME records the FQDN of the host to alias
+- ttl: if > 0 then set the time to live of the record
 
 #### Examples
 
 ```ruby
-windows_font 'Code New Roman.otf'
+# Create A record linked to 2 addresses with a 10 minute ttl
+windows_dns "m1.chef.test" do
+    target         ['10.9.8.7', '1.2.3.4']
+    ttl            600
+end
+```
+
+```ruby
+# Delete records. target is mandatory although not used
+windows_dns "m1.chef.test" do
+    action    :delete
+    target    []
+end
+```
+
+```ruby
+# Set an alias against the node in a role
+nodes = search( :node, "role:my_service" )
+windows_dns "myservice.chef.test" do
+    record_type    'CNAME'
+    target        nodes[0]['fqdn']
+end
 ```
 
 ### windows_http_acl
@@ -248,7 +190,7 @@ Sets the Access Control List for an http URL to grant non-admin accounts permiss
 
 - `url` - the name of the url to be created/deleted.
 - `sddl` - the DACL string configuring all permissions to URL. Mandatory for create if user is not provided. Can't be use with `user`.
-- `user` - the name (domain\user) of the user or group to be granted permission to the URL. Mandatory for create if sddl is not provided. Can't be use with `sddl`. Only one user or group can be granted permission so this replaces any previously defined entry.
+- `user` - the name (domain\user) of the user or group to be granted permission to the URL. Mandatory for create if sddl is not provided. Can't be use with `sddl`. Only one user or group can be granted permission so this replaces any previously defined entry. If you receive a parameter error your user may not exist.
 
 #### Examples
 
@@ -271,121 +213,35 @@ windows_http_acl 'http://+:50051/' do
 end
 ```
 
-### windows_printer_port
-
-Create and delete TCP/IPv4 printer ports.
-
-#### Actions
-
-- `:create` - Create a TCIP/IPv4 printer port. This is the default action.
-- `:delete` - Delete a TCIP/IPv4 printer port
-
-#### Properties
-
-- `ipv4_address` - Name attribute. Required. IPv4 address, e.g. '10.0.24.34'
-- `port_name` - Port name. Optional. Defaults to 'IP_' + `ipv4_address`
-- `port_number` - Port number. Optional. Defaults to 9100.
-- `port_description` - Port description. Optional.
-- `snmp_enabled` - Boolean. Optional. Defaults to false.
-- `port_protocol` - Port protocol, 1 (RAW), or 2 (LPR). Optional. Defaults to 1.
-
-#### Examples
-
-Create a TCP/IP printer port named 'IP_10.4.64.37' with all defaults
-
-```ruby
-windows_printer_port '10.4.64.37' do
-  action :create
-end
-```
-
-Delete a printer port
-
-```ruby
-windows_printer_port '10.4.64.37' do
-  action :delete
-end
-```
-
-Delete a port with a custom port_name
-
-```ruby
-windows_printer_port '10.4.64.38' do
-  port_name 'My awesome port'
-  action :delete
-end
-```
-
-Create a port with more options
-
-```ruby
-windows_printer_port '10.4.64.39' do
-  port_name 'My awesome port'
-  snmp_enabled true
-  port_protocol 2
-end
-```
-
-### windows_printer
-
-Create Windows printer. Note that this doesn't currently install a printer driver. You must already have the driver installed on the system.
-
-The Windows Printer LWRP will automatically create a TCP/IP printer port for you using the `ipv4_address` property. If you want more granular control over the printer port, just create it using the `windows_printer_port` LWRP before creating the printer.
-
-#### Actions
-
-- `:create` - Create a new printer
-- `:delete` - Delete a new printer
-
-#### Properties
-
-- `device_id` - Name attribute. Required. Printer queue name, e.g. 'HP LJ 5200 in fifth floor copy room'
-- `comment` - Optional string describing the printer queue.
-- `default` - Boolean. Optional. Defaults to false. Note that Windows sets the first printer defined to the default printer regardless of this setting.
-- `driver_name` - String. Required. Exact name of printer driver. Note that the printer driver must already be installed on the node.
-- `location` - Printer location, e.g. 'Fifth floor copy room', or 'US/NYC/Floor42/Room4207'
-- `shared` - Boolean. Defaults to false.
-- `share_name` - Printer share name.
-- `ipv4_address` - Printer IPv4 address, e.g. '10.4.64.23'. You don't have to be able to ping the IP address to set it. Required.
-
-An error of "Set-WmiInstance : Generic failure" is most likely due to the printer driver name not matching or not being installed.
-
-#### Examples
-
-Create a printer
-
-```ruby
-windows_printer 'HP LaserJet 5th Floor' do
-  driver_name 'HP LaserJet 4100 Series PCL6'
-  ipv4_address '10.4.64.38'
-end
-```
-
-Delete a printer. Note: this doesn't delete the associated printer port. See `windows_printer_port` above for how to delete the port.
-
-```ruby
-windows_printer 'HP LaserJet 5th Floor' do
-  action :delete
-end
-```
-
 ### windows_share
+
+`Note`: This resource is now included in Chef 14.7 and later. There is no need to depend on the Windows cookbook for this resource.
 
 Creates, modifies and removes Windows shares. All properties are idempotent.
 
+`Note`: This resource uses PowerShell cmdlets introduced in Windows 2012/8.
+
 #### Actions
 
-- :create: creates/modifies a share
-- :delete: deletes a share
+- `:create`: creates/modifies a share
+- `:delete`: deletes a share
 
 #### Properties
 
-- share_name: name attribute, the share name.
-- path: path to the directory to be shared. Required when creating. If the share already exists on a different path then it is deleted and re-created.
-- description: description to be applied to the share
-- full_users: array of users which should have "Full control" permissions
-- change_users: array of users which should have "Change" permissions
-- read_users: array of users which should have "Read" permissions
+property                 | type       | default       | description
+------------------------ | ---------- | ------------- | -----------------------------------------------------------------------------------------------------------------------------------------------------------
+`share_name`             | String     | resource name | the share to assign to the share
+`path`                   | String     |               | The path of the location of the folder to share. Required when creating. If the share already exists on a different path then it is deleted and re-created.
+`description`            | String     |               | description to be applied to the share
+`full_users`             | Array      | []            | users which should have "Full control" permissions
+`change_users`           | Array      | []            | Users are granted modify permission to access the share.
+`read_users`             | Array      | []            | users which should have "Read" permissions
+`temporary`              | True/False | false         | The lifetime of the new SMB share. A temporary share does not persist beyond the next restart of the computer
+`scope_name`             | String     | '*'           | The scope name of the share.
+`ca_timeout`             | Integer    | 0             | The continuous availability time-out for the share.
+`continuously_available` | True/False | false         | Indicates that the share is continuously available.
+`concurrent_user_limit`  | Integer    | 0 (unlimited) | The maximum number of concurrently connected users the share can accommodate
+`encrypt_data`           | True/False | false         | Indicates that the share is encrypted.
 
 #### Examples
 
@@ -404,157 +260,87 @@ windows_share "foo" do
 end
 ```
 
-### windows_shortcut
+### windows_user_privilege
 
-Creates and modifies Windows shortcuts.
-
-#### Actions
-
-- `:create` - create or modify a windows shortcut
-
-#### Properties
-
-- `name` - name attribute. The shortcut to create/modify.
-- `target` - what the shortcut links to
-- `arguments` - arguments to pass to the target when the shortcut is executed
-- `description` - description of the shortcut
-- `cwd` - Working directory to use when the target is executed
-- `iconlocation` - Icon to use, in the format of `"path, index"` where index is which icon in that file to use (See [WshShortcut.IconLocation](https://msdn.microsoft.com/en-us/library/3s9bx7at.aspx))
-
-#### Examples
-
-Add a shortcut all users desktop:
-
-```ruby
-require 'win32ole'
-all_users_desktop = WIN32OLE.new("WScript.Shell").SpecialFolders("AllUsersDesktop")
-
-windows_shortcut "#{all_users_desktop}/Notepad.lnk" do
-  target "C:\\WINDOWS\\notepad.exe"
-  description "Launch Notepad"
-  iconlocation "C:\\windows\\notepad.exe, 0"
-end
-```
-
-#### Library Methods
-
-```ruby
-Registry.value_exists?('HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run','BGINFO')
-Registry.key_exists?('HKLM\SOFTWARE\Microsoft')
-BgInfo = Registry.get_value('HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run','BGINFO')
-```
-
-### windows_path
+Adds the `principal` (User/Group) to the specified privileges (such as `Logon as a batch job` or `Logon as a Service`).
 
 #### Actions
 
-- `:add` - Add an item to the system path
-- `:remove` - Remove an item from the system path
+- `:add` - add the specified privileges to the `principal`
+- `:remove` - remove the specified privilege of the `principal`
 
 #### Properties
 
-- `path` - Name attribute. The name of the value to add to the system path
+- `principal` - Name attribute, Required, String. The user or group to be granted privileges.
+- `privilege` - Required, String/Array. The privilege(s) to be granted.
 
 #### Examples
 
-Add Sysinternals to the system path
+Grant the Administrator user the `Logon as a batch job` and `Logon as a service` privilege.
 
 ```ruby
-windows_path 'C:\Sysinternals' do
-  action :add
+windows_user_privilege 'Administrator' do
+  privilege %w(SeBatchLogonRight SeServiceLogonRight)
 end
 ```
 
-Remove 7-Zip from the system path
+Remove `Logon as a batch job` privilege of Administrator.
 
 ```ruby
-windows_path 'C:\7-Zip' do
+windows_user_privilege 'Administrator' do
+  privilege %w(SeBatchLogonRight)
   action :remove
 end
 ```
 
-### windows_task
+#### Available Privileges
 
-Creates, deletes or runs a Windows scheduled task. Requires Windows Server 2008 due to API usage.
-
-#### Actions
-
-- `:create` - creates a task (or updates existing if user or command has changed)
-- `:delete` - deletes a task
-- `:run` - runs a task
-- `:end` - ends a task
-- `:change` - changes the un/pw or command of a task
-- `:enable` - enable a task
-- `:disable` - disable a task
-
-#### Properties
-
-- `task_name` - name attribute, The task name. ("Task Name" or "/Task Name")
-- `force` - When used with create, will update the task.
-- `command` - The command the task will run.
-- `cwd` - The directory the task will be run from.
-- `user` - The user to run the task as. (defaults to 'SYSTEM')
-- `password` - The user's password. (requires user)
-- `run_level` - Run with `:limited` or `:highest` privileges.
-- `frequency` - Frequency with which to run the task. (default is :hourly. Other valid values include :minute, :hourly, :daily, :weekly, :monthly, :once, :on_logon, :onstart, :on_idle) :once requires start_time
-- `frequency_modifier` - Multiple for frequency. (15 minutes, 2 days). Monthly tasks may also use these values": ('FIRST', 'SECOND', 'THIRD', 'FOURTH', 'LAST', 'LASTDAY')
-- `start_day` - Specifies the first date on which the task runs. Optional string (MM/DD/YYYY)
-- `start_time` - Specifies the start time to run the task. Optional string (HH:mm)
-- `interactive_enabled` - (Allow task to run interactively or non-interactively. Requires user and password.)
-- `day` - For monthly or weekly tasks, the day(s) on which the task runs. (MON - SUN, *, 1 - 31)
-- `months` - The Months of the year on which the task runs. (JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC, *). Multiple months should be comma delimited.
-- `idle_time` - For :on_idle frequency, the time (in minutes) without user activity that must pass to trigger the task. (1 - 999)
-
-#### Examples
-
-Create a `chef-client` task with TaskPath `\` running every 15 minutes
-
-```ruby
-windows_task 'chef-client' do
-  user 'Administrator'
-  password '$ecR3t'
-  cwd 'C:\\chef\\bin'
-  command 'chef-client -L C:\\tmp\\'
-  run_level :highest
-  frequency :minute
-  frequency_modifier 15
-end
 ```
-
-Update `chef-client` task with new password and log location
-
-```ruby
-windows_task 'chef-client' do
-  user 'Administrator'
-  password 'N3wPassW0Rd'
-  cwd 'C:\\chef\\bin'
-  command 'chef-client -L C:\\chef\\logs\\'
-  action :change
-end
-```
-
-Delete a task named `old task`
-
-```ruby
-windows_task 'old task' do
-  action :delete
-end
-```
-
-Enable a task named `chef-client`
-
-```ruby
-windows_task 'chef-client' do
-  action :enable
-end
-```
-
-Disable a task named `ProgramDataUpdater` with TaskPath `\Microsoft\Windows\Application Experience\`
-
-```ruby
-windows_task '\Microsoft\Windows\Application Experience\ProgramDataUpdater' do
-  action :disable
-end
+SeTrustedCredManAccessPrivilege      Access Credential Manager as a trusted caller
+SeNetworkLogonRight                  Access this computer from the network
+SeTcbPrivilege                       Act as part of the operating system
+SeMachineAccountPrivilege            Add workstations to domain
+SeIncreaseQuotaPrivilege             Adjust memory quotas for a process
+SeInteractiveLogonRight              Allow log on locally
+SeRemoteInteractiveLogonRight        Allow log on through Remote Desktop Services
+SeBackupPrivilege                    Back up files and directories
+SeChangeNotifyPrivilege              Bypass traverse checking
+SeSystemtimePrivilege                Change the system time
+SeTimeZonePrivilege                  Change the time zone
+SeCreatePagefilePrivilege            Create a pagefile
+SeCreateTokenPrivilege               Create a token object
+SeCreateGlobalPrivilege              Create global objects
+SeCreatePermanentPrivilege           Create permanent shared objects
+SeCreateSymbolicLinkPrivilege        Create symbolic links
+SeDebugPrivilege                     Debug programs
+SeDenyNetworkLogonRight              Deny access this computer from the network
+SeDenyBatchLogonRight                Deny log on as a batch job
+SeDenyServiceLogonRight              Deny log on as a service
+SeDenyInteractiveLogonRight          Deny log on locally
+SeDenyRemoteInteractiveLogonRight    Deny log on through Remote Desktop Services
+SeEnableDelegationPrivilege          Enable computer and user accounts to be trusted for delegation
+SeRemoteShutdownPrivilege            Force shutdown from a remote system
+SeAuditPrivilege                     Generate security audits
+SeImpersonatePrivilege               Impersonate a client after authentication
+SeIncreaseWorkingSetPrivilege        Increase a process working set
+SeIncreaseBasePriorityPrivilege      Increase scheduling priority
+SeLoadDriverPrivilege                Load and unload device drivers
+SeLockMemoryPrivilege                Lock pages in memory
+SeBatchLogonRight                    Log on as a batch job
+SeServiceLogonRight                  Log on as a service
+SeSecurityPrivilege                  Manage auditing and security log
+SeRelabelPrivilege                   Modify an object label
+SeSystemEnvironmentPrivilege         Modify firmware environment values
+SeManageVolumePrivilege              Perform volume maintenance tasks
+SeProfileSingleProcessPrivilege      Profile single process
+SeSystemProfilePrivilege             Profile system performance
+SeUnsolicitedInputPrivilege          "Read unsolicited input from a terminal device"
+SeUndockPrivilege                    Remove computer from docking station
+SeAssignPrimaryTokenPrivilege        Replace a process level token
+SeRestorePrivilege                   Restore files and directories
+SeShutdownPrivilege                  Shut down the system
+SeSyncAgentPrivilege                 Synchronize directory service data
+SeTakeOwnershipPrivilege             Take ownership of files or other objects
 ```
 
 ### windows_zipfile
@@ -696,60 +482,6 @@ case ::Windows::VersionHelper.nt_version node
 end
 ```
 
-## Windows ChefSpec Matchers
-
-The Windows cookbook includes custom [ChefSpec](https://github.com/sethvargo/chefspec) matchers you can use to test your own cookbooks that consume Windows cookbook LWRPs.
-
-### Example Matcher Usage
-
-```ruby
-expect(chef_run).to install_windows_package('Node.js').with(
-  source: 'http://nodejs.org/dist/v0.10.26/x64/node-v0.10.26-x64.msi')
-```
-
-### Windows Cookbook Matchers
-
-- create_windows_auto_run
-- remove_windows_auto_run
-- create_windows_certificate
-- delete_windows_certificate
-- add_acl_to_windows_certificate
-- create_windows_certificate_binding
-- delete_windows_certificate_binding
-- install_windows_feature
-- install_windows_feature_dism
-- install_windows_feature_servermanagercmd
-- install_windows_feature_powershell
-- remove_windows_feature
-- remove_windows_feature_dism
-- remove_windows_feature_servermanagercmd
-- remove_windows_feature_powershell
-- delete_windows_feature
-- delete_windows_feature_dism
-- delete_windows_feature_powershell
-- install_windows_font
-- create_windows_http_acl
-- delete_windows_http_acl
-- install_windows_package
-- remove_windows_package
-- set_windows_pagefile
-- add_windows_path
-- remove_windows_path
-- create_windows_printer
-- delete_windows_printer
-- create_windows_printer_port
-- delete_windows_printer_port
-- create_windows_shortcut
-- create_windows_shortcut
-- create_windows_task
-- disable_windows_task
-- enable_windows_task
-- delete_windows_task
-- run_windows_task
-- change_windows_task
-- unzip_windows_zipfile_to
-- zip_windows_zipfile_to
-
 ## Usage
 
 Place an explicit dependency on this cookbook (using depends in the cookbook's metadata.rb) from any cookbook where you would like to use the Windows-specific resources/providers that ship with this cookbook.
@@ -766,7 +498,7 @@ depends 'windows'
 - Author:: Doug Ireton ([doug.ireton@nordstrom.com](mailto:doug.ireton@nordstrom.com))
 
 ```text
-Copyright 2011-2016, Chef Software, Inc.
+Copyright 2011-2018, Chef Software, Inc.
 Copyright 2010, VMware, Inc.
 Copyright 2011, Business Intelligence Associates, Inc
 Copyright 2012, Nordstrom, Inc.
