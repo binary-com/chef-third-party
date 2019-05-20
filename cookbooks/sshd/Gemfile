@@ -10,12 +10,12 @@ group :unit do
 end
 
 group :kitchen_common do
-  gem 'test-kitchen'
+  gem 'kitchen-inspec'
 end
 
 group :kitchen_vagrant do
-  gem 'kitchen-vagrant'
+  gem 'kitchen-vagrant', '~> 1.3.4'
 end
 
-gem 'rspec'
 gem 'chefspec'
+gem 'rspec'
