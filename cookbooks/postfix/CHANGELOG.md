@@ -2,6 +2,39 @@
 
 This file is used to list changes made in each version of the postfix cookbook.
 
+## 5.3.1 (2018-07-24)
+
+- Fixed sbin issue with Chef13
+
+## 5.3.0 (2018-05-23)
+
+- support multiple sasl_passwd entries
+- Add `packages` attribute so different postfix packages can be installed
+- add ability to set network connection port for a remote relayhost
+
+## 5.2.1 (2017-11-22)
+
+- Properly support FreeBSD
+- Do not run service restart for solaris which fails
+
+## 5.2.0 (2017-08-07)
+
+- Lazily evaluate the config template variables to allow overrides to properly apply
+- Avoid Chefspec deprecation warnings
+
+## 5.1.1 (2017-07-28)
+
+- Fix support for Amazon Linux on Chef 13
+- Expand testing to cover Debian 9 in Travis
+
+## 5.1.0 (2017-07-28)
+
+- Add an option to allow recipient canonical maps
+
+## 5.0.3 (2017-06-26)
+
+- Correct attribute line for use_relay_restrictions_maps to prevent converge failures
+
 ## 5.0.2 (2017-05-17)
 
 - Fix use_relay_restrictions_maps attribute misspelling in attributes file

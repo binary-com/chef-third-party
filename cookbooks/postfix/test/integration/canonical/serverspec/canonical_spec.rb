@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,18 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+require_relative './spec_helper'
 
-include_recipe 'postfix::_common'
-
-postmap_command = platform_family?('rhel') ? '/usr/sbin/postmap' : 'postmap'
-
-execute 'update-postfix-relay-restrictions' do
-  command "#{postmap_command} #{node['postfix']['relay_restrictions_db']}"
-  environment PATH: "#{ENV['PATH']}:/opt/omni/bin:/opt/omni/sbin" if platform_family?('omnios')
-  action :nothing
+describe file('/etc/postfix/recipient_canonical.db') do
+  it { should be_file }
 end
 
-template node['postfix']['relay_restrictions_db'] do
-  source 'relay_restrictions.erb'
-  notifies :run, 'execute[update-postfix-relay-restrictions]'
+describe file('/etc/postfix/main.cf') do
+  its(:content) { should match(%r{^\s*recipient_canonical_maps\s*=.*\/etc\/postfix\/recipient_canonical\s*$}) }
 end
