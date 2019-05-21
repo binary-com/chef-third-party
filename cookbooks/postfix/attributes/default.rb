@@ -14,9 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+default['postfix']['packages'] = %w(postfix)
+
 # Generic cookbook attributes
 default['postfix']['mail_type'] = 'client'
 default['postfix']['relayhost_role'] = 'relayhost'
+default['postfix']['relayhost_port'] = '25'
 default['postfix']['multi_environment_relay'] = false
 default['postfix']['use_procmail'] = false
 default['postfix']['use_alias_maps'] = (node['platform'] == 'freebsd')
@@ -33,6 +36,7 @@ default['postfix']['main_template_source'] = 'postfix'
 default['postfix']['master_template_source'] = 'postfix'
 default['postfix']['sender_canonical_map_entries'] = {}
 default['postfix']['smtp_generic_map_entries'] = {}
+default['postfix']['recipient_canonical_map_entries'] = {}
 default['postfix']['access_db_type'] = 'hash'
 default['postfix']['aliases_db_type'] = 'hash'
 default['postfix']['transport_db_type'] = 'hash'
@@ -98,6 +102,8 @@ when 'smartos'
   default['postfix']['main']['smtp_use_tls'] = 'no'
   default['postfix']['cafile'] = '/opt/local/etc/postfix/cacert.pem'
 when 'rhel'
+  default['postfix']['cafile'] = '/etc/pki/tls/cert.pem'
+when 'amazon'
   default['postfix']['cafile'] = '/etc/pki/tls/cert.pem'
 else
   default['postfix']['cafile'] = "#{node['postfix']['conf_dir']}/cacert.pem"
@@ -377,24 +383,22 @@ default['postfix']['master']['bsmtp']['args'] = ['flags=Fq. user=foo argv=/usr/l
 default['postfix']['aliases'] = case node['platform']
                                 when 'freebsd'
                                   {
-                                    'MAILER-DAEMON' =>  'postmaster',
-                                    'bin' =>            'root',
-                                    'daemon' =>         'root',
-                                    'named' =>          'root',
-                                    'nobody' =>         'root',
-                                    'uucp' =>           'root',
-                                    'www' =>            'root',
-                                    'ftp-bugs' =>       'root',
-                                    'postfix' =>        'root',
-                                    'manager' =>        'root',
-                                    'dumper' =>         'root',
-                                    'operator' =>       'root',
-                                    'abuse' =>          'postmaster',
+                                    'MAILER-DAEMON' => 'postmaster',
+                                    'bin' => 'root',
+                                    'daemon' => 'root',
+                                    'named' => 'root',
+                                    'nobody' => 'root',
+                                    'uucp' => 'root',
+                                    'www' => 'root',
+                                    'ftp-bugs' => 'root',
+                                    'postfix' => 'root',
+                                    'manager' => 'root',
+                                    'dumper' => 'root',
+                                    'operator' => 'root',
+                                    'abuse' => 'postmaster',
                                   }
                                 else
                                   {}
                                 end
 
-if node['postfix']['use_relay_restrictions_maps']
-  default['postfix']['main']['smtpd_relay_restrictions'] = "hash:#{node['postfix']['relay_restrictions_db']}, reject"
-end
+default['postfix']['main']['smtpd_relay_restrictions'] = "hash:#{node['postfix']['relay_restrictions_db']}, reject" if node['postfix']['use_relay_restrictions_maps']
