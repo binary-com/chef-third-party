@@ -1,5 +1,5 @@
 #
-# Copyright 2018, Noah Kantrowitz
+# Copyright 2015-2017, Noah Kantrowitz
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 
-eval_gemfile File.expand_path('../../../Gemfile', __FILE__)
 
-gem 'chef', '~> 13.2.20'
+module PoiseRuby
+  VERSION = '2.3.0'
+end

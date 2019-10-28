@@ -1,9 +1,5 @@
 # Changelog
 
-## v2.4.0
-
-* Add support for the rh-ruby24 SCL package.
-
 ## v2.3.0
 
 * Chef 13 support.

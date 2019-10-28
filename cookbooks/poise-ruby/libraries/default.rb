@@ -14,22 +14,6 @@
 # limitations under the License.
 #
 
-source 'https://rubygems.org/'
-
-gemspec path: File.expand_path('..', __FILE__)
-
-def dev_gem(name, path: File.join('..', name), github: nil)
-  path = File.expand_path(File.join('..', path), __FILE__)
-  if File.exist?(path)
-    gem name, path: path
-  elsif github
-    gem name, git: "https://github.com/#{github}.git"
-  end
-end
-
-dev_gem 'halite'
-dev_gem 'poise'
-dev_gem 'poise-archive'
-dev_gem 'poise-boiler'
-dev_gem 'poise-languages'
-dev_gem 'poise-profiler'
+raise 'Halite is not compatible with no_lazy_load false, please set no_lazy_load true in your Chef configuration file.' unless Chef::Config[:no_lazy_load]
+$LOAD_PATH << File.expand_path('../../files/halite_gem', __FILE__)
+require "poise_ruby/cheftie"
