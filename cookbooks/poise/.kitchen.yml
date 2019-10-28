@@ -1,6 +1,0 @@
----
-#<% require 'poise_boiler' %>
-<%= PoiseBoiler.kitchen(platforms: ENV['CI'] ? 'ubuntu-14.04' : %w{ubuntu-14.04 windows}) %>
-
-verifier:
-  name: inspec
