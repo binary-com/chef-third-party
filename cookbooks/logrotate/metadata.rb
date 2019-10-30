@@ -12,7 +12,6 @@ issues_url "https://github.com/stevendanna/logrotate/issues" if respond_to?(:iss
 recipe "logrotate", "Installs logrotate package"
 provides "logrotate_app"
 
-depends "compat_resource"
 
 %w{amazon centos debian fedora redhat scientific solaris2 ubuntu}.each do |platform|
   supports platform
