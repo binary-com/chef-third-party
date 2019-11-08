@@ -1,5 +1,71 @@
 # Sysctl
 
+## v1.1.0 (2019-11-07)
+
+- exposed the `sysctl_param` resource as `sysctl` as well to make upgrades less painful
+
+## v1.0.5 (2018-04-27)
+
+- Remove the last remains of the parameter backup functionality in the param resource
+- Use more friendly resource names when reloading the sysctl values
+- Fixed ignore_error to actually work and set it to not show up in reporting
+- Simplified how we load the current value
+
+## v1.0.4 (2018-04-07)
+
+- The param resource from this cookbook is now shipping as part of Chef 14\. With the inclusion of this resource into Chef itself we are now deprecating this cookbook. It will continue to function for Chef 13 users, but will not be updated.
+
+## v1.0.3 (2018-03-14)
+
+- Refactor sysctl helpers into the correct files
+- Hard fail on FreeBSD/SLEZ < 12 [#125](https://github.com/sous-chefs/sysctl/pull/125)
+
+## v1.0.2 (2018-02-28)
+
+- Removed sysctl collection in ohai for non-Linux hosts. This cookbook doesn't support it so we shouldn't increase ohai runtimes by collecting this data
+- Removed the mention of attributes in the readme and put a large warning for users upgrading to 1.0
+- Remove a debug statement that was left in the param resource
+- Fixed the :remove action in the param resource to not converge when there isn't a entry to remove
+- Increased the required Chef version to 12.7 since we're using action_class in the resource which had several bugs in 12.5/12.6
+
+## v1.0.1 (2018-02-19)
+
+- Add back systctl::default recipe, but log a warning that the recipe should be removed from cookbooks / runlists. Please update your cookbooks to require systctl 1 or later and remove this recipe.
+
+## v1.0.0 (2018-02-17)
+
+- Remove mentions of attributes
+- `sysctl_param` now doesn't use attributes
+- update ohai to 5+ to remove `compat_resource` dependency
+- Move all helpers into helpers.rb
+- Remove unused methods in the helpers
+- Turn `template` into `cookbook_file`
+
+### Behaviour Change
+
+- Always ignore error when getting a key, that way the error is vomited back into the Chef run if there is one.
+- Now use sysctl -p to set attributes This mean we can set/unset sysctl_param in one run.
+- Fix reload resource for systemd
+- No longer require `recipes:default` to be added to persist a parameter
+
+## v0.10.2 (2017-09-17)
+
+- Add attribute to handle with sysctl -e flag (#99)
+
+## v0.10.1 (2017-08-07)
+
+- Fix a typo in the helper that caused the cookbook to fail
+
+## v0.10.0 (2017-07-31)
+
+- Added support for Amazon Linux, Oracle Linux, and openSUSE
+- Removed support for Ubuntu 14.10, Ubuntu <= 9.10, and Fedora < 18
+- Resolved CHEF-19 Deprecation warnings that will impact Chef 14 runs
+- Expanded Travis testing to more platforms and releases
+- Removed problematic cdrom autoeject test that didn't work on all platforms
+- Reenabled testing of FoodCritic rules FC059 and FC085
+- Enabled testing of Chef deprecation warnings
+
 ## v0.9.0 (2017-05-18)
 
 - This cookbook is now maintained by Sous-Chefs. See <http://sous-chefs.org/>
