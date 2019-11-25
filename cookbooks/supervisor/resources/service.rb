@@ -18,8 +18,6 @@
 # limitations under the License.
 #
 
-# property :name, name_property: true, kind_of: String, required: true, :name_property => true
-# property :service_name, :kind_of => String
 property :service_name, kind_of: String, name_property: true
 property :command, kind_of: String
 property :process_name, kind_of: String, default: '%(program_name)s'
