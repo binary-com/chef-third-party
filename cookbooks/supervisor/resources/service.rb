@@ -78,14 +78,14 @@ action :start do
   when 'UNAVAILABLE'
     raise "Supervisor service #{new_resource.service_name} cannot be started because it does not exist"
   when 'RUNNING'
-    Chef::Log.info "#{new_resource} is already started."
+    Chef::Log.debug "#{new_resource} is already started."
   when 'STARTING'
-    Chef::Log.info "#{new_resource} is already starting."
+    Chef::Log.debug "#{new_resource} is already starting."
     wait_til_state('RUNNING')
   else
     converge_by("Starting #{new_resource}") do
       unless supervisorctl('start')
-	      raise "Supervisor service #{new_resource.service_name} was unable to be started"
+        raise "Supervisor service #{new_resource.service_name} was unable to be started"
       end
     end
   end
