@@ -56,12 +56,6 @@ property :eventlistener, kind_of: [TrueClass, FalseClass], default: false
 property :eventlistener_buffer_size, kind_of: Integer, default: nil
 property :eventlistener_events, kind_of: Array, default: nil
 
-attr_accessor :state
-attr_accessor :exists
-
-def load_current_value
-  state = get_current_state(name)
-end
 
 action :enable do
   converge_by("Enabling #{new_resource}") do
@@ -70,6 +64,7 @@ action :enable do
 end
 
 action :disable do
+  state = get_current_state(new_resource.service_name) 
   if state == 'UNAVAILABLE'
     Chef::Log.info "#{new_resource} is already disabled."
   else
@@ -80,27 +75,29 @@ action :disable do
 end
 
 action :start do
+  state = get_current_state(new_resource.service_name)
   case state
   when 'UNAVAILABLE'
-    raise "Supervisor service #{name} cannot be started because it does not exist"
+    raise "Supervisor service #{new_resource.service_name} cannot be started because it does not exist"
   when 'RUNNING'
-    Chef::Log.debug "#{new_resource} is already started."
+    Chef::Log.info "#{new_resource} is already started."
   when 'STARTING'
-    Chef::Log.debug "#{new_resource} is already starting."
+    Chef::Log.info "#{new_resource} is already starting."
     wait_til_state('RUNNING')
   else
     converge_by("Starting #{new_resource}") do
       unless supervisorctl('start')
-        raise "Supervisor service #{name} was unable to be started"
+	      raise "Supervisor service #{new_resource.service_name} was unable to be started"
       end
     end
   end
 end
 
 action :stop do
+  state = get_current_state(new_resource.service_name)
   case state
   when 'UNAVAILABLE'
-    raise "Supervisor service #{name} cannot be stopped because it does not exist"
+    raise "Supervisor service #{new_resource.service_name} cannot be stopped because it does not exist"
   when 'STOPPED'
     Chef::Log.debug "#{new_resource} is already stopped."
   when 'STOPPING'
@@ -109,20 +106,21 @@ action :stop do
   else
     converge_by("Stopping #{new_resource}") do
       unless supervisorctl('stop')
-        raise "Supervisor service #{name} was unable to be stopped"
+        raise "Supervisor service #{new_resource.service_name} was unable to be stopped"
       end
     end
   end
 end
 
 action :restart do
+  state = get_current_state(new_resource.service_name)
   case state
   when 'UNAVAILABLE'
-    raise "Supervisor service #{name} cannot be restarted because it does not exist"
+    raise "Supervisor service #{new_resource.service_name} cannot be restarted because it does not exist"
   else
     converge_by("Restarting #{new_resource}") do
       unless supervisorctl('restart')
-        raise "Supervisor service #{name} was unable to be started"
+        raise "Supervisor service #{new_resource.service_name} was unable to be started"
       end
     end
   end
