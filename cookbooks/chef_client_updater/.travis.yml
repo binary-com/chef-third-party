@@ -1,0 +1,83 @@
+# TAS50: THIS COOKBOOK DELIBERATELY DOES NOT USE THE STANDARD TRAVIS.YML FILE
+dist: xenial
+cache: bundler
+
+addons:
+  apt:
+    sources:
+      - chef-current-xenial
+    packages:
+      - chef-workstation
+
+branches:
+  only:
+    - master
+
+before_install:
+  - gem install bundler
+  - bundle --version
+  - gem update --system
+  - gem --version
+
+matrix:
+  include:
+    - rvm: 2.4.5
+      before_script:
+        - eval "$(chef shell-init bash)"
+      install: echo "skip bundle install"
+
+env:
+  - CHEF_LICENSE=accept
+      script:
+        - chef --version
+        - cookstyle --version
+        - foodcritic --version
+        - chef exec delivery local all
+    - rvm: 2.4.5
+      services: docker
+      before_script:
+        - sudo iptables -L DOCKER || ( echo "DOCKER iptables chain missing" ; sudo iptables -N DOCKER )
+      env:
+        - CHEF_VERSION=14.12.9
+        - KITCHEN_YAML=kitchen.dokken.yml
+      script:
+        # this tests that an upgrade to 15 succeeds when the license is accepted
+        - bundle exec kitchen test license-ubuntu-1604
+    - rvm: 2.4.5
+      services: docker
+      sudo: required
+      before_script:
+        - sudo iptables -L DOCKER || ( echo "DOCKER iptables chain missing" ; sudo iptables -N DOCKER )
+      env:
+        - CHEF_VERSION=13.6.0
+        - KITCHEN_YAML=kitchen.dokken.yml
+      script:
+        # this tests a downgrade from latest "13" to latest "12" via partial versions
+        - bundle exec kitchen test constrained-ubuntu-1604
+    - rvm: 2.4.5
+      services: docker
+      before_script:
+        - sudo iptables -L DOCKER || ( echo "DOCKER iptables chain missing" ; sudo iptables -N DOCKER )
+      env:
+        - CHEF_VERSION=14.1.1
+        - KITCHEN_YAML=kitchen.dokken.yml
+      script:
+        - bundle exec kitchen test default-ubuntu-1604
+    - rvm: 2.4.5
+      services: docker
+      before_script:
+        - sudo iptables -L DOCKER || ( echo "DOCKER iptables chain missing" ; sudo iptables -N DOCKER )
+      env:
+        - CHEF_VERSION=13.8.5
+        - KITCHEN_YAML=kitchen.dokken.yml
+      script:
+        - bundle exec kitchen test default-ubuntu-1604
+    - rvm: 2.4.5
+      services: docker
+      before_script:
+        - sudo iptables -L DOCKER || ( echo "DOCKER iptables chain missing" ; sudo iptables -N DOCKER )
+      env:
+        - CHEF_VERSION=12.21.31
+        - KITCHEN_YAML=kitchen.dokken.yml
+      script:
+        - bundle exec kitchen test default-ubuntu-1604
