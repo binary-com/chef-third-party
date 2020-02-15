@@ -2,6 +2,52 @@
 
 This file is used to list changes made in each version of the chef_client_updater cookbook.
 
+## 3.8.2 (2020-01-14)
+
+- Remove mandatory parameters for WaitForChefClientOrRescheduleUpgradeTask - [@bdwyertech](https://github.com/bdwyertech)
+
+## 3.8.1 (2020-01-14)
+
+- Necessary changes in PS script to accept the chef-client license while chef client upgrade in Windows. - [@Nimesh-Msys](https://github.com/Nimesh-Msys)
+
+## 3.8.0 (2019-12-20)
+
+- Add install_command_options to enable installing Chef as a scheduled task on Windows when updating - [@gholtiii](https://github.com/gholtiii)
+- Fix Chef_upgrade scheduled task to reschedule itself when it fails due to running ruby.exe - [@gholtiii](https://github.com/gholtiii)
+
+## 3.7.3 (2019-12-09)
+
+- Minor Fixes While detecting chef DK version - [@Nimesh-Msys](https://github.com/Nimesh-Msys)
+
+## 3.7.2 (2019-11-29)
+
+- fix windows chef install path - [@phomein](https://github.com/phomein)
+
+## 3.7.1 (2019-11-19)
+
+- Minor fixes while upgrading ChefDK - [@Nimesh-Msys](https://github.com/Nimesh-Msys)
+- Replace hardcode value for chef_install_path on Windows with a variable - [@dheerajd-msys](https://github.com/dheerajd-msys)
+
+## 3.7.0 (2019-11-18)
+
+- Added noproxy support for airgapped artifact solutions [@Romascopa](https://github.com/romascopa)
+- Fix for using custom rubygem server - [@dheerajd-msys](https://github.com/dheerajd-msys)
+- Remove opensuse from the list of platforms we support as the correct platform is opensuseleap - [@tas50](https://github.com/tas50)
+- Remove the long_description metadata that is unused - [@tas50](https://github.com/tas50)
+- Disable some Cookkstyle cops that would break Chef 12 compatibility - [@tas50](https://github.com/tas50)
+
+## 3.6.0 (2019-10-14)
+
+- Updated provider so that EventLog is properly restarted without error during convergence
+- Adding license acceptance support - [@tyler-ball](https://github.com/tyler-ball)
+- Fix creation of cron error while licence acceptance - [@NAshwini](https://github.com/NAshwini)
+
+## 3.5.3 (2019-06-11)
+
+- Add event_log_service_restart attribute to fix issue of non chef service restart. - [@NAshwini](https://github.com/NAshwini)
+- Use new ChefSpec format - [@tas50](https://github.com/tas50)
+- Allow path to handle.exe to be configured - [@stefanwb](https://github.com/stefanwb)
+
 ## 3.5.2 (2019-01-30)
 
 - Fix rubygems upgrade logic to prevent breaking older chef-client releases such as Chef 12.X

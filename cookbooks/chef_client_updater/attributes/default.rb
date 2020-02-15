@@ -46,3 +46,18 @@ default['chef_client_updater']['product_name'] = nil
 
 # download URL for Sysinternals handle.zip (Windows only)
 default['chef_client_updater']['handle_zip_download_url'] = nil
+default['chef_client_updater']['handle_exe_path'] = "#{Chef::Config[:file_cache_path]}/handle.exe"
+
+# The Eventlog service will be restarted immediately prior to cleanup broken chef to release any open file locks.
+default['chef_client_updater']['event_log_service_restart'] = true
+
+# Set to 'accept' or 'accept-no-persist' to accept the license. Provided to client execution
+# in a backwards compatible way. Use the same attribute from the chef-client cookbook to
+# avoid duplication.
+default['chef_client']['chef_license'] = nil
+
+# Set this to use internal or custom rubygems server.
+# Use the same attribute from the chef-client cookbook to avoid duplication.
+# Example "http://localhost:8808/"
+#
+default['chef_client']['config']['rubygems_url'] = nil
