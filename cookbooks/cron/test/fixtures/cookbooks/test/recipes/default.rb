@@ -2,7 +2,7 @@
 # Cookbook:: test
 # Recipe:: default
 #
-# Copyright:: 2008-2018, Chef Software, Inc
+# Copyright:: 2008-2019, Chef Software, Inc
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -144,7 +144,7 @@ cron_access 'tom' do
 end
 
 # legacy resource name
-cron_manage 'Bill breaks things. Take away cron' do
+cron_manage 'Bill breaks things. Take away cron' do # rubocop: disable ChefModernize/CronManageResource
   user 'bill'
   action :deny
 end
