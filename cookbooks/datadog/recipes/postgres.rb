@@ -5,6 +5,10 @@ include_recipe 'datadog::dd-agent'
 # @example
 #   node.override['datadog']['postgres']['instances'] = [
 #     {
+#       'host' => "/var/run/postgresql/.s.PGSQL.5432",
+#       'username' => "datadog"
+#     },
+#     {
 #       'host' => "localhost",
 #       'port' => "5432",
 #       'username' => "datadog",
@@ -26,4 +30,6 @@ include_recipe 'datadog::dd-agent'
 datadog_monitor 'postgres' do
   instances node['datadog']['postgres']['instances']
   logs node['datadog']['postgres']['logs']
+  action :add
+  notifies :restart, 'service[datadog-agent]' if node['datadog']['agent_start']
 end

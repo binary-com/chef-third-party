@@ -20,10 +20,14 @@ describe 'datadog::php_fpm' do
   EOF
 
   cached(:chef_run) do
-    ChefSpec::SoloRunner.new(step_into: ['datadog_monitor']) do |node|
+    ChefSpec::SoloRunner.new(
+      platform: 'ubuntu',
+      version: '16.04',
+      step_into: ['datadog_monitor']
+    ) do |node|
       node.automatic['languages'] = { 'python' => { 'version' => '2.7.2' } }
 
-      node.set['datadog'] = {
+      node.normal['datadog'] = {
         'api_key' => 'someapikey',
         'php_fpm' => {
           'instances' => [
@@ -61,7 +65,7 @@ describe 'datadog::php_fpm' do
   it { is_expected.to add_datadog_monitor('php_fpm') }
 
   it 'renders expected YAML config file' do
-    expect(chef_run).to(render_file('/etc/datadog-agent/conf.d/php_fpm.yaml').with_content { |content|
+    expect(chef_run).to(render_file('/etc/datadog-agent/conf.d/php_fpm.d/conf.yaml').with_content { |content|
       expect(YAML.safe_load(content).to_json).to be_json_eql(YAML.safe_load(expected_yaml).to_json)
     })
   end

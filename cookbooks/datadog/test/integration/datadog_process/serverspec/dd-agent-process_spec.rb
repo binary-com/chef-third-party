@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-PROCESS_CONFIG = File.join(@agent_config_dir, 'conf.d/process.yaml')
+PROCESS_CONFIG = File.join(@agent_config_dir, 'conf.d/process.d/conf.yaml')
 
 describe service(@agent_service_name) do
   it { should be_running }
@@ -24,6 +24,7 @@ describe file(PROCESS_CONFIG) do
           'search_string' => ['somepid', 'pidname']
         }
       ],
+      'logs' => nil,
       'init_config' => nil
     }
 
