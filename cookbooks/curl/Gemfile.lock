@@ -182,7 +182,7 @@ GEM
     public_suffix (3.0.3)
     rack (2.0.8)
     rainbow (3.0.0)
-    rake (12.3.2)
+    rake (12.3.3)
     retryable (2.0.4)
     ridley (5.1.1)
       addressable
