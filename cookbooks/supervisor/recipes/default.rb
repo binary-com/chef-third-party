@@ -41,7 +41,7 @@ template node['supervisor']['conffile'] do
   owner 'root'
   group 'root'
   mode '644'
-  variables((lazy do
+  variables(lazy do
                {
                 inet_port: node['supervisor']['inet_port'],
                 inet_username: node['supervisor']['inet_username'],
