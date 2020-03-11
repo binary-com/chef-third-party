@@ -36,7 +36,7 @@ describe 'datadog::go-metro' do
       ) do |node|
         node.automatic['languages'] = { python: { version: '2.7.2' } }
 
-        node.set['datadog'] = {
+        node.normal['datadog'] = {
           api_key: 'someapikey',
           'go-metro' => {
             instances: [
@@ -80,7 +80,7 @@ describe 'datadog::go-metro' do
 
     it 'renders expected YAML config file' do
       expect(chef_run).to(
-        render_file('/etc/datadog-agent/conf.d/go-metro.yaml')
+        render_file('/etc/datadog-agent/conf.d/go-metro.d/conf.yaml')
         .with_content { |content|
           expect(YAML.safe_load(content).to_json).to be_json_eql(
             YAML.safe_load(expected_yaml).to_json
@@ -116,11 +116,13 @@ describe 'datadog::go-metro' do
 
     cached(:chef_run) do
       ChefSpec::SoloRunner.new(
-        step_into: ['datadog_monitor'], platform: 'ubuntu', version: '16.04'
+        platform: 'ubuntu',
+        version: '16.04',
+        step_into: ['datadog_monitor']
       ) do |node|
         node.automatic['languages'] = { python: { version: '2.7.2' } }
 
-        node.set['datadog'] = {
+        node.normal['datadog'] = {
           api_key: 'someapikey',
           'go-metro' => {
             libcap_package: {
@@ -174,7 +176,7 @@ describe 'datadog::go-metro' do
 
     it 'renders expected YAML config file' do
       expect(chef_run).to(
-        render_file('/etc/datadog-agent/conf.d/go-metro.yaml')
+        render_file('/etc/datadog-agent/conf.d/go-metro.d/conf.yaml')
         .with_content { |content|
           expect(YAML.safe_load(content).to_json).to be_json_eql(
             YAML.safe_load(expected_yaml).to_json
@@ -191,7 +193,7 @@ describe 'datadog::go-metro' do
       ) do |node|
         node.automatic['languages'] = { python: { version: '2.7.2' } }
 
-        node.set['datadog'] = {
+        node.normal['datadog'] = {
           api_key: 'someapikey'
         }
       end

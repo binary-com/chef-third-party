@@ -1,6 +1,5 @@
 #!/usr/bin/env rake
 
-require 'emeril/rake' unless ENV['CI']
 require 'fileutils'
 require 'foodcritic'
 require 'kitchen/rake_tasks'
@@ -8,6 +7,8 @@ require 'rake/clean'
 require 'rspec/core/rake_task'
 require 'cookstyle'
 require 'rubocop/rake_task'
+
+Rake.add_rakelib 'tasks'
 
 task :default => %i[
   style
@@ -67,7 +68,7 @@ namespace :generate do
     puts <<-EOT.sub(/\n$/, '')
       New test suite created!
       Next steps:
-      - Add a new entry to .kitchen.yml
+      - Add a new entry to kitchen.yml
       - Modify #{spec_name} in #{sspec_dir}
       - Run `kitchen list #{suite_name}` to confirm suite added.
       - Run `kitchen test #{suite_name}` to run tests.
@@ -95,19 +96,11 @@ task :circle do
   end
 
   def command
-    commands = []
-
-    kitchen_config.platforms.sort_by(&:name).each_with_index do |platform, index|
+    kitchen_config.instances.sort_by(&:name).each_with_object([]).with_index do |(instance, commands), index|
       next unless index % total_workers == current_worker
-      # Escape the platform name to somehting the CLI will understand.
-      # TODO: This could likely be pulled from kitchen_config.instances somehow
-      name = platform.name.delete('.')
 
-      # Scope the suites to only execute against the Agent+handler installer suites.
-      commands.push "kitchen verify dd-agent-handler-#{name}"
-    end
-
-    commands.join(' && ')
+      commands << "kitchen verify #{instance}"
+    end.join(' && ')
   end
 
   sh command unless command.empty?

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-AGENT_CONFIG = File.join(@agent_config_dir, 'conf.d/mongo.yaml')
+AGENT_CONFIG = File.join(@agent_config_dir, 'conf.d/mongo.d/conf.yaml')
 
 describe service(@agent_service_name) do
   it { should be_running }
@@ -20,6 +20,7 @@ describe file(AGENT_CONFIG) do
           'server' => 'mongodb://localhost:27017'
         }
       ],
+      'logs' => nil,
       'init_config' => nil
     }
 
