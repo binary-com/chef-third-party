@@ -10,11 +10,17 @@ include_recipe 'datadog::dd-agent'
 #                                    {
 #                                      "url" => "localhost",
 #                                      "port" => "11211",
-#                                      "tags" => ["prod", "aws"]
+#                                      "tags" => ["prod", "aws"],
+#                                      "options" => [
+#                                        "items: false",
+#                                        "slabs: false"
+#                                      ]
 #                                    }
 #                                   ]
 
 datadog_monitor 'mcache' do
   instances node['datadog']['memcache']['instances']
   logs node['datadog']['memcache']['logs']
+  action :add
+  notifies :restart, 'service[datadog-agent]' if node['datadog']['agent_start']
 end

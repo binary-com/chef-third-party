@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-AGENT_CONFIG = File.join(@agent_config_dir, 'conf.d/couch.yaml')
+AGENT_CONFIG = File.join(@agent_config_dir, 'conf.d/couch.d/conf.yaml')
 
 describe service(@agent_service_name) do
   it { should be_running }
@@ -22,6 +22,7 @@ describe file(AGENT_CONFIG) do
           user: 'someuser'
         }
       ],
+      'logs' => nil,
       'init_config' => nil
     }
 

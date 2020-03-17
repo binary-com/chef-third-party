@@ -46,8 +46,20 @@ shared_examples_for 'common linux resources' do
   end
 end
 
+shared_examples_for 'datadog-agent v5' do
+  it_behaves_like 'common linux resources v5'
+end
+
 shared_examples_for 'datadog-agent' do
   it_behaves_like 'common linux resources'
+end
+
+shared_examples_for 'debianoids datadog-agent v5' do
+  it_behaves_like 'datadog-agent v5'
+
+  it 'installs the datadog-agent' do
+    expect(chef_run).to install_apt_package 'datadog-agent'
+  end
 end
 
 shared_examples_for 'debianoids datadog-agent' do
@@ -55,6 +67,14 @@ shared_examples_for 'debianoids datadog-agent' do
 
   it 'installs the datadog-agent' do
     expect(chef_run).to install_apt_package 'datadog-agent'
+  end
+end
+
+shared_examples_for 'rhellions datadog-agent v5' do
+  it_behaves_like 'datadog-agent v5'
+
+  it 'installs the datadog-agent' do
+    expect(chef_run).to install_yum_package 'datadog-agent'
   end
 end
 
@@ -110,7 +130,11 @@ shared_examples_for 'windows Datadog Agent v5' do |installer_extension|
   end
 
   it 'notifies the removal of the Datadog Agent when a remote file is downloaded' do
-    expect(chef_run.remote_file(agent_installer)).to notify('package[Datadog Agent removal]').to(:remove)
+    expect(chef_run.powershell_script('datadog_6.14.x_fix')).to notify('package[Datadog Agent removal]').to(:remove)
+  end
+
+  it 'notifies the execution of the powershell fix when a remote file is downloaded' do
+    expect(chef_run.remote_file(agent_installer)).to notify('powershell_script[datadog_6.14.x_fix]').to(:run)
   end
 
   it 'installs Datadog Agent' do
@@ -133,7 +157,11 @@ shared_examples_for 'windows Datadog Agent' do |installer_extension|
   end
 
   it 'notifies the removal of the Datadog Agent when a remote file is downloaded' do
-    expect(chef_run.remote_file(agent_installer)).to notify('package[Datadog Agent removal]').to(:remove)
+    expect(chef_run.powershell_script('datadog_6.14.x_fix')).to notify('package[Datadog Agent removal]').to(:remove)
+  end
+
+  it 'notifies the execution of the powershell fix when a remote file is downloaded' do
+    expect(chef_run.remote_file(agent_installer)).to notify('powershell_script[datadog_6.14.x_fix]').to(:run)
   end
 
   it 'installs Datadog Agent' do
