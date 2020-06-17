@@ -5,7 +5,7 @@
 # Cookbook::  chef-client
 # Recipe:: config
 #
-# Copyright:: 2008-2017, Chef Software, Inc.
+# Copyright:: 2008-2019, Chef Software, Inc.
 # Copyright:: 2009-2017, 37signals
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -86,9 +86,11 @@ template "#{node['chef_client']['conf_dir']}/client.rb" do
     chef_config: node['chef_client']['config'],
     chef_requires: chef_requires,
     ohai_disabled_plugins: node['ohai']['disabled_plugins'],
+    ohai_optional_plugins: node['ohai']['optional_plugins'],
     start_handlers: node['chef_client']['config']['start_handlers'],
     report_handlers: node['chef_client']['config']['report_handlers'],
-    exception_handlers: node['chef_client']['config']['exception_handlers']
+    exception_handlers: node['chef_client']['config']['exception_handlers'],
+    chef_license: node['chef_client']['chef_license']
   )
 
   if node['chef_client']['reload_config']
