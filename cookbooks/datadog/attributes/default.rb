@@ -40,6 +40,8 @@ default['datadog']['agent_major_version'] = nil # nil to autodetect based on 'ag
 # Example:
 # default['datadog']['agent_version'] = '7.16.0'
 default['datadog']['agent_version'] = nil # nil to install latest
+# Agent flavor to install, acceptable values are "datadog-agent", "datadog-iot-agent"
+default['datadog']['agent_flavor'] = 'datadog-agent' # "datadog-agent" to install the datadog-agent package
 
 # Allow override with `upgrade` to get latest (Linux only)
 default['datadog']['agent_package_action'] = 'install'
@@ -90,7 +92,7 @@ default['datadog']['tag_prefix'] = 'tag:'
 
 # The host of the Datadog intake server to send Agent data to, only set this option
 # if you need the Agent to send data to a custom URL.
-# The nil value will let the Agent 6 select the URL to send the data.
+# The nil value will let the Agent 6/7 select the URL to send the data.
 # Any non-nil value overrides the 'site' value, prefer using 'site' unless your
 # use case isn't covered by 'site'.
 # For Agent 5, the Agent 5 recipe will fallback on https://app.datadoghq.com
@@ -230,6 +232,9 @@ default['datadog']['agent_enable'] = true
 # Start agent or not
 default['datadog']['agent_start'] = true
 
+# installation info
+default['datadog']['install_info_enabled'] = true
+
 # Logging configuration
 default['datadog']['syslog']['active'] = false
 default['datadog']['syslog']['udp'] = false
@@ -247,7 +252,7 @@ default['datadog']['web_proxy']['host'] = nil
 default['datadog']['web_proxy']['port'] = nil
 default['datadog']['web_proxy']['user'] = nil
 default['datadog']['web_proxy']['password'] = nil
-default['datadog']['web_proxy']['skip_ssl_validation'] = nil # accepted values 'yes' or 'no'
+default['datadog']['web_proxy']['skip_ssl_validation'] = nil # accepted values true or false
 default['datadog']['web_proxy']['no_proxy'] = nil # only used for agent v6.0+
 
 # dogstatsd
@@ -295,7 +300,7 @@ default['datadog']['trace_env'] = nil
 default['datadog']['extra_sample_rate'] = nil
 default['datadog']['max_traces_per_second'] = nil
 default['datadog']['receiver_port'] = nil
-# `connection_limit` is ignored in Agent 6
+# `connection_limit` is ignored in Agent 6/7
 default['datadog']['connection_limit'] = nil
 
 # ddtrace ruby gem version
@@ -348,12 +353,15 @@ default['datadog']['system_probe']['debug_port'] = 0
 default['datadog']['system_probe']['bpf_debug'] = false
 default['datadog']['system_probe']['enable_conntrack'] = false
 
-# Logs functionality settings (Agent 6 only)
+# Logs functionality settings (Agent 6/7 only)
 # Set `enable_logs_agent` to:
 # * `true` to explicitly enable the log agent
 # * `false` to explicitly disable it
 # Leave it to `nil` to let the agent's default behavior decide whether to run the log-agent
 default['datadog']['enable_logs_agent'] = nil
+# Here you can specify any settings that should end up under 'logs_config' in datadog.yaml
+# eg: default['datadog']['logs_agent_config'] = { 'use_http' => false, 'use_compression' => true }
+default['datadog']['logs_agent_config'] = nil
 
 # For custom gem servers on restricted networks
 # This attribute only works on Chef >= 12.3

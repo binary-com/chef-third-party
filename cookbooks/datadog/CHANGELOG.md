@@ -1,10 +1,30 @@
 Changes
 =======
 
-# 4.2.0 / 2020-02-27
+# 4.4.0 / 2020-06-19
+* [FEATURE] Add support for `datadog-iot-agent` agent flavor. See [#717][]
+* [BUGFIX] Do not crash if agent_version doesn't match version regex. See [#711][] [@albertvaka][]
+* [BUGFIX] Support '+' sign (for nightlies) in agent version. See [#712][] [@albertvaka][]
+* [BUGFIX] Fix Proxy configuration with authentication. See [#714][] [@fatbasstard][]
+* [BUGFIX] Fix link to win32_event_log sample config. See [#715][] [@albertvaka][]
+* [BUGFIX] Do not crash if the agent is not running. See [#718][] [@albertvaka][]
+
+# 4.3.0 / 2020-04-30
+* [FEATURE] Allow configuration of log collection via `datadog['logs_agent_config']`. See [#704][] [@Nibons][]
+* [FEATURE] Update the list of Cassandra metrics to collect from JMX. See [#708][] [@k2v][]
+* [FEATURE] Add `combine_connection_states` and `collect_count_metrics` to network check. See [#650][] [@danjamesmay][]
+* [FEATURE] Create `install_info` file with version info for Chef and the cookbook. See [#707][] [@kbogtob][]
+* [BUGFIX] Fix `datadog_monitor` action `:delete` always using Agent 5's path. See [#709][] [@albertvaka][]
+* [BUGFIX] Use `true` and `false` instead of `yes` and `no` for `skip_ssl_validation`. See [#693][] [@jaxi]
+
+# 4.2.1 / 2020-03-03
+
+* [REVERT] Reverted PR [#691][] and [#694][] in order to allow users to install Agent on Windows without credentials. See [#699][] [@kbogtob][]
+
+# 4.2.0 / 2020-02-27 - KNOWN BUG
 
 * [FEATURE] Automatically uninstall and then install the Agent only when trying to downgrade agent version on Windows. See [#690][] [@kbogtob][]
-* [BUGFIX] Set Windows installer as sensitive resource and use env var to specify Windows user credentials to avoid leaks of credentials in logs. See [#691][] and [#694][] [@julien-lebot][]
+* [BUGFIX] Set Windows installer as sensitive resource and use env var to specify Windows user credentials to avoid leaks of credentials in logs. See [#691][] and [#694][] [@julien-lebot][] - Known bug: This bugfix introduces a new bug blocking users not using credentials to install on Windows
 * [FEATURE] Support tags feature on directory integration. See [#687][] [@dimier]
 * [FEATURE] Support options feature on memcache integration. See [#689][] [@mikelaning]
 
@@ -834,6 +854,7 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [#643]: https://github.com/DataDog/chef-datadog/issues/643
 [#647]: https://github.com/DataDog/chef-datadog/issues/647
 [#648]: https://github.com/DataDog/chef-datadog/issues/648
+[#650]: https://github.com/DataDog/chef-datadog/issues/650
 [#652]: https://github.com/DataDog/chef-datadog/issues/652
 [#653]: https://github.com/DataDog/chef-datadog/issues/653
 [#654]: https://github.com/DataDog/chef-datadog/issues/654
@@ -849,7 +870,19 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [#689]: https://github.com/DataDog/chef-datadog/issues/689
 [#690]: https://github.com/DataDog/chef-datadog/issues/690
 [#691]: https://github.com/DataDog/chef-datadog/issues/691
+[#693]: https://github.com/DataDog/chef-datadog/issues/693
 [#694]: https://github.com/DataDog/chef-datadog/issues/694
+[#699]: https://github.com/DataDog/chef-datadog/issues/699
+[#704]: https://github.com/DataDog/chef-datadog/issues/704
+[#707]: https://github.com/DataDog/chef-datadog/issues/707
+[#708]: https://github.com/DataDog/chef-datadog/issues/708
+[#709]: https://github.com/DataDog/chef-datadog/issues/709
+[#711]: https://github.com/DataDog/chef-datadog/issues/711
+[#712]: https://github.com/DataDog/chef-datadog/issues/712
+[#714]: https://github.com/DataDog/chef-datadog/issues/714
+[#715]: https://github.com/DataDog/chef-datadog/issues/715
+[#717]: https://github.com/DataDog/chef-datadog/issues/717
+[#718]: https://github.com/DataDog/chef-datadog/issues/718
 [@ABrehm264]: https://github.com/ABrehm264
 [@AlexBevan]: https://github.com/AlexBevan
 [@BrentOnRails]: https://github.com/BrentOnRails
@@ -862,6 +895,7 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [@MiguelMoll]: https://github.com/MiguelMoll
 [@NBParis]: https://github.com/NBParis
 [@NathanielMichael]: https://github.com/NathanielMichael
+[@Nibons]: https://github.com/Nibons
 [@RedWhiteMiko]: https://github.com/RedWhiteMiko
 [@SelerityMichael]: https://github.com/SelerityMichael
 [@SupermanScott]: https://github.com/SupermanScott
@@ -891,6 +925,7 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [@coosh]: https://github.com/coosh
 [@ctrlok]: https://github.com/ctrlok
 [@dafyddcrosby]: https://github.com/dafyddcrosby
+[@danjamesmay]: https://github.com/danjamesmay
 [@darron]: https://github.com/darron
 [@datwiz]: https://github.com/datwiz
 [@degemer]: https://github.com/degemer
@@ -907,6 +942,7 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [@elijahandrews]: https://github.com/elijahandrews
 [@eplanet]: https://github.com/eplanet
 [@evan2645]: https://github.com/evan2645
+[@fatbasstard]: https://github.com/fatbasstard
 [@flah00]: https://github.com/flah00
 [@foobarto]: https://github.com/foobarto
 [@frezbo]: https://github.com/frezbo
@@ -924,6 +960,7 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [@iashwash]: https://github.com/iashwash
 [@inokappa]: https://github.com/inokappa
 [@isaacdd]: https://github.com/isaacdd
+[@jaxi]: https://github.com/jaxi
 [@jblancett]: https://github.com/jblancett
 [@jcftang-r7]: https://github.com/jcftang-r7
 [@jedi4ever]: https://github.com/jedi4ever
@@ -936,6 +973,7 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [@juliandunn]: https://github.com/juliandunn
 [@julien-lebot]: https://github.com/julien-lebot
 [@jvrplmlmn]: https://github.com/jvrplmlmn
+[@k2v]: https://github.com/k2v
 [@kbogtob]: https://github.com/kbogtob
 [@kevinconaway]: https://github.com/kevinconaway
 [@khouse]: https://github.com/khouse

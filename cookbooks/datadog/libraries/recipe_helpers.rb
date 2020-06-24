@@ -2,6 +2,11 @@ class Chef
   # Helper class for Datadog Chef recipes
   class Datadog
     class << self
+      ACCEPTABLE_AGENT_FLAVORS = %w[
+        datadog-agent
+        datadog-iot-agent
+      ].freeze
+
       def agent_version(node)
         dd_agent_version = node['datadog']['agent_version']
         if dd_agent_version.respond_to?(:each_pair)
@@ -27,20 +32,36 @@ class Chef
         agent_major_version = node['datadog']['agent_major_version']
         agent_version = agent_version(node)
 
-        if !agent_version.nil?
-          _epoch, major, _minor, _patch, _suffix, _release = agent_version.match(/([0-9]+:)?([0-9]+)\.([0-9]+)\.([0-9]+)([^-\s]+)?(?:-([0-9]+))?/).captures
-          if !agent_major_version.nil? && major.to_i != agent_major_version.to_i
-            raise "Provided (#{agent_major_version}) and deduced (#{major}) agent_major_version don't match"
+        unless agent_version.nil?
+          match = agent_version.match(/([0-9]+:)?([0-9]+)\.([0-9]+)\.([0-9]+)([^-\s]+)?(?:-([0-9]+))?/)
+          if match.nil?
+            Chef::Log.warn "Couldn't infer agent_major_version from agent_version '#{agent_version}'"
+          else
+            _epoch, major, _minor, _patch, _suffix, _release = match.captures
+            if !agent_major_version.nil? && major.to_i != agent_major_version.to_i
+              raise "Provided (#{agent_major_version}) and deduced (#{major}) agent_major_version don't match"
+            end
+            return major.to_i
           end
-          ret = major.to_i
-        elsif !agent_major_version.nil?
-          ret = agent_major_version.to_i
-        else
-          # default to Agent 7
-          node.default['datadog']['agent_major_version'] = 7
-          ret = 7
         end
-        ret
+
+        return agent_major_version.to_i unless agent_major_version.nil?
+
+        # default to Agent 7
+        node.default['datadog']['agent_major_version'] = 7
+        7
+      end
+
+      def agent_flavor(node)
+        # user-specified values
+        agent_flavor = node['datadog']['agent_flavor']
+        agent_flavor ||= node.default['datadog']['agent_flavor']
+
+        unless ACCEPTABLE_AGENT_FLAVORS.include?(agent_flavor)
+          raise "Unknown agent flavor '#{agent_flavor}' (acceptable values: #{ACCEPTABLE_AGENT_FLAVORS.inspect})"
+        end
+
+        agent_flavor
       end
 
       def api_key(node)
@@ -57,6 +78,10 @@ class Chef
 
       def ddagentuser_password(node)
         run_state_or_attribute(node, 'windows_ddagentuser_password')
+      end
+
+      def cookbook_version(run_context)
+        run_context.cookbook_collection['datadog'].version
       end
 
       private
@@ -92,7 +117,10 @@ class Chef
           agent_status = `"#{WIN_BIN_PATH}" status`
           match_data = agent_status.match(/^Agent \(v(.*)\)/)
 
-          Gem::Version.new(match_data[1]) if match_data
+          # Nightlies like 6.20.0-devel+git.38.cd7f989 fail to parse as Gem::Version because of the '+' sign
+          version = match_data[1].tr('+', '-') if match_data
+
+          Gem::Version.new(version) if version
         end
 
         def requested_agent_version(node)
