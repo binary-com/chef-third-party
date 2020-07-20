@@ -123,6 +123,10 @@ module DockerCookbook
         end
       end
 
+      def containerd_daemon_opts
+        ['--containerd=/run/containerd/containerd.sock'].join(' ')
+      end
+
       def docker_major_version
         ray = installed_docker_version.split('.')
         ray.pop
@@ -148,7 +152,7 @@ module DockerCookbook
       end
 
       def docker_daemon_cmd
-        [dockerd_bin, docker_daemon_arg, docker_daemon_opts].join(' ')
+        [dockerd_bin, docker_daemon_arg, docker_daemon_opts, containerd_daemon_opts].join(' ')
       end
 
       def docker_cmd
@@ -225,6 +229,7 @@ module DockerCookbook
         opts << "--userland-proxy=#{userland_proxy}" unless userland_proxy.nil?
         opts << "--disable-legacy-registry=#{disable_legacy_registry}" unless disable_legacy_registry.nil?
         opts << "--userns-remap=#{userns_remap}" if userns_remap
+        opts << '--live-restore' if live_restore
         opts << misc_opts if misc_opts
         opts
       end

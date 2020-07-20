@@ -1,13 +1,14 @@
 module DockerCookbook
   class DockerImagePrune < DockerBase
     resource_name :docker_image_prune
+    provides :docker_image_prune
     # Requires docker API v1.25
     # Modify the default of read_timeout from 60 to 120
     property :read_timeout, default: 120, desired_state: false
     property :host, [String, nil], default: lazy { ENV['DOCKER_HOST'] }, desired_state: false
 
     # https://docs.docker.com/engine/api/v1.35/#operation/ImagePrune
-    property :dangling, [TrueClass, FalseClass], default: true
+    property :dangling, [true, false], default: true
     property :prune_until, String
     # https://docs.docker.com/engine/reference/builder/#label
     property :with_label, String

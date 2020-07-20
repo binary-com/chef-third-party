@@ -2,6 +2,76 @@
 
 This file is used to list changes made in each version of the docker cookbook.
 
+## 6.0.3 (2020-06-15)
+
+- Removed default value for properties working_dir and memory_swap. - [@antima-gupta](https://github.com/antima-gupta)
+- Updated memory_swap default value 0 to nil - [@antima-gupta](https://github.com/antima-gupta)
+- Fix for docker_exec does not check the return code of the command it runs - [@kapilchouhan99](https://github.com/kapilchouhan99)
+- Add provides in addition to resource_name to all resources - [@tas50](https://github.com/tas50)
+
+## 6.0.2 (2020-06-02)
+
+- Standardise files with files in chef-cookbooks/repo-management - [@xorimabot](https://github.com/xorimabot)
+- Resolved deprecations to provide Chef Infra Client 16 compatibility - [@xorimabot](https://github.com/xorimabot)
+  - resolved cookstyle error: libraries/docker_container.rb:3:5 warning: `ChefDeprecations/ResourceUsesOnlyResourceName`
+  - resolved cookstyle error: libraries/docker_exec.rb:3:5 warning: `ChefDeprecations/ResourceUsesOnlyResourceName`
+  - resolved cookstyle error: libraries/docker_image.rb:3:5 warning: `ChefDeprecations/ResourceUsesOnlyResourceName`
+  - resolved cookstyle error: libraries/docker_image_prune.rb:3:5 warning: `ChefDeprecations/ResourceUsesOnlyResourceName`
+  - resolved cookstyle error: libraries/docker_installation_package.rb:3:5 warning: `ChefDeprecations/ResourceUsesOnlyResourceName`
+  - resolved cookstyle error: libraries/docker_installation_tarball.rb:3:5 warning: `ChefDeprecations/ResourceUsesOnlyResourceName`
+  - resolved cookstyle error: libraries/docker_network.rb:3:5 warning: `ChefDeprecations/ResourceUsesOnlyResourceName`
+  - resolved cookstyle error: libraries/docker_plugin.rb:3:5 warning: `ChefDeprecations/ResourceUsesOnlyResourceName`
+  - resolved cookstyle error: libraries/docker_registry.rb:3:5 warning: `ChefDeprecations/ResourceUsesOnlyResourceName`
+  - resolved cookstyle error: libraries/docker_service_manager_execute.rb:3:5 warning: `ChefDeprecations/ResourceUsesOnlyResourceName`
+  - resolved cookstyle error: libraries/docker_tag.rb:3:5 warning: `ChefDeprecations/ResourceUsesOnlyResourceName`
+  - resolved cookstyle error: libraries/docker_volume.rb:3:5 warning: `ChefDeprecations/ResourceUsesOnlyResourceName`
+
+## 6.0.1 (2020-05-26)
+
+- Allow configuring reload signal #1089 - [@scalp42](https://github.com/scalp42)
+- Update docker_image doc to fix escaping typo - [@pgilad](https://github.com/pgilad)
+- Fix for env_file breaks on Chef 16 - [@kapilchouhan99](https://github.com/kapilchouhan99)
+
+## 6.0.0 (2020-04-28)
+
+- Require Chef Infra Client 15+ to fix issues with package versions on RHEL / Fedora since Chef Infra Client 15 reworked how yum_package performed and let us now pass in human readable versions to be installed- [@tas50](https://github.com/tas50)
+
+## 5.0.0 (2020-04-28)
+
+- Fix missing reference to new_resource.restart_policy - [@petracvv](https://github.com/petracvv)
+- Add testing with Github Actions - [@tas50](https://github.com/tas50)
+- Added debian 10 support
+- Add 'live_restore' property to 'docker_service'
+- Use new_resource to read attribute - [@dud225](https://github.com/dud225)
+- set default ipc_mode to shareable to prevent redeploying containers on each run - [@dheerajd-msys](https://github.com/dheerajd-msys)
+- Cookstyle fix - [@tas50](https://github.com/tas50)
+- Remove legacy Amazon Linux 201x support. This cookbook now requires Amazon Linux 2 - [@tas50](https://github.com/tas50)
+- Remove support for EOL Ubuntu distros 14.04 and 17.10 - [@tas50](https://github.com/tas50)
+- install_package: Remove support for Docker 17.03 and earlier - [@tas50](https://github.com/tas50)
+- Require Chef Infra Client 13 or later - [@tas50](https://github.com/tas50)
+- Simplify the platform detection code - [@tas50](https://github.com/tas50)
+
+## 4.12.0 (2020-01-03)
+
+- Include support for other architectures using upstream repo - [@ramereth](https://github.com/ramereth)
+
+## 4.11.0 (2019-12-16)
+
+- Update format of docker tarball filenames > 18.06.3 - [@smcavallo](https://github.com/smcavallo)
+- Rework integration and unit tests to get everything green again - [@smcavallo](https://github.com/smcavallo)
+- Update the systemd unit file - [@smcavallo](https://github.com/smcavallo)
+- Remove the legacy foodcritic comments that aren't needed since we use cookstyle - [@tas50](https://github.com/tas50)
+
+## 4.10.0 (2019-11-18)
+
+- Cookstyle: Don't set allowed_actions in the resource - [@tas50](https://github.com/tas50)
+- update to the latest version of docker (for security reasons) - [@smcavallo](https://github.com/smcavallo)
+- fixing the default docker version in the kitchen tests - [@smcavallo](https://github.com/smcavallo)
+
+## 4.9.3 (2019-08-14)
+
+- fixes issue #1061, docker_volume 'driver' and 'opts' don't work
+
 ## 4.9.2 (2019-02-15)
 
 - Support setting shared memory size.

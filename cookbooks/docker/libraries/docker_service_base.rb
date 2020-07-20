@@ -11,6 +11,7 @@ module DockerCookbook
     #####################
 
     resource_name :docker_service_base
+    provides :docker_service_base
 
     # register with the resource resolution system
     provides :docker_service_manager
@@ -20,16 +21,16 @@ module DockerCookbook
 
     # daemon management
     property :instance, String, name_property: true, desired_state: false
-    property :auto_restart, [TrueClass, FalseClass], default: false
+    property :auto_restart, [true, false], default: false
     property :api_cors_header, String
     property :bridge, String
     property :bip, [IPV4_ADDR, IPV4_CIDR, IPV6_ADDR, IPV6_CIDR, nil]
     property :cluster_store, String
     property :cluster_advertise, String
     property :cluster_store_opts, [String, Array], coerce: proc { |v| v.nil? ? nil : Array(v) }
-    property :daemon, [TrueClass, FalseClass], default: true
+    property :daemon, [true, false], default: true
     property :data_root, String
-    property :debug, [TrueClass, FalseClass], default: false
+    property :debug, [true, false], default: false
     property :dns, [String, Array], coerce: proc { |v| v.nil? ? nil : Array(v) }
     property :dns_search, Array
     property :exec_driver, ['native', 'lxc', nil]
@@ -38,15 +39,15 @@ module DockerCookbook
     property :fixed_cidr_v6, String
     property :group, String, default: 'docker'
     property :host, [String, Array], coerce: proc { |v| coerce_host(v) }, desired_state: false
-    property :icc, [TrueClass, FalseClass]
+    property :icc, [true, false]
     property :insecure_registry, [Array, String, nil], coerce: proc { |v| coerce_insecure_registry(v) }
     property :ip, [IPV4_ADDR, IPV6_ADDR, nil]
-    property :ip_forward, [TrueClass, FalseClass]
-    property :ipv4_forward, [TrueClass, FalseClass], default: true
-    property :ipv6_forward, [TrueClass, FalseClass], default: true
-    property :ip_masq, [TrueClass, FalseClass]
-    property :iptables, [TrueClass, FalseClass]
-    property :ipv6, [TrueClass, FalseClass]
+    property :ip_forward, [true, false]
+    property :ipv4_forward, [true, false], default: true
+    property :ipv6_forward, [true, false], default: true
+    property :ip_masq, [true, false]
+    property :iptables, [true, false]
+    property :ipv6, [true, false]
     property :default_ip_address_pool, String
     property :log_level, %w(debug info warn error fatal)
     property :labels, [String, Array], coerce: proc { |v| coerce_daemon_labels(v) }, desired_state: false
@@ -57,12 +58,13 @@ module DockerCookbook
     property :pidfile, String, default: lazy { "/var/run/#{docker_name}.pid" }
     property :registry_mirror, String
     property :storage_driver, [String, Array], coerce: proc { |v| v.nil? ? nil : Array(v) }
-    property :selinux_enabled, [TrueClass, FalseClass]
+    property :selinux_enabled, [true, false]
     property :storage_opts, Array
     property :default_ulimit, [String, Array], coerce: proc { |v| v.nil? ? nil : Array(v) }
-    property :userland_proxy, [TrueClass, FalseClass]
-    property :disable_legacy_registry, [TrueClass, FalseClass]
+    property :userland_proxy, [true, false]
+    property :disable_legacy_registry, [true, false]
     property :userns_remap, String
+    property :live_restore, [true, false], default: false
 
     # These are options specific to systemd configuration such as
     # LimitNOFILE or TasksMax that you may wannt to use to customize
@@ -85,15 +87,13 @@ module DockerCookbook
     # docker-wait-ready timeout
     property :service_timeout, Integer, default: 20
 
-    allowed_actions :start, :stop, :restart
-
     alias_method :label, :labels
     alias_method :run_group, :group
     alias_method :graph, :data_root
 
     declare_action_class.class_eval do
       def libexec_dir
-        return '/usr/libexec/docker' if node['platform_family'] == 'rhel'
+        return '/usr/libexec/docker' if platform_family?('rhel')
         '/usr/lib/docker'
       end
 

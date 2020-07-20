@@ -1,6 +1,7 @@
 module DockerCookbook
   class DockerServiceManagerSystemd < DockerServiceBase
     resource_name :docker_service_manager_systemd
+    provides :docker_service_manager_systemd
 
     provides :docker_service_manager, os: 'linux' do |_node|
       Chef::Platform::ServiceHelpers.service_resource_providers.include?(:systemd)
@@ -26,6 +27,7 @@ module DockerCookbook
       end
 
       # stock systemd unit file
+      # See - https://github.com/docker/docker-ce-packaging/blob/master/systemd/docker.service
       template "/lib/systemd/system/#{docker_name}.service" do
         source 'systemd/docker.service.erb'
         cookbook 'docker'

@@ -1,10 +1,11 @@
 module DockerCookbook
   class DockerPlugin < DockerBase
     resource_name :docker_plugin
+    provides :docker_plugin
 
     property :local_alias, String, name_property: true
     property :remote_tag, String, default: 'latest'
-    property :remote, [String, nil], default: nil
+    property :remote, [String, nil]
     property :grant_privileges, [Array, TrueClass], default: []
     property :options, Hash, default: {}
 
