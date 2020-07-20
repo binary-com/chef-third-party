@@ -1,18 +1,19 @@
 module DockerCookbook
   class DockerImage < DockerBase
     resource_name :docker_image
+    provides :docker_image
 
     # Modify the default of read_timeout from 60 to 120
     property :read_timeout, default: 120, desired_state: false
 
     # https://docs.docker.com/engine/api/v1.35/#tag/Image
     property :destination, String
-    property :force, [TrueClass, FalseClass], default: false, desired_state: false
+    property :force, [true, false], default: false, desired_state: false
     property :host, [String, nil], default: lazy { ENV['DOCKER_HOST'] }, desired_state: false
-    property :nocache, [TrueClass, FalseClass], default: false
-    property :noprune, [TrueClass, FalseClass], default: false
+    property :nocache, [true, false], default: false
+    property :noprune, [true, false], default: false
     property :repo, String, name_property: true
-    property :rm, [TrueClass, FalseClass], default: true
+    property :rm, [true, false], default: true
     property :source, String
     property :tag, String, default: 'latest'
 

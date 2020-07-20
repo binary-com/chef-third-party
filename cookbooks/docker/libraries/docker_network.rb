@@ -1,16 +1,17 @@
 module DockerCookbook
   class DockerNetwork < DockerBase
     resource_name :docker_network
+    provides :docker_network
 
     property :auxiliary_addresses, [String, Array, nil], coerce: proc { |v| coerce_auxiliary_addresses(v) }
     property :container, String, desired_state: false
     property :driver, String
     property :driver_opts, PartialHashType
-    property :enable_ipv6, [TrueClass, FalseClass]
+    property :enable_ipv6, [true, false]
     property :gateway, [String, Array, nil], coerce: proc { |v| coerce_gateway(v) }
     property :host, [String, nil], default: lazy { ENV['DOCKER_HOST'] }, desired_state: false
     property :id, String
-    property :internal, [TrueClass, FalseClass]
+    property :internal, [true, false]
     property :ip_range, [String, Array, nil], coerce: proc { |v| coerce_ip_range(v) }
     property :ipam_driver, String
     property :network, Docker::Network, desired_state: false
