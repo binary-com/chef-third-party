@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-resource_name :logrotate_app
-
 property :path, [String, Array], required: true
 property :frequency, String, default: 'weekly'
 property :cookbook, default: 'logrotate'
@@ -36,8 +34,8 @@ CookbookLogrotate::VALUES.each do |configurable_name|
 end
 
 # Deprecated options
-property :sharedscripts, [TrueClass, FalseClass], default: false
-property :enable, [TrueClass, FalseClass], default: true
+property :sharedscripts, [true, false], default: false
+property :enable, [true, false], default: true
 
 action :enable do
   unless new_resource.enable
