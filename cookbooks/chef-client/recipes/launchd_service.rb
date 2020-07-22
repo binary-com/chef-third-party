@@ -12,11 +12,6 @@ node.default['chef_client']['bin'] = client_bin
 
 create_chef_directories
 
-file '/Library/LaunchDaemons/com.opscode.chef-client.plist' do
-  action :delete
-  notifies :stop, 'macosx_service[com.opscode.chef-client]'
-end
-
 template '/Library/LaunchDaemons/com.chef.chef-client.plist' do
   source 'com.chef.chef-client.plist.erb'
   mode '0644'
@@ -27,13 +22,10 @@ template '/Library/LaunchDaemons/com.chef.chef-client.plist' do
     launchd_mode: node['chef_client']['launchd_mode'],
     log_dir: node['chef_client']['log_dir'],
     log_file: node['chef_client']['log_file'],
-    splay: node['chef_client']['splay']
+    splay: node['chef_client']['splay'],
+    working_dir: node['chef_client']['launchd_working_dir']
   )
-  notifies :restart, 'macosx_service[com.chef.chef-client]'
-end
-
-macosx_service 'com.opscode.chef-client' do
-  action :nothing
+  notifies :restart, 'macosx_service[com.chef.chef-client]' if node['chef_client']['launchd_self-update']
 end
 
 macosx_service 'com.chef.chef-client' do
