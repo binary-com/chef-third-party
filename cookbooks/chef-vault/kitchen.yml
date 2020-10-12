@@ -1,0 +1,26 @@
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_zero
+  nodes_path: test/fixtures/nodes
+  clients_path: test/fixtures/clients
+  environments_path: test/fixtures/environments
+  data_bags_path: test/fixtures/data_bags
+  client_rb:
+    environment: test
+
+platforms:
+  - name: centos-6
+  - name: centos-7
+  - name: centos-8
+  - name: ubuntu-16.04
+  - name: ubuntu-18.04
+
+suites:
+  - name: default
+    run_list:
+      - recipe[test]
+  - name: secret_resource
+    run_list:
+      - recipe[test::chef_vault_secret]

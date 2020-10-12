@@ -1,0 +1,9 @@
+{
+  "name": "hydroelectric",
+  "chef_environment": "test",
+  "run_list": [
+
+  ],
+  "normal": {
+  }
+}
