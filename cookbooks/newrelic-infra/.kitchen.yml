@@ -1,0 +1,54 @@
+driver:
+  name: vagrant
+  provider: virtualbox
+
+provisioner:
+  name: chef_zero
+  product_version: <%= ENV['CHEF_VERSION'] || 12 %>
+
+verifier:
+  name: inspec
+
+platforms:
+- name: centos-5
+  driver:
+    box: bento/centos-5
+- name: centos-6
+  driver:
+    box: bento/centos-6
+- name: centos-7
+  driver:
+    box: bento/centos-7
+- name: ubuntu-12.04
+  driver:
+    box: bento/ubuntu-12.04
+- name: ubuntu-14.04
+  driver:
+    box: bento/ubuntu-14.04
+- name: ubuntu-16.04
+  driver:
+    box: bento/ubuntu-16.04
+- name: ubuntu-18.04
+  driver:
+    box: bento/ubuntu-18.04
+- name: windows-2012r2
+  driver:
+    box: mwrock/Windows2012R2
+
+suites:
+- name: default
+  run_list:
+  - recipe[newrelic-infra::default]
+  attributes:
+    newrelic_infra:
+      delete_yaml_quotes: false
+      features:
+        host_integrations: ['nri-cassandra', 'nri-mysql', 'nri-redis', 'nri-nginx', 'nri-apache']
+      config:
+        license_key: abcd
+      host_integrations:
+        config:
+          cassandra:
+            username: test
+            password: kitchen
+            hosts: '["/"]'
