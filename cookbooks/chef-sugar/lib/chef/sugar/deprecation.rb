@@ -1,6 +1,4 @@
 #
-# Copyright 2013-2015, Seth Vargo <sethvargo@gmail.com>
-#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,8 +12,34 @@
 # limitations under the License.
 #
 
+if defined?(Chef::Deprecated::Base)
+  class Chef
+    class Deprecated
+      class ChefSugar < Base
+        def id
+          28
+        end
+        def target
+          "chef_sugar.html"
+        end
+      end
+    end
+  end
+end
+
 class Chef
   module Sugar
-    VERSION = "5.1.11"
+    module Deprecation
+      if defined?(Chef::Deprecated::Base)
+        def deprecated(message)
+          Chef.deprecated(:chef_sugar, message)
+        end
+      else
+        def deprecated(message)
+          Chef::Log.warn(message)
+        end
+      end
+      extend self
+    end
   end
 end
