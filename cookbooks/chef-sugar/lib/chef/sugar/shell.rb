@@ -14,8 +14,8 @@
 # limitations under the License.
 #
 
-require 'mixlib/shellout'
-require 'pathname'
+require 'mixlib/shellout' unless defined?(Mixlib::ShellOut)
+require 'pathname' unless defined?(Pathname)
 
 class Chef
   module Sugar
@@ -51,7 +51,11 @@ class Chef
       # @return [String]
       #
       def dev_null(node)
-        Chef::Sugar::PlatformFamily.windows?(node) ? 'NUL' : '/dev/null'
+        if defined?(ChefUtils)
+          ChefUtils.windows?(node) ? 'NUL' : '/dev/null'
+        else
+          Chef::Sugar::PlatformFamily.windows?(node) ? 'NUL' : '/dev/null'
+        end
       end
 
       #

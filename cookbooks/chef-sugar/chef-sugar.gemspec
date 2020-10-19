@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'chef/sugar/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'chef-sugar-ng'
+  spec.name          = 'chef-sugar'
   spec.version       = Chef::Sugar::VERSION
   spec.authors       = ['Seth Vargo']
   spec.email         = ['sethvargo@gmail.com']
