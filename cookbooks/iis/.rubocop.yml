@@ -1,0 +1,20 @@
+# rubocop todo
+
+Lint/ParenthesesAsGroupedExpression:
+  Exclude:
+    - 'test/**/*.rb'
+
+Naming/PredicateName:
+  Exclude:
+    - 'spec/**/*'
+    - 'test/integration/**/*'
+
+Style/IfUnlessModifier:
+  Exclude:
+    - 'resources/pool.rb'
+    - 'resources/site.rb'
+
+# Fix missing Carriage return error on Windows
+# https://github.com/bbatsov/rubocop/issues/4293
+Layout/EndOfLine:
+  EnforcedStyle: lf
