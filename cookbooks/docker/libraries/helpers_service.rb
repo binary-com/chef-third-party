@@ -45,13 +45,24 @@ module DockerCookbook
         "docker-#{name}"
       end
 
+      def docker_install_method
+        case node['platform_family']
+        when 'amazon'
+          'tarball'
+        when 'debian', 'rhel', 'fedora'
+          'package'
+        else
+          'script'
+        end
+      end
+
       def installed_docker_version
         o = shell_out("#{docker_bin} --version")
         o.stdout.split[2].chomp(',')
       end
 
       def connect_host
-        return nil unless host
+        return unless host
         sorted = coerce_host(host).sort do |a, b|
           c_a = 1 if a =~ /^unix:/
           c_a = 2 if a =~ /^fd:/
@@ -76,7 +87,7 @@ module DockerCookbook
 
       def connect_socket
         return "/var/run/#{docker_name}.sock" unless host
-        return nil if host.grep(%r{unix://|fd://}).empty?
+        return if host.grep(%r{unix://|fd://}).empty?
         sorted = coerce_host(host).sort do |a, b|
           c_a = 1 if a =~ /^unix:/
           c_a = 2 if a =~ /^fd:/
@@ -124,7 +135,11 @@ module DockerCookbook
       end
 
       def containerd_daemon_opts
-        ['--containerd=/run/containerd/containerd.sock'].join(' ')
+        if docker_containerd
+          ['--containerd=/run/containerd/containerd.sock'].join(' ')
+        else
+          []
+        end
       end
 
       def docker_major_version
@@ -152,7 +167,7 @@ module DockerCookbook
       end
 
       def docker_daemon_cmd
-        [dockerd_bin, docker_daemon_arg, docker_daemon_opts, containerd_daemon_opts].join(' ')
+        [dockerd_bin, docker_daemon_arg, docker_daemon_opts, containerd_daemon_opts].flatten.join(' ')
       end
 
       def docker_cmd
@@ -202,7 +217,7 @@ module DockerCookbook
         opts << "--fixed-cidr-v6=#{fixed_cidr_v6}" if fixed_cidr_v6
         opts << "--group=#{group}" if group
         opts << "--data-root=#{data_root}" if data_root
-        opts << "--default-address-pool=#{default_ip_address_pool}" unless default_ip_address_pool.nil?
+        opts << "--default-address-pool #{default_ip_address_pool}" unless default_ip_address_pool.nil?
         host.each { |h| opts << "--host #{h}" } if host
         opts << "--icc=#{icc}" unless icc.nil?
         insecure_registry.each { |i| opts << "--insecure-registry=#{i}" } if insecure_registry
@@ -217,7 +232,7 @@ module DockerCookbook
         log_opts.each { |log_opt| opts << "--log-opt '#{log_opt}'" } if log_opts
         opts << "--mtu=#{mtu}" if mtu
         opts << "--pidfile=#{pidfile}" if pidfile
-        opts << "--registry-mirror=#{registry_mirror}" if registry_mirror
+        registry_mirror.each { |mirror| opts << "--registry-mirror=#{mirror}" } if registry_mirror
         storage_driver.each { |s| opts << "--storage-driver=#{s}" } if storage_driver
         opts << "--selinux-enabled=#{selinux_enabled}" unless selinux_enabled.nil?
         storage_opts.each { |storage_opt| opts << "--storage-opt=#{storage_opt}" } if storage_opts
@@ -238,6 +253,18 @@ module DockerCookbook
         o = shell_out("#{docker_cmd} ps | head -n 1 | grep ^CONTAINER")
         return true if o.stdout =~ /CONTAINER/
         false
+      end
+
+      def docker_containerd
+        ::File.exist?('/usr/bin/containerd')
+      end
+
+      def docker_containerd_service_type
+        if Gem::Version.new(docker_major_version) <= Gem::Version.new('18.09')
+          'simple'
+        else
+          'notify'
+        end
       end
     end unless defined?(DockerCookbook::DockerHelpers::Service)
   end

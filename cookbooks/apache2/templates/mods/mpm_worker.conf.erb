@@ -1,0 +1,11 @@
+# worker MPM
+<IfModule mpm_worker_module>
+  StartServers           <%= @startservers %>
+  MinSpareThreads        <%= @minsparethreads %>
+  MaxSpareThreads        <%= @maxsparethreads %>
+  ThreadsPerChild        <%= @threadsperchild %>
+  MaxRequestWorkers      <%= @maxrequestworkers %>
+  MaxConnectionsPerChild <%= @maxconnectionsperchild %>
+  ThreadLimit            <%= @threadlimit %>
+  ServerLimit            <%= @serverlimit %>
+</IfModule>

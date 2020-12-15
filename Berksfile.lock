@@ -1,0 +1,147 @@
+DEPENDENCIES
+  bind
+    git: https://github.com/joyofhex/cookbook-bind.git
+    revision: e1e32b9cc60523bab9031deadc7db1fe3c40d239
+  openstack-bare-metal
+    git: https://opendev.org/openstack/cookbook-openstack-bare-metal
+    revision: 315e9d77a78e1fd6f1948c814ee3a04b3c34b1c3
+  openstack-block-storage
+    git: https://opendev.org/openstack/cookbook-openstack-block-storage
+    revision: 2e5dd8c317b2d9cc0443bd1d7ee6eae9c26f43aa
+  openstack-common
+    git: https://opendev.org/openstack/cookbook-openstack-common
+    revision: f888e048e75b888c6ec209809847f55b5248708b
+  openstack-compute
+    git: https://opendev.org/openstack/cookbook-openstack-compute
+    revision: af47ea6ef506385a98ac4c28115e2d7b71cefcce
+  openstack-dashboard
+    git: https://opendev.org/openstack/cookbook-openstack-dashboard
+    revision: 86127240974041b456086b5fff6f8f525c9cf555
+  openstack-dns
+    git: https://opendev.org/openstack/cookbook-openstack-dns
+    revision: 97a980eac7769b05c46e673308e0499f7cc67b02
+  openstack-identity
+    git: https://opendev.org/openstack/cookbook-openstack-identity
+    revision: 9ed88a8ff48d003931a6c20c49e876ab12160e9c
+  openstack-image
+    git: https://opendev.org/openstack/cookbook-openstack-image
+    revision: d60c618b4e7e142cef14f7a3acaa8b03997e8ce5
+  openstack-integration-test
+    git: https://opendev.org/openstack/cookbook-openstack-integration-test
+    revision: 6f6e3ec9fd2f116601e9054ac249c1c1a2bae6b7
+  openstack-network
+    git: https://opendev.org/openstack/cookbook-openstack-network
+    revision: 8f5801890f36b70a67fb44ffc7b6aa8ca660485a
+  openstack-ops-database
+    git: https://opendev.org/openstack/cookbook-openstack-ops-database
+    revision: fd0bdcb7e52234e395eca9cc662007370721a6e8
+  openstack-ops-messaging
+    git: https://opendev.org/openstack/cookbook-openstack-ops-messaging
+    revision: 89013931c22dd1ea8792f35b9c9cfcc329f04872
+  openstack-orchestration
+    git: https://opendev.org/openstack/cookbook-openstack-orchestration
+    revision: 5178e1c9374308b76e82b5fde9da1bcc0c8c6935
+  openstack-telemetry
+    git: https://opendev.org/openstack/cookbook-openstack-telemetry
+    revision: c13ea35e3d1f9b3ec0c53be7eff5cf7a15f9cb1a
+  openstackclient
+    git: https://opendev.org/openstack/cookbook-openstackclient
+    revision: e216cc621e8ea92197ae3a63b3dbf35858564470
+
+GRAPH
+  apache2 (8.7.0)
+  bind (2.3.1)
+  docker (7.4.0)
+  dpkg_autostart (0.4.2)
+  erlang (8.1.0)
+    yum-epel (>= 0.0.0)
+    yum-erlang_solutions (>= 1.0.3)
+  etcd (6.3.0)
+    docker (>= 0.0.0)
+  logrotate (2.2.3)
+  lvm (5.0.5)
+  mariadb (4.2.0)
+    selinux_policy (~> 2.4)
+  memcached (6.1.0)
+  openstack-bare-metal (20.0.0)
+    apache2 (~> 8.1)
+    openstack-common (>= 20.0.0)
+    openstack-identity (>= 20.0.0)
+    openstack-image (>= 20.0.0)
+    openstack-network (>= 20.0.0)
+  openstack-block-storage (20.0.0)
+    apache2 (~> 8.1)
+    lvm (>= 0.0.0)
+    openstack-common (>= 20.0.0)
+    openstack-identity (>= 20.0.0)
+    openstack-image (>= 20.0.0)
+    openstackclient (>= 0.0.0)
+  openstack-common (20.0.0)
+    etcd (~> 6.0)
+    mariadb (~> 4.0)
+    memcached (~> 6.0)
+    selinux (>= 0.0.0)
+    yum-epel (>= 0.0.0)
+  openstack-compute (20.0.0)
+    apache2 (~> 8.1)
+    openstack-common (>= 20.0.0)
+    openstack-identity (>= 20.0.0)
+    openstack-image (>= 20.0.0)
+    openstack-network (>= 20.0.0)
+    openstackclient (>= 0.0.0)
+  openstack-dashboard (20.0.0)
+    apache2 (~> 8.1)
+    openstack-common (>= 20.0.0)
+    openstack-identity (>= 20.0.0)
+  openstack-dns (20.0.0)
+    openstack-common (>= 20.0.0)
+    openstack-identity (>= 20.0.0)
+    openstack-network (>= 20.0.0)
+    openstackclient (>= 0.0.0)
+  openstack-identity (20.0.0)
+    apache2 (~> 8.1)
+    openstack-common (>= 20.0.0)
+    openstackclient (>= 0.0.0)
+  openstack-image (20.0.0)
+    openstack-common (>= 20.0.0)
+    openstack-identity (>= 20.0.0)
+    openstackclient (>= 0.0.0)
+  openstack-integration-test (20.0.0)
+    bind (~> 2.3.1)
+    openstack-common (>= 20.0.0)
+    openstack-dns (>= 20.0.0)
+    openstack-image (>= 20.0.0)
+    openstackclient (>= 0.0.0)
+    resolver (>= 0.0.0)
+  openstack-network (20.0.0)
+    openstack-common (>= 20.0.0)
+    openstack-identity (>= 20.0.0)
+    openstackclient (>= 0.0.0)
+  openstack-ops-database (20.0.0)
+    mariadb (~> 4.0)
+    openstack-common (>= 20.0.0)
+  openstack-ops-messaging (20.0.0)
+    openstack-common (>= 20.0.0)
+    rabbitmq (>= 5.8.5)
+  openstack-orchestration (20.0.0)
+    openstack-common (>= 20.0.0)
+    openstack-identity (>= 20.0.0)
+    openstackclient (>= 0.0.0)
+  openstack-telemetry (20.0.0)
+    apache2 (~> 8.1)
+    openstack-common (>= 20.0.0)
+    openstack-identity (>= 20.0.0)
+    openstackclient (>= 0.0.0)
+  openstackclient (20.0.0)
+  rabbitmq (5.8.5)
+    dpkg_autostart (>= 0.0.0)
+    erlang (>= 0.0.0)
+    logrotate (>= 0.0.0)
+    yum-epel (>= 0.0.0)
+    yum-erlang_solutions (>= 0.0.0)
+  resolver (2.1.0)
+  selinux (3.1.1)
+  selinux_policy (2.4.3)
+  yum-epel (3.3.0)
+  yum-erlang_solutions (2.0.0)
+    yum-epel (>= 0.0.0)

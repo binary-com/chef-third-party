@@ -1,0 +1,7 @@
+<IfModule mod_info.c>
+  <Location /server-info>
+    SetHandler server-info
+    Require local
+    Require ip <%= @info_allow_list.join(' ') %>
+  </Location>
+</IfModule>
