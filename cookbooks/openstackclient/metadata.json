@@ -1,0 +1,41 @@
+{
+  "name": "openstackclient",
+  "description": "Installs the fog-openstack gem and offers LWRPs to use it",
+  "long_description": "",
+  "maintainer": "OpenStack",
+  "maintainer_email": "openstack-discuss@lists.openstack.org",
+  "license": "Apache-2.0",
+  "platforms": {
+    "ubuntu": ">= 0.0.0",
+    "redhat": ">= 0.0.0",
+    "centos": ">= 0.0.0"
+  },
+  "dependencies": {
+
+  },
+  "providing": {
+
+  },
+  "recipes": {
+
+  },
+  "version": "20.0.0",
+  "source_url": "https://opendev.org/openstack/cookbook-openstack-client",
+  "issues_url": "https://launchpad.net/openstack-chef",
+  "privacy": false,
+  "chef_versions": [
+    [
+      ">= 15.0"
+    ]
+  ],
+  "ohai_versions": [
+
+  ],
+  "gems": [
+    [
+      "fog-openstack",
+      "~> 1.0.11"
+    ]
+  ],
+  "eager_load_libraries": true
+}

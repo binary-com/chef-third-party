@@ -1,0 +1,9 @@
+# prefork MPM
+<IfModule mpm_prefork_module>
+  StartServers           <%= @startservers %>
+  MinSpareServers        <%= @minspareservers %>
+  MaxSpareServers        <%= @maxspareservers %>
+  ServerLimit            <%= @serverlimit %>
+  MaxRequestWorkers      <%= @maxrequestworkers %>
+  MaxConnectionsPerChild <%= @maxconnectionsperchild %>
+</IfModule>

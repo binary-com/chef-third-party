@@ -1,6 +1,71 @@
-# Docker Cookbook Changelog
+# docker Cookbook CHANGELOG
 
 This file is used to list changes made in each version of the docker cookbook.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## 7.4.0 - *2020-12-04*
+
+- Support `local`  option for the `log_driver` properties of `docker_service` and `docker_container` resources
+
+## 7.3.0 - *2020-12-02*
+
+- Updates the `registry_mirror` option of `docker_service` to be either a string or array. This way multiple mirrors can be configured
+
+## 7.2.2 (2020-11-05)
+
+- Remove creates guard for extracting tarball which prevents upgrades
+
+## 7.2.1 (2020-11-03)
+
+- Fix issue with `default-ip-addr` in systemd
+
+## 7.2.0 (2020-10-26)
+
+- Add `cpus` options to `docker_container`
+
+## 7.1.0 (2020-10-23)
+
+### Changed
+
+- Sous Chefs Adoption
+- Update Changelog to Sous Chefs
+- Update to use Sous Chefs GH workflow
+- Disable installation-script-experimental
+- Update README to sous-chefs
+- Update metadata.rb to Sous Chefs
+- Update tarball version to 19.03.13
+- Update tarball suite tests
+- Update tarball checksums to latest versions
+
+### Fixed
+
+- Cookstyle fixes
+- Update and fix ChefSpec tests
+- Yamllint fixes
+- MDL Fixes
+- Loosen docker-api gem to allow >= 1.34, < 3.0 (resolves #1135)
+- Update test recipes/tests so they can work with Cinc
+- Ensure `docker` group exists for tarball installation
+- Enable containerd systemd unit if binary exists
+
+### Added
+
+- Add testing for CentOS 8
+- Add testing for Ubuntu 20.04
+- Add `docker_install_method` helper to automate install method
+- Add `container.service` unit for tarball installation method
+
+### Removed
+
+- Disable broken tests and `resources` suite
+
+## 7.0.0 (2020-08-31)
+
+### Breaking Change
+
+The 7.0 release includes a breaking change to package installs with version specified. Before this change RHEL based systems allowed specifying any valid version string (19, 19.03, 19.03.8) and an * was added automatically to package name for specified version installation. New change specifies docker-ce package name and uses package resource version option to specify version. The version option default has been removed and thus will default to the lastest version. If version option is specified it'll lock the package to that version. Debian family machines are unaffected by the change. With this change we will not need to constantly release new versions of the cookbook for new releases of Docker.
 
 ## 6.0.3 (2020-06-15)
 
@@ -106,7 +171,7 @@ This file is used to list changes made in each version of the docker cookbook.
 - Add :default_address_pool property to docker_service
 - Import docker.com repository gpg key via HTTPS directly from docker to avoid timeouts with Ubuntu's key registry
 
-## 4.6.6 (unreleased)
+## 4.6.6 (7.3.0 - *2020-12-02*)
 
 - :default_ip_address_pool property added to configure default address pool for networks created by Docker.
 
@@ -1616,7 +1681,7 @@ This release deprecates AUFS/device-mapper handling from chef-docker, but provid
 
 # 0.32.0
 
-_If you're using CentOS/RHEL with EPEL, upcoming docker-io 0.9.0 package upgrade can be tracked at [Bugzilla 1074880](https://bugzilla.redhat.com/show_bug.cgi?id=1074880)_
+## If you're using CentOS/RHEL with EPEL, upcoming docker-io 0.9.0 package upgrade can be tracked at [Bugzilla 1074880](https://bugzilla.redhat.com/show_bug.cgi?id=1074880)
 
 This release includes Docker 0.9.0 changes and defaults, such as setting exec_driver to libcontainer ("native"), setting -rm on docker build, double dash arguments on the CLI, additional flags, etc.
 

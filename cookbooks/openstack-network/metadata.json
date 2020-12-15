@@ -1,0 +1,40 @@
+{
+  "name": "openstack-network",
+  "description": "Installs and configures the OpenStack Network API Service and various agents and plugins",
+  "long_description": "",
+  "maintainer": "openstack-chef",
+  "maintainer_email": "openstack-discuss@lists.openstack.org",
+  "license": "Apache-2.0",
+  "platforms": {
+    "ubuntu": ">= 0.0.0",
+    "redhat": ">= 0.0.0",
+    "centos": ">= 0.0.0"
+  },
+  "dependencies": {
+    "openstackclient": ">= 0.0.0",
+    "openstack-common": ">= 20.0.0",
+    "openstack-identity": ">= 20.0.0"
+  },
+  "providing": {
+
+  },
+  "recipes": {
+
+  },
+  "version": "20.0.0",
+  "source_url": "https://opendev.org/openstack/cookbook-openstack-network",
+  "issues_url": "https://launchpad.net/openstack-chef",
+  "privacy": false,
+  "chef_versions": [
+    [
+      ">= 15.0"
+    ]
+  ],
+  "ohai_versions": [
+
+  ],
+  "gems": [
+
+  ],
+  "eager_load_libraries": true
+}
