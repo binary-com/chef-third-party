@@ -1,0 +1,47 @@
+{
+  "name": "apache2",
+  "description": "Installs and configures apache2",
+  "long_description": "",
+  "maintainer": "Sous Chefs",
+  "maintainer_email": "help@sous-chefs.org",
+  "license": "Apache-2.0",
+  "platforms": {
+    "debian": ">= 0.0.0",
+    "ubuntu": ">= 0.0.0",
+    "redhat": ">= 0.0.0",
+    "centos": ">= 0.0.0",
+    "fedora": ">= 0.0.0",
+    "amazon": ">= 0.0.0",
+    "scientific": ">= 0.0.0",
+    "freebsd": ">= 0.0.0",
+    "suse": ">= 0.0.0",
+    "opensuse": ">= 0.0.0",
+    "opensuseleap": ">= 0.0.0",
+    "arch": ">= 0.0.0"
+  },
+  "dependencies": {
+
+  },
+  "providing": {
+
+  },
+  "recipes": {
+
+  },
+  "version": "8.7.0",
+  "source_url": "https://github.com/sous-chefs/apache2",
+  "issues_url": "https://github.com/sous-chefs/apache2/issues",
+  "privacy": false,
+  "chef_versions": [
+    [
+      ">= 15"
+    ]
+  ],
+  "ohai_versions": [
+
+  ],
+  "gems": [
+
+  ],
+  "eager_load_libraries": true
+}

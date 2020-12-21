@@ -1,0 +1,14 @@
+<IfModule actions_module>
+  #
+  # Action lets you define media types that will execute a script whenever
+  # a matching file is called. This eliminates the need for repeated URL
+  # pathnames for oft-used CGI file processors.
+  # Format: Action media/type /cgi-script/location
+  # Format: Action handler-name /cgi-script/location
+  #
+  <% unless @actions.empty? %>
+	<% @actions.each do |handler_name, location| %>
+	Action <%= handler_name location %>
+	<% end -%>
+	<% end -%>		
+</IfModule>

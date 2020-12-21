@@ -1,0 +1,43 @@
+{
+  "name": "openstack-block-storage",
+  "description": "The OpenStack Advanced Volume Management service Cinder.",
+  "long_description": "",
+  "maintainer": "Chef OpenStack",
+  "maintainer_email": "openstack-discuss@lists.openstack.org",
+  "license": "Apache-2.0",
+  "platforms": {
+    "ubuntu": ">= 0.0.0",
+    "redhat": ">= 0.0.0",
+    "centos": ">= 0.0.0"
+  },
+  "dependencies": {
+    "apache2": "~> 8.1",
+    "lvm": ">= 0.0.0",
+    "openstackclient": ">= 0.0.0",
+    "openstack-common": ">= 20.0.0",
+    "openstack-identity": ">= 20.0.0",
+    "openstack-image": ">= 20.0.0"
+  },
+  "providing": {
+
+  },
+  "recipes": {
+
+  },
+  "version": "20.0.0",
+  "source_url": "https://opendev.org/openstack/cookbook-openstack-block-storage",
+  "issues_url": "https://launchpad.net/openstack-chef",
+  "privacy": false,
+  "chef_versions": [
+    [
+      ">= 15.0"
+    ]
+  ],
+  "ohai_versions": [
+
+  ],
+  "gems": [
+
+  ],
+  "eager_load_libraries": true
+}

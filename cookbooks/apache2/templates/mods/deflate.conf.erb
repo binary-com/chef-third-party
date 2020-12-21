@@ -1,0 +1,9 @@
+<IfModule mod_deflate.c>
+  <IfModule mod_filter.c>
+     <% unless @add_output_filter_by_type.empty? %>
+     <% @add_output_filter_by_type.each_value do |filter| %>
+     AddOutputFilterByType <%= filter %>
+     <% end -%>
+     <% end -%>
+  </IfModule>
+</IfModule>

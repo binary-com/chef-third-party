@@ -1,12 +1,20 @@
 # Docker Cookbook
 
-[![Build Status](https://travis-ci.org/chef-cookbooks/docker.svg?branch=master)](https://travis-ci.org/chef-cookbooks/docker) [![Cookbook Version](https://img.shields.io/cookbook/v/docker.svg)](https://supermarket.chef.io/cookbooks/docker)
+[![Cookbook Version](https://img.shields.io/cookbook/v/docker.svg)](https://supermarket.chef.io/cookbooks/docker)
+[![CI State](https://github.com/sous-chefs/docker/workflows/ci/badge.svg)](https://github.com/sous-chefs/docker/actions?query=workflow%3Aci)
+[![OpenCollective](https://opencollective.com/sous-chefs/backers/badge.svg)](#backers)
+[![OpenCollective](https://opencollective.com/sous-chefs/sponsors/badge.svg)](#sponsors)
+[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
 
 The Docker Cookbook provides resources for installing docker as well as building, managing, and running docker containers.
 
 ## Scope
 
 This cookbook is concerned with the [Docker](http://docker.io) container engine as distributed by Docker, Inc. It does not address Docker ecosystem tooling or prerequisite technology such as cgroups or aufs.
+
+## Maintainers
+
+This cookbook is maintained by the Sous Chefs. The Sous Chefs are a community of Chef cookbook maintainers working together to maintain important cookbooks. If you’d like to know more please visit [sous-chefs.org](https://sous-chefs.org/) or come chat with us on the Chef Community Slack in [#sous-chefs](https://chefcommunity.slack.com/messages/C2V7B88SF).
 
 ## Requirements
 
@@ -19,8 +27,8 @@ This cookbook is concerned with the [Docker](http://docker.io) container engine 
 - Amazon Linux 2
 - Debian 9/10
 - Fedora
-- Ubuntu 16.04/18.04
-- CentOS 7
+- Ubuntu 16.04/18.04/20.04
+- CentOS 7/8
 
 ## Cookbook Dependencies
 
@@ -228,7 +236,7 @@ The `docker_installation_package` resource uses the system package manager to in
 
 ```ruby
 docker_installation_package 'default' do
-  version '19.03.8'
+  version '19.03.13'
   action :create
   package_options %q|--force-yes -o Dpkg::Options::='--force-confold' -o Dpkg::Options::='--force-all'| # if Ubuntu for example
 end
@@ -236,7 +244,7 @@ end
 
 ### Properties
 
-- `version` - Used to calculate package_version string. On Ubuntu / Debian this needs to be the complete version (19.03.8) while on Fedora / RHEL this can be any valid version string (19, 19.03, 19.03.8). We add an asterisk on automatically on RHEL/Fedora so leave that out.
+- `version` - Used to calculate package_version string. This needs to be the complete version (19.03.8).
 - `package_version` - Manually specify the package version string
 - `package_name` - Name of package to install. Defaults to 'docker-ce'
 - `package_options` - Manually specify additional options, like apt-get directives for example
@@ -383,7 +391,7 @@ The `docker_service` resource property list mostly corresponds to the options fo
 - `no_proxy` - ENV variable set before for Docker daemon starts
 - `package_name` - Set the package name. Defaults to `docker-ce`
 - `pidfile` - Path to use for daemon PID file
-- `registry_mirror` - Preferred Docker registry mirror
+- `registry_mirror` - A string or array to set the preferred Docker registry mirror(s)
 - `selinux_enabled` - Enable selinux support
 - `source` - URL to the pre-compiled Docker binary used for installation. Defaults to a calculated URL based on kernel version, Docker version, and platform arch. By default, this will try to get to "<http://get.docker.io/builds/>".
 - `storage_driver` - Storage driver to use
@@ -592,8 +600,8 @@ Note - this is best implemented by subscribing to `docker_image` changes.  There
 The `docker_image_prune` resource properties map to filters
 
 - `dangling` - When set to true (or 1), prune only unused and untagged images. When set to false (or 0), all unused images are pruned
-- `prune_until` - Prune images created before this timestamp. The <timestamp> can be Unix timestamps, date formatted timestamps, or Go duration strings (e.g. 10m, 1h30m) computed relative to the daemon machine’s time.
-- `with_label/without_label` -  (label=<key>, label=<key>=<value>, label!=<key>, or label!=<key>=<value>) Prune images with (or without, in case label!=... is used) the specified labels.
+- `prune_until` - Prune images created before this timestamp. The `<timestamp>` can be Unix timestamps, date formatted timestamps, or Go duration strings (e.g. 10m, 1h30m) computed relative to the daemon machine’s time.
+- `with_label/without_label` -  (`label=<key>`, `label=<key>=<value>`, `label!=<key>`, or `label!=<key>=<value>`) Prune images with (or without, in case label!=... is used) the specified labels.
 - `host` - A string containing the host the API should communicate with. Defaults to `ENV['DOCKER_HOST']` if set.
 
 ### Examples
@@ -676,6 +684,7 @@ Most `docker_container` properties are the `snake_case` version of the `CamelCas
 - `volumes` - An array of volume bindings for this container. Each volume binding is a string in one of these forms: `container_path` to create a new volume for the container. `host_path:container_path` to bind-mount a host path into the container. `host_path:container_path:ro` to make the bind-mount read-only inside the container.
 - `cap_add` - An array Linux Capabilities (`man 7 capabilities`) to add to grant the container beyond what it normally gets.
 - `cap_drop` - An array Linux Capabilities (`man 7 capabilities`) to revoke that the container normally has.
+- `cpus` - A float or integer value specifying how much of the available CPU resources a container can use. Available in Docker 1.13 and higher.
 - `cpu_shares` - An integer value containing the CPU Shares for the container.
 - `devices` - A Hash of devices to add to the container.
 - `dns` - An array of DNS servers the container will use for name resolution.
@@ -686,7 +695,7 @@ Most `docker_container` properties are the `snake_case` version of the `CamelCas
 - `env_file` - Read environment variables from a file and set in the container. Accepts an Array or String to the file location. lazy evaluator must be set if the file passed is created by Chef.
 - `extra_hosts` - An array of hosts to add to the container's `/etc/hosts` in the form `['host_a:10.9.8.7', 'host_b:10.9.8.6']`
 - `force` - A boolean to use in container operations that support a `force` option. Defaults to `false`
-- `health_check` - A hash containing the health check options - https://docs.docker.com/engine/reference/run/#healthcheck
+- `health_check` - A hash containing the health check options - [healthcheck reference](https://docs.docker.com/engine/reference/run/#healthcheck)
 - `host` - A string containing the host the API should communicate with. Defaults to ENV['DOCKER_HOST'] if set
 - `host_name` - The hostname for the container.
 - `labels` A string, array, or hash to set metadata on the container in the form ['foo:bar', 'hello:world']`
@@ -1363,26 +1372,27 @@ docker_exec 'touch_it' do
 end
 ```
 
-## Maintainers
+## Contributors
 
-- Sean OMeara ([sean@sean.io](mailto:sean@sean.io))
-- Brian Flad ([bflad417@gmail.com](mailto:bflad417@gmail.com))
-- Chase Bolt ([chase.bolt@gmail.com](mailto:chase.bolt@gmail.com))
+This project exists thanks to all the people who [contribute.](https://opencollective.com/sous-chefs/contributors.svg?width=890&button=false)
 
-## License
+### Backers
 
-**Copyright:** 2015-2018, Chef Software, Inc.
+Thank you to all our backers!
 
-```
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+![https://opencollective.com/sous-chefs#backers](https://opencollective.com/sous-chefs/backers.svg?width=600&avatarHeight=40)
 
-    http://www.apache.org/licenses/LICENSE-2.0
+### Sponsors
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-```
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website.
+
+![https://opencollective.com/sous-chefs/sponsor/0/website](https://opencollective.com/sous-chefs/sponsor/0/avatar.svg?avatarHeight=100)
+![https://opencollective.com/sous-chefs/sponsor/1/website](https://opencollective.com/sous-chefs/sponsor/1/avatar.svg?avatarHeight=100)
+![https://opencollective.com/sous-chefs/sponsor/2/website](https://opencollective.com/sous-chefs/sponsor/2/avatar.svg?avatarHeight=100)
+![https://opencollective.com/sous-chefs/sponsor/3/website](https://opencollective.com/sous-chefs/sponsor/3/avatar.svg?avatarHeight=100)
+![https://opencollective.com/sous-chefs/sponsor/4/website](https://opencollective.com/sous-chefs/sponsor/4/avatar.svg?avatarHeight=100)
+![https://opencollective.com/sous-chefs/sponsor/5/website](https://opencollective.com/sous-chefs/sponsor/5/avatar.svg?avatarHeight=100)
+![https://opencollective.com/sous-chefs/sponsor/6/website](https://opencollective.com/sous-chefs/sponsor/6/avatar.svg?avatarHeight=100)
+![https://opencollective.com/sous-chefs/sponsor/7/website](https://opencollective.com/sous-chefs/sponsor/7/avatar.svg?avatarHeight=100)
+![https://opencollective.com/sous-chefs/sponsor/8/website](https://opencollective.com/sous-chefs/sponsor/8/avatar.svg?avatarHeight=100)
+![https://opencollective.com/sous-chefs/sponsor/9/website](https://opencollective.com/sous-chefs/sponsor/9/avatar.svg?avatarHeight=100)

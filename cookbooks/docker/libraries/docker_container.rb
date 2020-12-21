@@ -14,6 +14,7 @@ module DockerCookbook
     property :cap_add, [Array, nil], coerce: proc { |v| Array(v).empty? ? nil : Array(v) }
     property :cap_drop, [Array, nil], coerce: proc { |v| Array(v).empty? ? nil : Array(v) }
     property :cgroup_parent, String, default: ''
+    property :cpus, [Integer, Float], coerce: proc { |v| coerce_cpus(v) }, default: 0
     property :cpu_shares, Integer, default: 0
     property :cpuset_cpus, String, default: ''
     property :detach, [true, false], default: true, desired_state: false
@@ -34,7 +35,7 @@ module DockerCookbook
     property :kernel_memory, [String, Integer], coerce: proc { |v| coerce_to_bytes(v) }, default: 0
     property :labels, [String, Array, Hash], default: {}, coerce: proc { |v| coerce_labels(v) }
     property :links, UnorderedArrayType, coerce: proc { |v| coerce_links(v) }
-    property :log_driver, %w( json-file syslog journald gelf fluentd awslogs splunk etwlogs gcplogs none ), default: 'json-file', desired_state: false
+    property :log_driver, %w( json-file syslog journald gelf fluentd awslogs splunk etwlogs gcplogs none local ), default: 'json-file', desired_state: false
     property :log_opts, [Hash, nil], coerce: proc { |v| coerce_log_opts(v) }, desired_state: false
     property :init, [TrueClass, FalseClass, nil]
     property :ip_address, String
@@ -125,7 +126,7 @@ module DockerCookbook
       when DockerBase::UnorderedArray, nil
         v
       else
-        return nil if v.empty?
+        return if v.empty?
         # Parse docker input of /source:/container_name/dest into source:dest
         DockerBase::UnorderedArray.new(Array(v)).map! do |link|
           if link =~ %r{^/(?<source>.+):/#{name}/(?<dest>.+)}
@@ -164,6 +165,11 @@ module DockerCookbook
                    end
 
       n * multiplier
+    end
+
+    def coerce_cpus(v)
+      return 0 if v.nil?
+      (v * (10**9)).to_i
     end
 
     def coerce_to_bytes(v)
@@ -522,6 +528,7 @@ module DockerCookbook
               'MemorySwap'      => new_resource.memory_swap,
               'MemorySwappiness' => new_resource.memory_swappiness,
               'MemoryReservation' => new_resource.memory_reservation,
+              'NanoCpus'        => new_resource.cpus,
               'NetworkMode'     => new_resource.network_mode,
               'OomKillDisable'  => new_resource.oom_kill_disable,
               'OomScoreAdj'     => new_resource.oom_score_adj,
@@ -732,7 +739,7 @@ module DockerCookbook
       end
 
       def parsed_hostname
-        return nil if new_resource.network_mode == 'host'
+        return if new_resource.network_mode == 'host'
         new_resource.hostname
       end
 
@@ -746,7 +753,7 @@ module DockerCookbook
       end
 
       def ulimits_to_hash
-        return nil if new_resource.ulimits.nil?
+        return if new_resource.ulimits.nil?
         new_resource.ulimits.map do |u|
           name = u.split('=')[0]
           soft = u.split('=')[1].split(':')[0]
