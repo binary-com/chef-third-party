@@ -5,6 +5,66 @@ This file is used to list changes made in each version of the docker cookbook.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+## 8.1.0 - *2021-08-25*
+
+- Remove Ubuntu 16.04 support now it's end of life
+
+## 8.0.1 - *2021-08-25*
+
+## 8.0.0 - *2021-08-25*
+
+- Remove upstart docker service manage
+  - We don't officialy support any distros that use upstart anymore
+
+## 7.7.8 - *2021-08-25
+
+## 7.7.7 - *2021-08-24*
+
+- Update port syntax for `docker_container`
+
+## 7.7.6 - *2021-08-24*
+
+## 7.7.5 - *2021-08-24*
+
+- Disable installation-script-main suite on Debian 9 due to lack of upstream support
+
+## 7.7.4 - *2021-08-24*
+
+## 7.7.3 - *2021-07-17*
+
+- Ensure `docker_image :load` is idempotent
+
+## 7.7.2 - *2021-07-01*
+
+- Fix `installed_docker_version` method on ppc64le which appends `v` to the version
+
+## 7.7.1 - *2021-06-30*
+
+- Fix package installation on RHEL s390x architecture
+
+## 7.7.0 - *2021-02-26*
+
+- Add `buildargs` property to `docker_image` resource
+
+## 7.6.1 - *2021-01-11*
+
+- Fixed `reload_signal` and `cpus` bug for `docker_container` in #1090 [@urlund](https://github.com/urlund)
+
+## 7.6.0 - *2021-01-06*
+
+- Support for loki-docker driver logging plugin
+
+## 7.5.0 - *2021-01-04*
+
+- Update to use 20.10 by default
+- Update tarball for 19.03 to 19.03.14
+
+## 7.4.1 - *2021-01-01*
+
+- Fix the codeowners to use the correct group
+
 ## 7.4.0 - *2020-12-04*
 
 - Support `local`  option for the `log_driver` properties of `docker_service` and `docker_container` resources

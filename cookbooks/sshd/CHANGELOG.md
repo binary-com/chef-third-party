@@ -3,6 +3,30 @@ sshd CHANGELOG
 
 This file is used to list changes made in each version of the sshd cookbook.
 
+3.0.0
+-----
+
+- Rename resource from `openssh_server` to `sshd_server`
+- Add platforms: centos-8 debian-10 and ubuntu-20
+- Apply cookstyle linting
+
+```ruby
+# Old notation
+sshd_server '/etc/sshd_config' do
+  Port 1234
+  X11Forward 'no'
+end
+
+# New notation
+sshd_server '/etc/sshd_config' do
+  sshd_config(
+    Port: 1234,
+    X11Forward: 'no'
+  )
+end
+```
+
+
 2.0.0
 -----
 
@@ -14,7 +38,7 @@ This file is used to list changes made in each version of the sshd cookbook.
 
 ```ruby
 # Old notation
-openssh_server '/etc/sshd_config' do
+open_server '/etc/sshd_config' do
   Port 1234
   X11Forward 'no'
 end
