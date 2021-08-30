@@ -1,0 +1,41 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_zero
+  product_name: chef
+  enforce_idempotency: true
+  multiple_converge: 2
+  deprecations_as_errors: true
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: centos-7
+  - name: centos-8
+  - name: debian-9
+  - name: debian-10
+  - name: ubuntu-18.04
+  - name: ubuntu-20.04
+
+suites:
+  - name: default
+    run_list:
+      - recipe[htpasswd]
+      - recipe[test]
+  - name: delete
+    provisioner:
+      enforce_idempotency: false
+      multiple_converge: 2
+    run_list:
+      - recipe[htpasswd]
+      - recipe[test::delete]
+  - name: overwrite
+    provisioner:
+      enforce_idempotency: false
+      multiple_converge: 2
+    run_list:
+      - recipe[htpasswd]
+      - recipe[test::overwrite]
