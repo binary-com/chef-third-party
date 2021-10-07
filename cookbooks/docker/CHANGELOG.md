@@ -5,6 +5,133 @@ This file is used to list changes made in each version of the docker cookbook.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+## 9.7.0 - *2021-09-21*
+
+- Move the docker_image library to a custom resource
+
+## 9.6.1 - *2021-09-20*
+
+- Update exec resource to use partial/_base
+
+## 9.6.0 - *2021-09-16*
+
+- Move the docker_plugin library to a custom resource
+
+## 9.5.0 - *2021-09-16*
+
+- Move the docker_network library to a custom resource
+
+## 9.4.0 - *2021-09-16*
+
+- Add `ip`and `ip6` properties to `docker_network`
+
+## 9.3.1 - *2021-09-15*
+
+- Move the Docker log properties to a partial
+
+## 9.3.0 - *2021-09-15*
+
+- Update and sync log drivers list for docker_service_manager and docker_container
+
+## 9.2.0 - *2021-09-15*
+
+- Move the docker_exec library to a custom resource
+
+## 9.1.0 - *2021-09-15*
+
+- Move the docker_container resource to a custom resource
+
+## 9.0.0 - *2021-09-15*
+
+- Move the docker_volume resources to a custom resource
+- Add the base partial for all future resources
+- Require Chef 16+ for resource partial support
+
+## 8.3.0 - *2021-09-13*
+
+- Remove Ubuntu 16.04 from the GitHub Actions test matrix
+- Add amazonlinux-2 to the test matrix
+
+## 8.2.4 - *2021-09-09*
+
+- Ensure docker_container :health_check is idempotent
+
+## 8.2.3 - *2021-09-08*
+
+- Fix private registries credentials handling and public registries
+
+## 8.2.2 - *2021-08-27*
+
+- Use new action_class instead of declare_action_class.class_eval for helper methods in resources
+
+## 8.2.1 - *2021-08-26*
+
+- Ensure `docker_container :user` is idempotent
+
+## 8.2.0 - *2021-08-26*
+
+- Ensure `docker_container :health_check` is idempotent
+
+## 8.1.0 - *2021-08-25*
+
+- Remove Ubuntu 16.04 support now it's end of life
+
+## 8.0.1 - *2021-08-25*
+
+## 8.0.0 - *2021-08-25*
+
+- Remove upstart docker service manage
+  - We don't officialy support any distros that use upstart anymore
+
+## 7.7.8 - *2021-08-25
+
+## 7.7.7 - *2021-08-24*
+
+- Update port syntax for `docker_container`
+
+## 7.7.6 - *2021-08-24*
+
+## 7.7.5 - *2021-08-24*
+
+- Disable installation-script-main suite on Debian 9 due to lack of upstream support
+
+## 7.7.4 - *2021-08-24*
+
+## 7.7.3 - *2021-07-17*
+
+- Ensure `docker_image :load` is idempotent
+
+## 7.7.2 - *2021-07-01*
+
+- Fix `installed_docker_version` method on ppc64le which appends `v` to the version
+
+## 7.7.1 - *2021-06-30*
+
+- Fix package installation on RHEL s390x architecture
+
+## 7.7.0 - *2021-02-26*
+
+- Add `buildargs` property to `docker_image` resource
+
+## 7.6.1 - *2021-01-11*
+
+- Fixed `reload_signal` and `cpus` bug for `docker_container` in #1090 [@urlund](https://github.com/urlund)
+
+## 7.6.0 - *2021-01-06*
+
+- Support for loki-docker driver logging plugin
+
+## 7.5.0 - *2021-01-04*
+
+- Update to use 20.10 by default
+- Update tarball for 19.03 to 19.03.14
+
+## 7.4.1 - *2021-01-01*
+
+- Fix the codeowners to use the correct group
+
 ## 7.4.0 - *2020-12-04*
 
 - Support `local`  option for the `log_driver` properties of `docker_service` and `docker_container` resources
