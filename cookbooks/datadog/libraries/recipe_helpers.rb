@@ -52,6 +52,20 @@ class Chef
         7
       end
 
+      def agent_minor_version(node)
+        agent_version = agent_version(node)
+        unless agent_version.nil?
+          match = agent_version.match(/([0-9]+:)?([0-9]+)\.([0-9]+)\.([0-9]+)([^-\s]+)?(?:-([0-9]+))?/)
+          if match.nil?
+            Chef::Log.warn "Couldn't infer agent_minor_version from agent_version '#{agent_version}'"
+          else
+            _epoch, _major, minor, _patch, _suffix, _release = match.captures
+            return minor.to_i
+          end
+        end
+        nil
+      end
+
       def agent_flavor(node)
         # user-specified values
         agent_flavor = node['datadog']['agent_flavor']
@@ -80,8 +94,31 @@ class Chef
         run_state_or_attribute(node, 'windows_ddagentuser_password')
       end
 
+      def npm_install(node)
+        run_state_or_attribute(node, 'windows_npm_install') || run_state_or_attribute_system_probe(node, 'network_enabled')
+      end
+
       def cookbook_version(run_context)
         run_context.cookbook_collection['datadog'].version
+      end
+
+      def upstart_platform?(node)
+        agent_major_version(node) > 5 &&
+          (((node['platform'] == 'amazon' || node['platform_family'] == 'amazon') && node['platform_version'].to_i != 2) ||
+           (node['platform'] == 'ubuntu' && node['platform_version'].to_f < 15.04) || # chef <11.14 doesn't use the correct service provider
+          (node['platform'] != 'amazon' && node['platform_family'] == 'rhel' && node['platform_version'].to_i < 7))
+      end
+
+      def service_provider(node)
+        if node['datadog']['service_provider']
+          specified_provider = node['datadog']['service_provider']
+          if Chef::Provider::Service.constants.include?(specified_provider.to_sym)
+            service_provider = Chef::Provider::Service.const_get(specified_provider)
+          end
+          service_provider
+        elsif upstart_platform?(node)
+          Chef::Provider::Service::Upstart
+        end
       end
 
       private
@@ -91,6 +128,14 @@ class Chef
           node.run_state['datadog'][attribute]
         else
           node['datadog'][attribute]
+        end
+      end
+
+      def run_state_or_attribute_system_probe(node, attribute)
+        if node.run_state.key?('datadog') && node.run_state['datadog'].key?('system_probe') && node.run_state['datadog']['system_probe'].key?(attribute)
+          node.run_state['datadog']['system_probe'][attribute]
+        else
+          node['datadog']['system_probe'][attribute]
         end
       end
     end
@@ -111,11 +156,16 @@ class Chef
 
         private
 
-        def fetch_current_version
+        include Chef::Mixin::ShellOut
+        def agent_status
           return nil unless File.exist?(WIN_BIN_PATH)
+          shell_out("\"#{WIN_BIN_PATH}\" status").stdout.strip
+        end
 
-          agent_status = `"#{WIN_BIN_PATH}" status`
-          match_data = agent_status.match(/^Agent \(v(.*)\)/)
+        def fetch_current_version
+          status = agent_status
+          return nil if status.nil?
+          match_data = status.match(/^Agent \(v(.*)\)/)
 
           # Nightlies like 6.20.0-devel+git.38.cd7f989 fail to parse as Gem::Version because of the '+' sign
           version = match_data[1].tr('+', '-') if match_data
