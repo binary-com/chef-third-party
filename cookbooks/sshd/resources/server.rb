@@ -1,8 +1,8 @@
 #
-# Cookbook Name:: sshd
-# Definition:: openssh_server
+# Cookbook:: sshd
+# Definition:: sshd_server
 #
-# Copyright 2012, Chris Aumann
+# Copyright:: 2012, Chris Aumann
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,9 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-resource_name :openssh_server
-
-property :name, String
 property :sshd_config, Hash, default: {}
 property :template_action, default: :create
 property :cookbook, String, default: 'sshd'
@@ -44,12 +41,21 @@ action :create do
   # Check sshd_config
   execute 'check_sshd_config' do
     command "#{node['sshd']['sshd_path']} -t -f #{filename}"
+    only_if { node['sshd']['sshd_config']['HostKey'].map { |f| ::File.exist?(f) }.include?(true) }
     action :nothing
   end
 
   service node['sshd']['service_name'] do
     supports status: true, restart: true, reload: true
     action :nothing
+  end
+
+  directory '/run/sshd' do
+    owner 'root'
+    group 'root'
+    mode '0755'
+    action :create
+    only_if { platform?('debian', 'ubuntu') }
   end
 
   template filename do
