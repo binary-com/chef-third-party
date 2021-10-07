@@ -12,7 +12,7 @@ provisioner:
   name: chef_zero
   deprecations_as_errors: true
   product_name: chef
-  product_version: 13
+  product_version: 14.7
 
 verifier:
   name: inspec
@@ -24,9 +24,6 @@ platforms:
   - name: windows-10
     driver:
       box: chef/windows-10-enterprise
-  - name: windows-2008r2
-    driver:
-      box: tas50/windows_2008r2_updated
   - name: windows-2012r2
     driver:
       box: tas50/windows_2012r2
@@ -38,16 +35,12 @@ platforms:
       box: tas50/windows_2019
 
 suites:
-  - name: certificate
-    run_list:
-      - recipe[test::certificate]
   - name: http_acl
     run_list:
       - recipe[test::http_acl]
-  - name: share
+  - name: schannel
     run_list:
-      - recipe[test::share]
-    excludes: ["windows-2008r2"]
+      - recipe[test::schannel]
   - name: zipfile
     run_list:
       - recipe[test::zipfile]

@@ -18,12 +18,14 @@
 # limitations under the License.
 #
 
+unified_mode true if respond_to?(:unified_mode)
+
 include Windows::Helper
 
 property :url, String, name_property: true
 property :user, String
 property :sddl, String
-property :exists, [true, false], desired_state: true
+property :exists, [true, false]
 
 # See https://msdn.microsoft.com/en-us/library/windows/desktop/cc307236%28v=vs.85%29.aspx for netsh info
 

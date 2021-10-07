@@ -2,6 +2,49 @@
 
 This file is used to list changes made in each version of the windows cookbook.
 
+## 7.0.2 (2020-09-10)
+
+- Resolve a typo in the user_privilege resource - [@tas50](https://github.com/tas50)
+- Don't run delivery in Appveyor - [@tas50](https://github.com/tas50)
+
+## 7.0.1 (2020-09-10)
+
+- Remove testing of Windows 2008 R2 - [@tas50](https://github.com/tas50)
+- Cookstyle 6.2.9 Fixes - [@xorimabot](https://github.com/xorimabot)
+- Avoid deprcation warnings when using user_privilege resource on Chef >= - [@tas50](https://github.com/tas50)
+
+## Unreleased
+
+- resolved cookstyle error: libraries/registry_helper.rb:69:9 refactor: `ChefCorrectness/ChefApplicationFatal`
+- resolved cookstyle error: libraries/registry_helper.rb:232:9 convention: `Style/RedundantReturn`
+- resolved cookstyle error: libraries/registry_helper.rb:234:9 convention: `Style/RedundantReturn`
+- resolved cookstyle error: libraries/registry_helper.rb:244:9 convention: `Style/RedundantReturn`
+- resolved cookstyle error: libraries/registry_helper.rb:245:7 convention: `Style/EmptyElse`
+- resolved cookstyle error: libraries/registry_helper.rb:246:9 convention: `Style/RedundantReturn`
+- resolved cookstyle error: libraries/registry_helper.rb:272:9 convention: `Style/RedundantReturn`
+- resolved cookstyle error: libraries/registry_helper.rb:274:9 convention: `Style/RedundantReturn`
+- resolved cookstyle error: libraries/windows_helper.rb:165:14 warning: `Lint/SendWithMixinArgument`
+
+## 7.0.0 (2020-03-26)
+
+### Breaking Changes
+
+- This cookbook now requires Chef Infra Client 14.7 and later as it no longer includes the `windows_share` and `windows_certificate` resources that are now built into Chef Infra Client.
+
+### Other Changes
+
+- Remove list of actions in the dns resource - [@tas50](https://github.com/tas50)
+- Don't set the guard_interpreter in powershell_script - [@tas50](https://github.com/tas50)
+- Add windows_schannel resource (#619) - [@Xorima](https://github.com/Xorima)
+- Remove desired_state: true from resources - [@tas50](https://github.com/tas50)
+- The host_name property in the dns resource doesn't need to be a name property - [@tas50](https://github.com/tas50)
+- Remove unnecessary include of the powershell mixin - [@tas50](https://github.com/tas50)
+
+## 6.0.1 (2019-10-01)
+
+- Update README.md for Windows cookbook suggesting core dns resources (#616) - [@NAshwini](https://github.com/NAshwini)
+- Add a warning when using windows_zipfile resource as users should migrate to archive_file (#617) - [@NAshwini](https://github.com/NAshwini)
+
 ## 6.0.0 (2019-04-25)
 
 ### Breaking Changes
