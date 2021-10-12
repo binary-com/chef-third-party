@@ -2,6 +2,47 @@
 
 This file is used to list changes made in each version of the yum-epel cookbook.
 
+## Unreleased
+
+## 4.1.4 - *2021-08-30*
+
+- Standardise files with files in sous-chefs/repo-management
+
+## 4.1.3 - *2021-07-14*
+
+- Remove deprecated `failoverprorioty` setting
+
+## 4.1.2 - *2021-06-01*
+
+- Standardise files with files in sous-chefs/repo-management
+
+## 4.1.1 - *2021-01-24*
+
+- Fix support for Oracle Linux
+
+## 4.1.0 - *2021-01-14*
+
+- Sous Chefs Adoption
+
+## 4.0.1 (2021-01-04)
+
+- Return empty array on non-yum systems - [@ramereth](https://github.com/ramereth)
+
+## 4.0.0 (2020-12-15)
+
+- Cookstyle fixes - [@tas50](https://github.com/tas50)
+- Switch all http URLs to HTTPS URLs - [@damacus](https://github.com/damacus)
+- Switch gpgkey urls - [@knightorc](https://github.com/knightorc)
+- Require Chef 12.15+ - [@tas50](https://github.com/tas50)
+- Remove CentOS 6 / Amazon Linux 201X support/testing - [@ramereth](https://github.com/ramereth)
+- Improve InSpec test by using yum.repo resource - [@ramereth](https://github.com/ramereth)
+- Fix repo descriptions on Amazon Linux - [@ramereth](https://github.com/ramereth)
+- Test all supported repos in new "all" suite - [@ramereth](https://github.com/ramereth)
+- Ensure other epel repos are not enabled in default suite - [@ramereth](https://github.com/ramereth)
+- Add various modular and playground repos for EL8 - [@ramereth](https://github.com/ramereth)
+- Update README - [@ramereth](https://github.com/ramereth)
+- Cleanup metadata.rb formatting - [@ramereth](https://github.com/ramereth)
+
 ## 3.3.0 (2018-10-09)
 
 - Fix cookbook to work on all releases of Amazon Linux 2
