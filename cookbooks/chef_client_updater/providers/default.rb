@@ -3,7 +3,7 @@
 # Resource:: updater
 #
 # Copyright:: 2016-2018, Will Jordan
-# Copyright:: 2016-2019, Chef Software Inc.
+# Copyright:: 2016-2020, Chef Software Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 
 # NOTE: this cookbook uses Chef-11 backwards compatible syntax to support
 # upgrades from Chef 11.x and this pattern should not be copied for any modern
-# cookbook.  This is a poor example cookbook of how to write Chef.
+# cookbook. This is a poor example cookbook of how to write Chef Infra code.
 
 include ::ChefClientUpdaterHelper
 
@@ -29,16 +29,20 @@ use_inline_resources # cookstyle: disable ChefDeprecations/UseInlineResourcesDef
 provides :chef_client_updater if respond_to?(:provides) # cookstyle: disable ChefModernize/RespondToProvides
 
 def load_mixlib_install
-  gem 'mixlib-install', '~> 3.11'
+  gem 'mixlib-install', '~> 3.12'
   require 'mixlib/install'
 rescue LoadError
   Chef::Log.info('mixlib-install gem not found. Installing now')
   chef_gem 'mixlib-install' do
-    version '~> 3.11'
-    compile_time true if respond_to?(:compile_time)
+    version '~> 3.12'
+    compile_time true if respond_to?(:compile_time) # cookstyle: disable ChefModernize/RespondToCompileTime
     if new_resource.rubygems_url
       clear_sources true if respond_to?(:clear_sources)
-      options "--source #{new_resource.rubygems_url}" if respond_to?(:options)
+      if respond_to?(:source)
+        source new_resource.rubygems_url
+      elsif respond_to?(:options)
+        options "--source #{new_resource.rubygems_url}"
+      end
     end
   end
 
@@ -50,7 +54,7 @@ def load_mixlib_versioning
 rescue LoadError
   Chef::Log.info('mixlib-versioning gem not found. Installing now')
   chef_gem 'mixlib-versioning' do
-    compile_time true if respond_to?(:compile_time)
+    compile_time true if respond_to?(:compile_time) # cookstyle: disable ChefModernize/RespondToCompileTime
     if new_resource.rubygems_url
       clear_sources true if respond_to?(:clear_sources)
       options "--source #{new_resource.rubygems_url}" if respond_to?(:options)
@@ -77,7 +81,7 @@ def update_rubygems
     if new_resource.rubygems_url
       gem_bin = "#{Gem.bindir}/gem"
       if !::File.exist?(gem_bin) && windows?
-        gem_bin = "#{Gem.bindir}/gem.cmd" # on Chef Client 13+ the rubygem executable is gem.cmd, not gem
+        gem_bin = "#{Gem.bindir}/gem.cmd" # on Chef Infra Client 13+ the rubygem executable is gem.cmd, not gem
       end
       raise 'cannot find omnibus install' unless ::File.exist?(gem_bin)
       source = "--clear-sources --source #{new_resource.rubygems_url}"
@@ -113,10 +117,10 @@ end
 #
 def current_version
   case new_resource.product_name
-  when 'chef', 'angrychef'
+  when 'chef', 'angrychef', 'cinc', 'angrycinc'
     node['chef_packages']['chef']['version']
   when 'chefdk'
-    versions = Mixlib::ShellOut.new('chef -v').run_command.stdout
+    versions = Mixlib::ShellOut.new('chef -v').run_command.stdout # cookstyle: disable ChefModernize/ShellOutHelper
     # There is a verbiage change in newer version of Chef Infra
     version = versions.match(/(ChefDK Version(.)*:)\s*([\d.]+)/i) || versions.match(/(Chef Development Kit Version(.)*:)\s*([\d.]+)/i)
 
@@ -159,7 +163,7 @@ def update_necessary?
     cur_version = Mixlib::Versioning.parse(current_version)
     Chef::Log.debug("The current #{new_resource.product_name} version is #{cur_version} and the desired version is #{des_version}")
     necessary = new_resource.prevent_downgrade ? (des_version > cur_version) : (des_version != cur_version)
-    Chef::Log.debug("A chef-client upgrade #{necessary ? 'is' : "isn't"} necessary")
+    Chef::Log.debug("A Chef Infra Client upgrade #{necessary ? 'is' : "isn't"} necessary")
     necessary
   end
 end
@@ -168,7 +172,7 @@ def eval_post_install_action
   return unless new_resource.post_install_action == 'exec'
 
   if Chef::Config[:interval] || Chef::Config[:client_fork]
-    Chef::Log.warn 'post_install_action "exec" not supported for chef-client running forked -- changing to "kill".'
+    Chef::Log.warn 'post_install_action "exec" not supported for Chef Infra Client running forked -- changing to "kill".'
     new_resource.post_install_action = 'kill'
   end
 
@@ -200,10 +204,10 @@ def run_post_install_action
     Kernel.exec(env, new_resource.exec_command, *new_resource.exec_args)
   when 'kill'
     if Chef::Config[:client_fork] && Process.ppid != 1 && !windows?
-      Chef::Log.warn 'Chef client is running forked with a supervisor. Sending KILL to parent process!'
+      Chef::Log.warn 'Chef Infra Client is running forked with a supervisor. Sending KILL to parent process!'
       Process.kill('KILL', Process.ppid)
     end
-    Chef::Log.warn 'New chef-client installed and exit is allowed. Forcing chef exit!'
+    Chef::Log.warn 'New Chef Infra Client installed and client process exit is allowed and/or specified. Now forcing Chef Infra Client to exit. Disregard any failure messages.'
     exit(213)
   else
     raise "Unexpected post_install_action behavior: #{new_resource.post_install_action}"
@@ -229,17 +233,17 @@ end
 # cleanup cruft from *prior* runs
 def cleanup
   if ::File.exist?(chef_backup_dir)
-    converge_by("remove #{chef_backup_dir} from previous chef-client run") do
+    converge_by("remove #{chef_backup_dir} from previous Chef Infra Client run") do
       FileUtils.rm_rf chef_backup_dir
     end
   end
   if ::File.exist?(chef_upgrade_log)
-    converge_by("remove #{chef_upgrade_log} from previous chef-client run") do
+    converge_by("remove #{chef_upgrade_log} from previous Chef Infra Client run") do
       FileUtils.rm_rf chef_upgrade_log
     end
   end
   if ::File.exist?(chef_broken_dir) && new_resource.event_log_service_restart
-    converge_by("remove #{chef_broken_dir} from previous chef-client run") do
+    converge_by("remove #{chef_broken_dir} from previous Chef Infra Client run") do
       event_log_ps_code
       FileUtils.rm_rf chef_broken_dir
     end
@@ -262,7 +266,7 @@ rescue
 end
 
 # windows does not like having running open files nuked behind it so we have to move the old file
-# out of the way.  on both platforms we must clean up the old install to not leave behind any old
+# out of the way. on both platforms we must clean up the old install to not leave behind any old
 # gem files.
 #
 def move_opt_chef(src, dest)
@@ -296,12 +300,18 @@ end
 
 def prepare_windows
   copy_opt_chef(chef_install_dir, chef_backup_dir)
-  Kernel.spawn("c:/windows/system32/schtasks.exe /F /RU SYSTEM /create /sc once /ST \"#{upgrade_start_time}\" /tn Chef_upgrade /tr \"powershell.exe -ExecutionPolicy Bypass \"#{chef_install_dir}\"/chef_upgrade.ps1 > #{chef_upgrade_log}\"")
+
+  remote_file "#{Chef::Config[:file_cache_path]}/handle.zip" do
+    source new_resource.handle_zip_download_url
+    not_if { ::File.file?(node['chef_client_updater']['handle_exe_path']) }
+  end.run_action(:create)
+
+  Kernel.spawn("c:/windows/system32/schtasks.exe /F /RU SYSTEM /create /sc once /ST \"#{upgrade_start_time}\" /tn Chef_upgrade /tr \"powershell.exe -ExecutionPolicy Bypass \"#{chef_install_dir}\"/../chef_upgrade.ps1 2>&1 > #{chef_upgrade_log}\"")
   FileUtils.rm_rf "#{chef_install_dir}/bin/chef-client.bat"
 end
 
 def uninstall_ps_code
-  uninstall_ps_code = <<-EOH
+  <<-EOH
     function guid_from_regvalue($value) {
       $order = 7,6,5,4,3,2,1,0,11,10,9,8,15,14,13,12,17,16,19,18,21,20,23,22,25,24,27,26,29,28,31,30
       $dash_pos = 8,13,18,23
@@ -319,19 +329,18 @@ def uninstall_ps_code
       $installed_product = (get-item HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Installer\\UpgradeCodes\\C58A706DAFDB80F438DEE2BCD4DCB65C).Property
       $msi_guid = guid_from_regvalue $installed_product
 
+      Write-Output "Removing installed product {$msi_guid}"
       Start-Process msiexec.exe -Wait -ArgumentList "/x {$msi_guid} /q"
     }
 
     installed_remove
   EOH
-
-  uninstall_ps_code
 end
 
 def wait_for_chef_client_or_reschedule_upgrade_task_function
   <<-EOH
   Function WaitForChefClientOrRescheduleUpgradeTask {
-    <# Wait for running chef-client to finish up to n times.  If it has not finished after maxcount tries, then reschedule the upgrade task inMinutes minutes in the future and exit.
+    <# Wait for running Chef Infra Client to finish up to n times. If it has not finished after maxcount tries, then reschedule the upgrade task inMinutes minutes in the future and exit.
     #>
     param(
           [Parameter(Mandatory=$false)]
@@ -346,11 +355,11 @@ def wait_for_chef_client_or_reschedule_upgrade_task_function
     while ($status -gt 0) {
       $count++
       if ($count -gt $maxcount) {
-        Write-Output "Chef cannot be upgraded while in use.  Rescheduling the upgrade in $inMinutes minutes..."
+        Write-Output "Chef Infra Client cannot be upgraded while in use. Rescheduling the upgrade in $inMinutes minutes..."
         RescheduleTask Chef_upgrade $inMinutes
         exit 0
       }
-      Write-Output "Chef cannot be upgraded while in use - Attempt $count of $maxcount.  Sleeping for 60 seconds and retrying..."
+      Write-Output "Chef Infra Client cannot be upgraded while in use - Attempt $count of $maxcount. Sleeping for 60 seconds and retrying..."
       Start-Sleep 60
       $status = (Get-WmiObject Win32_Process -Filter "name = 'ruby.exe'" | Select-Object CommandLine | select-string 'opscode').count
     }
@@ -371,21 +380,28 @@ def reschedule_task_function
           [Int]$minutes
     )
 
-    $env:SystemDirectory = [Environment]::SystemDirectory
-    $tasksRoot = $env:SystemDirectory + '\Tasks\'
-    $taskScheduler = New-Object -ComObject Schedule.Service
-    $taskFolder = $taskScheduler.GetFolder('\')
-    Try {
-      $task = $taskFolder.GetTask($taskName)
-      $xml = [xml]$task.Xml
-      $startBoundary = [datetime]$xml.Task.Triggers.TimeTrigger.StartBoundary
-      $newDateTime = $startBoundary.AddMinutes($minutes)
-      $newDate = $newDateTime.ToString('MM/dd/yyyy')
-      $newTime = $newDateTime.ToString('HH:mm:ss')
-      $prms = '/change', '/tn', $taskName, '/sd', $newDate, '/st', $newTime
-      & schtasks.exe $prms
+    $newDateTime = ((Get-Date).AddMinutes($minutes)).ToString("yyyy-MM-ddTHH:mm:ss")
+    try
+    {
+        $task = Get-ScheduledTask -TaskName $taskName -TaskPath '\\'
+
+        # Multiple triggers or types can exist. If the first trigger is not a daily, we'll bail out.
+        # This could be made more resilient, but the task is ours to not foul up.
+        if (($task.Triggers[0].ToString() -eq "MSFT_TaskDailyTrigger") -or
+           ($task.Triggers[0].ToString() -eq "MSFT_TaskTimeTrigger")) {
+              $newTrigger = $task.Triggers[0].Clone()
+              $newTrigger.StartBoundary = $newDateTime
+              $task.Triggers[0].StartBoundary = $newDateTime
+        }
+        else {
+            throw "Error rescheduling $taskname task trigger. Valid trigger not found."
+        }
+        # Assure this task will run even if the scheduled time is missed
+        $newTaskSettings = New-ScheduledTaskSettingsSet -StartWhenAvailable
+        # Updates the scheduled task with new setting and new trigger.
+        $task = Set-ScheduledTask -TaskName $taskName -TaskPath '\\' -Settings $newTaskSettings -trigger $task.triggers
     }
-    Catch {
+    catch {
       $_.Exception.Message
     }
   }
@@ -434,14 +450,38 @@ end
 def event_log_ps_code
   powershell_script 'EventLog Restart' do
     code <<-EOH
-      $windows_kernel_version = (Get-WmiObject -class Win32_OperatingSystem).Version
-      if (-Not ($windows_kernel_version.Contains('6.0') -or $windows_kernel_version.Contains('6.1'))) {
-        $process="svchost.exe"
-        $data = Get-CimInstance Win32_Process -Filter "name = '$process'" | select ProcessId, CommandLine | where {$_.CommandLine -Match "LocalServiceNetworkRestricted"}
+    $windows_kernel_version = (Get-CimInstance -class Win32_OperatingSystem).Version
+    if (-Not ($windows_kernel_version.Contains('6.0') -or $windows_kernel_version.Contains('6.1'))) {
+      # Get Dependent Services for Eventlog that are running
+      $depsvcsrunning = Get-Service -Name 'EventLog' | Select-Object -ExpandProperty DependentServices |
+                        Where-Object Status -eq 'Running' | Select-Object -ExpandProperty Name
+      # Attempt to preemptively stop Dependent Services
+      $depsvcsrunning | ForEach-Object {
+        Stop-Service -Name "$_" -Force -ErrorAction SilentlyContinue
+      }
+      # Stop EventLog Service - First Politely, then Forcibly
+      try {
+        Stop-Service -Name 'EventLog' -Force -ErrorAction Stop
+      } catch {
+        $process='svchost.exe'
+        $data = Get-CimInstance Win32_Process -Filter "name = '$process'" | Select-Object ProcessId, CommandLine | Where-Object {$_.CommandLine -Match "LocalServiceNetworkRestricted"}
         $data = $data.ProcessId
         Stop-Process -Id $data -Force
-        Start-Service -Name "EventLog"
+        Start-Sleep -Seconds 10
       }
+      # Restart EventLog Service, if Not AutoStarted
+      $evtlogstate = Get-Service -Name 'EventLog'
+      if ($evtlogstate.Status -eq 'Stopped') {
+        Start-Service -Name 'EventLog'
+      }
+      # Restart Dependent Services - if Stopped
+      $depsvcsrunning | ForEach-Object {
+        $svcstate = Get-Service -Name "$_"
+        if ($svcstate.Status -eq 'Stopped') {
+          Start-Service -Name "$_" -ErrorAction SilentlyContinue
+        }
+      }
+    }
     EOH
   end
 end
@@ -462,16 +502,14 @@ def execute_install_script(install_script)
                     ''
                   end
 
-    remote_file "#{Chef::Config[:file_cache_path]}/handle.zip" do
-      source new_resource.handle_zip_download_url
-      not_if { ::File.file?(node['chef_client_updater']['handle_exe_path']) }
-    end.run_action(:create)
-
     license_provided = node['chef_client']['chef_license'] || ''
 
-    powershell_script 'name' do
+    powershell_script 'Chef Infra Client Upgrade Script' do
       code <<-EOH
         $command = {
+          $timestamp = Get-Date
+          Write-Output "Starting upgrade at $timestamp"
+
           Get-Service chef-client -ErrorAction SilentlyContinue | stop-service
           Get-Service push-jobs-client -ErrorAction SilentlyContinue | stop-service
 
@@ -505,10 +543,25 @@ def execute_install_script(install_script)
             exit 3
           }
 
+          Write-Output "Attempting to uninstall product"
           #{uninstall_first}
-          #{install_script}
 
-          Remove-Item "#{chef_install_dir}/chef_upgrade.ps1"
+          Write-Output "Running product install script..."
+          try {
+            #{install_script}
+          }
+          catch {
+            Write-Output "An error occurred while trying to install product"
+            Write-Output $_
+
+            # Might need more testing about different ways the installation could fail
+            Move-Item "#{chef_backup_dir}" "#{chef_install_dir}"
+
+            exit 100
+          }
+          Write-Output "Install script finished"
+
+          Remove-Item "#{chef_install_dir}/../chef_upgrade.ps1"
           c:/windows/system32/schtasks.exe /delete /f /tn Chef_upgrade
 
           if ('#{desired_version}' -ge '15') {
@@ -533,6 +586,9 @@ def execute_install_script(install_script)
           #{post_action}
 
           Get-Service push-jobs-client -ErrorAction SilentlyContinue | start-service
+
+          $timestamp = Get-Date
+          Write-Output "Finished upgrade at $timestamp"
         }
 
         $http_proxy = $env:http_proxy
@@ -540,8 +596,8 @@ def execute_install_script(install_script)
         $set_proxy = "`$env:http_proxy=`'$http_proxy`'"
         $set_no_proxy = "`$env:no_proxy=`'$no_proxy`'"
 
-        Set-Content -Path "#{chef_install_dir}/chef_upgrade.ps1" -Value "$set_proxy", "$set_no_proxy"
-        Add-Content "#{chef_install_dir}/chef_upgrade.ps1" "`n$command"
+        Set-Content -Path "#{chef_install_dir}/../chef_upgrade.ps1" -Value "$set_proxy", "$set_no_proxy"
+        Add-Content "#{chef_install_dir}/../chef_upgrade.ps1" "`n$command"
 
       EOH
       action :nothing
@@ -550,9 +606,34 @@ def execute_install_script(install_script)
     upgrade_command = Mixlib::ShellOut.new(install_script, timeout: new_resource.install_timeout)
     upgrade_command.run_command
     if upgrade_command.exitstatus != 0
-      raise "Error updating chef-client. exit code: #{upgrade_command.exitstatus}.\nSTDERR: #{upgrade_command.stderr}\nSTDOUT: #{upgrade_command.stdout}"
+      raise "Error updating Chef Infra Client. exit code: #{upgrade_command.exitstatus}.\nSTDERR: #{upgrade_command.stderr}\nSTDOUT: #{upgrade_command.stdout}"
     end
   end
+end
+
+def license_acceptance!
+  if node['chef_client']['chef_license'].nil?
+    Chef::Log.debug 'No license acceptance configuration found, skipping.'
+    return
+  end
+
+  license_acceptance = shell_out("#{chef_install_dir}/bin/chef-apply -e 'exit 0'", timeout: 60, environment: { 'CHEF_LICENSE' => "#{node['chef_client']['chef_license']}" })
+
+  unless license_acceptance.error?
+    Chef::Log.debug 'Successfully accepted license.'
+    return
+  end
+
+  msg = ['Something went wrong while accepting the license.']
+  unless license_acceptance.stdout.empty?
+    msg << 'STDOUT:'
+    msg << license_acceptance.stdout
+  end
+  unless license_acceptance.stderr.empty?
+    msg << 'STDERR:'
+    msg << license_acceptance.stderr
+  end
+  Chef::Log.warn msg.join("\n")
 end
 
 action :update do
@@ -578,16 +659,15 @@ action :update do
     # sysvinit won't restart after we exit, potentially use cron to do so
     # either trust the chef-client cookbook's init scripts or the users choice
     if (node['chef_client'] && node['chef_client']['init_style'] == 'init') || node['chef_client_updater']['restart_chef_via_cron']
-      Chef::Log.warn 'Chef Client was upgraded, scheduling chef-client start via cron in 5 minutes'
+      Chef::Log.warn 'Chef Infra Client was upgraded, scheduling Chef Infra Client start via cron in 5 minutes'
       cron_time = Time.now + 300
       start_cmd = if platform_family?('aix')
                     '/usr/bin/startsrc -s chef > /dev/console 2>&1'
                   else
                     '/etc/init.d/chef-client start'
                   end
-      unless node['chef_client']['chef_license'].nil?
-        start_cmd = "env CHEF_LICENSE=\"#{node['chef_client']['chef_license']}\" " + start_cmd
-      end
+
+      license_acceptance!
 
       r = cron 'chef_client_updater' do
         hour cron_time.hour
@@ -601,7 +681,7 @@ action :update do
     raise
   rescue Exception => e # rubocop:disable Lint/RescueException
     if ::File.exist?(chef_backup_dir)
-      Chef::Log.warn "CHEF UPGRADE ABORTED due to #{e}: rolling back to #{chef_backup_dir} copy"
+      Chef::Log.warn "CHEF INFRA CLIENT UPGRADE ABORTED due to #{e}: rolling back to #{chef_backup_dir} copy"
       move_opt_chef(chef_backup_dir, chef_install_dir) unless platform_family?('windows')
     else
       Chef::Log.warn "NO #{chef_backup_dir} DIR TO ROLL BACK TO!"
