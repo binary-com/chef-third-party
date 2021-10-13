@@ -1,6 +1,7 @@
 # lvm Cookbook
 
-[![Build Status](https://travis-ci.org/chef-cookbooks/lvm.svg?branch=master)](https://travis-ci.org/chef-cookbooks/lvm) [![Cookbook Version](https://img.shields.io/cookbook/v/lvm.svg)](https://supermarket.chef.io/cookbooks/lvm)
+![delivery](https://github.com/chef-cookbooks/lvm/workflows/delivery/badge.svg)
+[![Cookbook Version](https://img.shields.io/cookbook/v/lvm.svg)](https://supermarket.chef.io/cookbooks/lvm)
 
 Installs lvm2 package and includes resources for managing LVM.
 
@@ -121,7 +122,8 @@ Action  | Description
         <li>driver:
   name: dokken
   privileged: true # because Docker and SystemD/Upstart
-  chef_version: current - (required) the directory to mount the volume on</li>
+          chef_version: current</li>
+        <li><tt>location</tt> - (required) the directory to mount the volume on</li>
         <li><tt>options</tt> - the mount options for the volume</li>
         <li><tt>dump</tt> - the <tt>dump</tt> field for the fstab entry</li>
         <li><tt>pass</tt> - the <tt>pass</tt> field for the fstab entry</li>
@@ -298,7 +300,8 @@ Manages LVM thin pools (which are simply logical volumes created with the --thin
         <li>driver:
   name: dokken
   privileged: true # because Docker and SystemD/Upstart
-  chef_version: current - (required) the directory to mount the volume on</li>
+  chef_version: current</li>
+        <li><tt>location</tt> - (required) the directory to mount the volume on</li>
         <li><tt>options</tt> - the mount options for the volume</li>
         <li><tt>dump</tt> - the <tt>dump</tt> field for the fstab entry</li>
         <li><tt>pass</tt> - the <tt>pass</tt> field for the fstab entry</li>
