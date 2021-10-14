@@ -4,7 +4,9 @@
 
 Contains custom resources for adding Ohai hints and installing custom Ohai plugins. Handles path creation as well as the reloading of Ohai so that new data will be available during the same run.
 
-NOTE: The ohai_hint resource shipped in Chef 14.0 (April 2018). When Chef 15.0 is released (April 2019) and Chef 13 goes EOL the ohai_hint resource will be removed from this cookbook.
+# Deprecation
+
+This cookbook has been deprecated as all functionality here is now built into the Chef Infra Client itself. The `ohai_hint` resource now ships in Chef Infra Client and any plugins can be installed by placing them in an `ohai` directory within a cookbook in your runlist.
 
 ## Requirements
 
@@ -18,7 +20,7 @@ NOTE: The ohai_hint resource shipped in Chef 14.0 (April 2018). When Chef 15.0 i
 
 ### Chef
 
-- Chef 12.7+
+- Chef 13+
 
 ### Cookbooks
 
@@ -30,7 +32,7 @@ NOTE: The ohai_hint resource shipped in Chef 14.0 (April 2018). When Chef 15.0 i
 
 Creates Ohai hint files, which are consumed by Ohai plugins in order to determine if they should run or not.
 
-#### Resource Attributes
+#### Resource Properties
 
 - `hint_name` - The name of hints file and key. Should be string, default is name of resource.
 - `content` - Values of hints. It will be used as automatic attributes. Should be Hash, default is empty Hash
@@ -71,7 +73,7 @@ You can check for the creation or deletion of ohai hints with chefspec using the
 
 Installs custom Ohai plugins.
 
-#### Resource Attributes
+#### Resource Properties
 
 - `plugin_name` - The name to give the plugin on the filesystem. Should be string, default is name of resource.
 - `path` - The path to your custom plugin directory. Defaults to a directory named 'plugins' under the directory 'ohai' in the Chef config dir.
@@ -80,6 +82,7 @@ Installs custom Ohai plugins.
 - `resource` - The resource type for the plugin file. Either `:cookbook_file` or `:template`. Defaults to `:cookbook_file`.
 - `variables` - Usable only if `resource` is `:template`. Defines the template's variables.
 - `compile_time` - Should the resource run at compile time. This defaults to `true`.
+- `load_single_plugin` - Reload all plugins unless this value is set to true. Load only the named plugin.
 
 #### examples
 
