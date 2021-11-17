@@ -1,0 +1,8 @@
+{
+  "generator-poise": {
+    "created": true,
+    "name": "poise-service",
+    "cookbookName": "auto",
+    "noMinor": true
+  }
+}

@@ -1,8 +1,8 @@
 #
-# Cookbook Name:: datadog
+# Cookbook:: datadog
 # Recipe:: integrations
 #
-# Copyright 2011-2015, Datadog
+# Copyright:: 2011-2015, Datadog
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-include_recipe 'datadog::dd-agent'
+include_recipe '::dd-agent'
 
 # Install all specified integrations
 # example:

@@ -16,6 +16,7 @@
 # limitations under the License.
 #
 provides :mariadb_server_install
+unified_mode true
 
 include MariaDBCookbook::Helpers
 
@@ -28,6 +29,7 @@ property :external_pid_file, String,        default: lazy { "/var/run/mysql/#{ve
 property :password,          [String, nil], default: 'generate'
 property :port,              Integer,       default: 3306
 property :initdb_locale,     String,        default: 'UTF-8'
+property :install_sleep,     Integer,       default: 4, desired_state: false
 
 action :install do
   node.run_state['mariadb'] ||= {}
@@ -39,6 +41,8 @@ action :install do
   end
 
   package server_pkg_name
+
+  selinux_policy_install 'mariadb' if selinux_enabled?
 
   %w(mariadb-server mariadb).each do |m|
     selinux_policy_module m do
@@ -97,7 +101,7 @@ flush privileges;"
   execute 'apply-mariadb-root-password' do
     user 'mysql'
     # TODO, I really dislike the sleeps here, should come up with a better way to do this
-    command "(test -f #{pid_file} && kill `cat #{pid_file}` && sleep 3); /usr/sbin/mysqld -u root --pid-file=#{pid_file} --init-file=#{data_dir}/recovery.conf&>/dev/null& sleep 2 && (test -f #{pid_file} && kill `cat #{pid_file}`)"
+    command "(test -f #{pid_file} && kill `cat #{pid_file}` && sleep #{new_resource.install_sleep}); /usr/sbin/mysqld -u root --pid-file=#{pid_file} --init-file=#{data_dir}/recovery.conf&>/dev/null& sleep #{new_resource.install_sleep} && (test -f #{pid_file} && kill `cat #{pid_file}`)"
     notifies :enable, "service[#{platform_service_name}]", :before
     notifies :stop, "service[#{platform_service_name}]", :before
     notifies :create, 'file[generate-mariadb-root-password]', :before
@@ -110,6 +114,5 @@ end
 
 action_class do
   include MariaDBCookbook::Helpers
-
-  Chef::Resource.include Chef::Util::Selinux
+  include Chef::Util::Selinux
 end

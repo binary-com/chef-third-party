@@ -1,0 +1,54 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_solo
+  product_name: chef
+  enforce_idempotency: true
+  multiple_converge: 2
+  solo_rb:
+    treat_deprecation_warnings_as_errors: true
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: centos-7
+  - name: centos-8
+  - name: debian-9
+  - name: debian-10
+  - name: ubuntu-18.04
+  - name: ubuntu-20.04
+
+suites:
+  - name: repository
+    run_list:
+      - recipe[test::repository]
+  - name: client_install
+    run_list:
+      - recipe[test::client_install]
+  - name: server_install
+    run_list:
+      - recipe[test::server_install]
+  - name: configuration
+    run_list:
+      - recipe[test::configuration]
+  - name: server_configuration
+    run_list:
+      - recipe[test::server_configuration]
+  - name: resources
+    run_list:
+      - recipe[test::user_database]
+  - name: replication
+    run_list:
+      - recipe[test::replication]
+  - name: datadir
+    run_list:
+      - recipe[test::datadir]
+  - name: port
+    run_list:
+      - recipe[test::port]
+  - name: galera_configuration
+    run_list:
+      - recipe[test::galera_configuration]

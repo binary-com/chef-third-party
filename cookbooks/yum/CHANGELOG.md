@@ -2,6 +2,43 @@
 
 This file is used to list changes made in each version of the yum cookbook.
 
+## Unreleased
+
+## 7.2.0 - *2021-09-29*
+
+- Add `dnf_module` resource for managing DNF modules on RHEL 8+ / Fedora
+
+## 7.1.0 - *2021-08-29*
+
+- Add support for DNF (Yum v4) property `install_weak_deps` (#193)
+
+## 7.0.1 - *2021-08-26*
+
+- Standardise files with files in sous-chefs/repo-management (#191)
+
+## 7.0.0 - *2021-08-13*
+
+- Enable `unified_mode` for Chef 17 compatibility
+- Remove deprecated `dnf_yum_compat` recipe
+
+## 6.1.1 - *2021-06-01*
+
+## 6.1.0 - *2021-03-24*
+
+- complete ip_resolve additions started in 6.0.0
+
+## 6.0.0 - *2021-01-20*
+
+- Sous Chefs Adoption
+- Cookstyle fixes
+- Various testing fixes
+- Standardise files with files in sous-chefs/repo-management
+- Adding proper distroverpkg assignment for Oracle Linux
+- Require 13+
+- Remove RHEL5 references
+- Mark `dnf_yum_compat` recipe deprecated
+- Add EL8 support
+
 ## 5.1.0 (2017-08-04)
 
 - Avoid spec deprecation warnings

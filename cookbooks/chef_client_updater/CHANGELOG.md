@@ -2,6 +2,54 @@
 
 This file is used to list changes made in each version of the chef_client_updater cookbook.
 
+## 3.12.0 (2021-04-14)
+
+- Bump version of mixlib-install we install to 3.12 - [@gscho](https://github.com/gscho)
+
+## 3.11.1 (2020-08-25)
+
+- Fix license acceptance on non-windows - [@dheerajd-msys](https://github.com/dheerajd-msys)
+
+## 3.11.0 (2020-08-12)
+
+- #209 Fixed Windows PowerShell task reschedule by using Scheduled Task cmdlets available on PowerShell 3+ on Windows 2012+- [@jwdean](https://github.com/jwdean)
+- resolved cookstyle error: providers/default.rb:314:3 convention: `Style/RedundantAssignment`
+
+## 3.10.1 (2020-05-27)
+
+- Catch when the windows upgrades fail and make sure we leave the C:\opscode\chef dir - [@teknofire](https://github.com/teknofire)
+- Improve logging on Windows - [@teknofire](https://github.com/teknofire)
+- More chef-client / chef -> Chef Infra Client - [@tas50](https://github.com/tas50)
+- Improve the exit message so users realize it was a success - [@tas50](https://github.com/tas50)
+- Expand testing with new platforms - [@tas50](https://github.com/tas50)
+
+## 3.10.0 (2020-05-04)
+
+- Disable if_respond to cop for legacy support - [@tas50](https://github.com/tas50)
+- Use source parameter for chef_gem if it exists - [@ramereth](https://github.com/ramereth)
+- Include cinc as an allowed product_name - [@ramereth](https://github.com/ramereth)
+
+## 3.9.0 (2020-04-14)
+
+- Remove #to_s conversion of attributes - [@jasonwbarnett](https://github.com/jasonwbarnett)
+- More robust eventlog and dependent services restarts on Windows - [@rabidpitbull](https://github.com/rabidpitbull)
+
+## 3.8.6 (2020-03-06)
+
+- Fixed restart eventlog and dependent services - [@sanga1794](https://github.com/sanga1794)
+
+## 3.8.5 (2020-03-05)
+
+- Fix nil:NilClass error - [@dheerajd-msys](https://github.com/dheerajd-msys)
+
+## 3.8.4 (2020-02-20)
+
+-Fix the type for the rubygems_url property
+
+## 3.8.3 (2020-02-20)
+
+- Updated rubygems_url resource property default and removed attribute - [@BrandonTheMandon](https://github.com/BrandonTheMandon)
+
 ## 3.8.2 (2020-01-14)
 
 - Remove mandatory parameters for WaitForChefClientOrRescheduleUpgradeTask - [@bdwyertech](https://github.com/bdwyertech)

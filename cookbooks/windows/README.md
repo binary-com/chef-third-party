@@ -4,87 +4,29 @@
 
 Provides a set of Windows-specific resources to aid in the creation of cookbooks/recipes targeting the Windows platform.
 
+## EOL Notice
+
+This cookbook is no longer required for managing Windows nodes with Chef Infra. The necessary resources and helpers are now built into Chef Infra Client itself. These built-in resources are more feature rich and execute faster.
+
 ## Requirements
 
 ### Platforms
 
-- Windows 7
-- Windows Server 2008 R2
+- Windows 7 (EOL)
+- Windows Server 2008 R2 (EOL)
 - Windows 8, 8.1
 - Windows Server 2012 (R1, R2)
 - Windows Server 2016
 
 ### Chef
 
-- Chef 14+
+- Chef 14.7+
 
 ## Resources
 
-### Deprecated Resources Note
-
-As of Chef 14.7+ the windows_share and windows_certificate resources are now included in the Chef Client. If you are running Chef 14.7+ the resources in Chef client will take precedence over the resources in this cookbook. In November 2019 we will release a new major version of this cookbook that removes these resources.
-
-### windows_certificate
-
-`Note`: This resource is now included in Chef 14.7 and later. There is no need to depend on the Windows cookbook for this resource.
-
-Installs a certificate into the Windows certificate store from a file, and grants read-only access to the private key for designated accounts. Due to current limitations in WinRM, installing certificated remotely may not work if the operation requires a user profile. Operations on the local machine store should still work.
-
-#### Actions
-
-- `:create` - creates or updates a certificate.
-- `:delete` - deletes a certificate.
-- `:acl_add` - adds read-only entries to a certificate's private key ACL.
-- `:verify` - logs whether or not a certificate is valid
-
-#### Properties
-
-- `source` - name attribute. The source file (for create and acl_add), thumbprint (for delete and acl_add) or subject (for delete).
-- `pfx_password` - the password to access the source if it is a pfx file.
-- `private_key_acl` - array of 'domain\account' entries to be granted read-only access to the certificate's private key. This is not idempotent.
-- `store_name` - the certificate store to manipulate. One of:
-  - MY (Personal)
-  - CA (Intermediate Certification Authorities)
-  - ROOT (Trusted Root Certification Authorities)
-  - TRUSTEDPUBLISHER (Trusted Publishers)
-  - CLIENTAUTHISSUER (Client Authentication Issuers)
-  - REMOTE DESKTOP (Remote Desktop)
-  - TRUSTEDDEVICES (Trusted Devices)
-  - WEBHOSTING (Web Hosting)
-  - AUTHROOT (Third-Party Root Certification Authorities)
-  - TRUSTEDPEOPLE (Trusted People)
-  - SMARTCARDROOT (Smart Card Trusted Roots)
-  - TRUST (Enterprise Trust)
-  - DISALLOWED (Untrusted Certificates)
-- `user_store` - if false (default) then use the local machine store; if true then use the current user's store.
-
-#### Examples
-
-```ruby
-# Add PFX cert to local machine personal store and grant accounts read-only access to private key
-windows_certificate "c:/test/mycert.pfx" do
-    pfx_password    "password"
-    private_key_acl    ["acme\fred", "pc\jane"]
-end
-```
-
-```ruby
-# Add cert to trusted intermediate store
-windows_certificate "c:/test/mycert.cer" do
-    store_name    "CA"
-end
-```
-
-```ruby
-# Remove all certificates matching the subject
-windows_certificate "me.acme.com" do
-    action :delete
-end
-```
-
 ### windows_certificate_binding
 
-Binds a certificate to an HTTP port in order to enable TLS communication.
+Binds a certificate to an HTTP port to enable TLS communication.
 
 #### Actions
 
@@ -134,6 +76,8 @@ end
 ```
 
 ### windows_dns
+
+`Note`: This resource is now included in Chef 15 and later. If you are using newer versions of [windows](https://devblogs.microsoft.com/powershell/configuration-in-a-devops-world-windows-powershell-desired-state-configuration/) then should use the core [resource](https://github.com/chef/chef/blob/master/RELEASE_NOTES.md#windows_dns_record-resource) instead of windows_dns.
 
 Configures A and CNAME records in Windows DNS. This requires the DNSCMD to be installed, which is done by adding the DNS role to the server or installing the Remote Server Admin Tools.
 
@@ -213,52 +157,19 @@ windows_http_acl 'http://+:50051/' do
 end
 ```
 
-### windows_share
+### windows_schannel
 
-`Note`: This resource is now included in Chef 14.7 and later. There is no need to depend on the Windows cookbook for this resource.
-
-Creates, modifies and removes Windows shares. All properties are idempotent.
-
-`Note`: This resource uses PowerShell cmdlets introduced in Windows 2012/8.
+Used to configure the schannel security settings in windows, this is used by dotnet apps and PowerShell to be able to speak to tls 1.2 endpoints
 
 #### Actions
 
-- `:create`: creates/modifies a share
-- `:delete`: deletes a share
+- `configure`: Configures the setting
 
 #### Properties
 
 property                 | type       | default       | description
 ------------------------ | ---------- | ------------- | -----------------------------------------------------------------------------------------------------------------------------------------------------------
-`share_name`             | String     | resource name | the share to assign to the share
-`path`                   | String     |               | The path of the location of the folder to share. Required when creating. If the share already exists on a different path then it is deleted and re-created.
-`description`            | String     |               | description to be applied to the share
-`full_users`             | Array      | []            | users which should have "Full control" permissions
-`change_users`           | Array      | []            | Users are granted modify permission to access the share.
-`read_users`             | Array      | []            | users which should have "Read" permissions
-`temporary`              | True/False | false         | The lifetime of the new SMB share. A temporary share does not persist beyond the next restart of the computer
-`scope_name`             | String     | '*'           | The scope name of the share.
-`ca_timeout`             | Integer    | 0             | The continuous availability time-out for the share.
-`continuously_available` | True/False | false         | Indicates that the share is continuously available.
-`concurrent_user_limit`  | Integer    | 0 (unlimited) | The maximum number of concurrently connected users the share can accommodate
-`encrypt_data`           | True/False | false         | Indicates that the share is encrypted.
-
-#### Examples
-
-```ruby
-windows_share "foo" do
-  action :create
-  path "C:\\foo"
-  full_users ["DOMAIN_A\\some_user", "DOMAIN_B\\some_other_user"]
-  read_users ["DOMAIN_C\\Domain users"]
-end
-```
-
-```ruby
-windows_share "foo" do
-  action :delete
-end
-```
+`use_strong_crypto`             | True, False     | true | Enables or disables the setting
 
 ### windows_user_privilege
 
@@ -345,7 +256,9 @@ SeTakeOwnershipPrivilege             Take ownership of files or other objects
 
 ### windows_zipfile
 
-Most version of Windows do not ship with native cli utility for managing compressed files. This resource provides a pure-ruby implementation for managing zip files. Be sure to use the `not_if` or `only_if` meta parameters to guard the resource for idempotence or action will be taken every Chef run.
+`Note`: This resource has been deprecated as Chef Infra Client 15.0 shipped with a new archive_file resource, which natively handles multiple archive formats. Please update any cookbooks using this resource to instead use the `archive_file` resource: https://docs.chef.io/resource_archive_file.html
+
+Most versions of Windows do not ship with native cli utility for managing compressed files. This resource provides a pure-ruby implementation for managing zip files. Be sure to use the `not_if` or `only_if` meta parameters to guard the resource for idempotence or action will be taken every Chef run.
 
 #### Actions
 
@@ -401,7 +314,7 @@ Returns a hash of all DisplayNames installed
 
 ```ruby
 # usage in a recipe
-::Chef::Recipe.send(:include, Windows::Helper)
+::Chef::DSL::Recipe.send(:include, Windows::Helper)
 hash_of_installed_packages = installed_packages
 ```
 
@@ -414,7 +327,7 @@ Download a file if a package isn't installed
 
 ```ruby
 # usage in a recipe to not download a file if package is already installed
-::Chef::Recipe.send(:include, Windows::Helper)
+::Chef::DSL::Recipe.send(:include, Windows::Helper)
 is_win_sdk_installed = is_package_installed?('Windows Software Development Kit')
 
 remote_file 'C:\windows\temp\windows_sdk.zip' do
@@ -436,11 +349,11 @@ end
 
 ### Windows::VersionHelper
 
-Helper that allows you to get information of the windows version running on your node. It leverages windows ohai from kernel.os_info, easy to mock and to use even on linux.
+Helper that allows you to get information on the windows version running on your node. It leverages windows ohai from kernel.os_info, easy to mock and to use even on Linux.
 
 #### core_version?
 
-Determines whether given node is running on a windows Core.
+Determines whether the given node is running on a Windows Core.
 
 ```ruby
 if ::Windows::VersionHelper.core_version? node
@@ -450,7 +363,7 @@ end
 
 #### workstation_version?
 
-Determines whether given node is a windows workstation version (XP, Vista, 7, 8, 8.1, 10)
+Determines whether the given node is a windows workstation version (XP, Vista, 7, 8, 8.1, 10)
 
 ```ruby
 if ::Windows::VersionHelper.workstation_version? node
@@ -460,7 +373,7 @@ end
 
 #### server_version?
 
-Determines whether given node is a windows server version (Server 2003, Server 2008, Server 2012, Server 2016)
+Determines whether the given node is a windows server version (Server 2003, Server 2008, Server 2012, Server 2016)
 
 ```ruby
 if ::Windows::VersionHelper.server_version? node
