@@ -1,7 +1,6 @@
 volumes_filter = '{{ .Config.Volumes }}'
 mounts_filter = '{{ .Mounts }}'
 uber_options_network_mode = 'bridge'
-chef_dir = file('/opt/cinc').exist? ? '/opt/cinc' : '/opt/chef'
 
 ##################################################
 #  test/cookbooks/docker_test/recipes/default.rb
@@ -10,7 +9,7 @@ chef_dir = file('/opt/cinc').exist? ? '/opt/cinc' : '/opt/chef'
 # docker_service[default]
 
 describe docker.version do
-  its('Server.Version') { should eq '20.10.1' }
+  its('Server.Version') { should eq '19.03.5' }
 end
 
 describe command('docker info') do
@@ -324,7 +323,7 @@ end
 
 describe command("docker inspect -f \"#{volumes_filter}\" chef_container") do
   its(:exit_status) { should eq 0 }
-  its(:stdout) { should match(/#{chef_dir}\:/) }
+  its(:stdout) { should match(%r{\/opt\/chef\:}) }
 end
 
 # docker_container[ohai_debian]
@@ -340,7 +339,7 @@ end
 
 describe command("docker inspect -f \"#{mounts_filter}\" ohai_debian") do
   its(:exit_status) { should eq 0 }
-  its(:stdout) { should match(/#{chef_dir}/) }
+  its(:stdout) { should match(%r{\/opt\/chef}) }
 end
 
 # docker_container[env]
@@ -396,7 +395,7 @@ describe docker_container('sean_was_here') do
   it { should_not be_running }
 end
 
-describe command("docker run --rm --volumes-from chef_container debian ls -la #{chef_dir}/") do
+describe command('docker run --rm --volumes-from chef_container debian ls -la /opt/chef/') do
   its(:exit_status) { should eq 0 }
   its(:stdout) { should match(/sean_was_here-/) }
 end
@@ -407,7 +406,7 @@ describe docker_container('attached') do
   it { should_not be_running }
 end
 
-describe command("docker run --rm --volumes-from chef_container debian ls -la #{chef_dir}/") do
+describe command('docker run --rm --volumes-from chef_container debian ls -la /opt/chef/') do
   its(:exit_status) { should eq 0 }
   its(:stdout) { should match(/attached-\d{12}/) }
 end
@@ -418,7 +417,7 @@ describe docker_container('attached_with_timeout') do
   it { should_not be_running }
 end
 
-describe command("docker run --rm --volumes-from chef_container debian ls -la #{chef_dir}/") do
+describe command('docker run --rm --volumes-from chef_container debian ls -la /opt/chef/') do
   its(:exit_status) { should eq 0 }
   its(:stdout) { should_not match(/attached_with_timeout-\d{12}/) }
 end
@@ -531,18 +530,6 @@ end
 #   its(:exit_status) { should eq 0 }
 #   its(:stdout) { should_not match(/0f343b0931126a20f133d67c2b018a3b/) }
 # end
-
-# docker_container[cpus]
-
-describe docker_container('cpus') do
-  it { should exist }
-  it { should_not be_running }
-end
-
-describe command("docker inspect -f '{{ .HostConfig.NanoCpus }}' cpus") do
-  its(:exit_status) { should eq 0 }
-  its(:stdout) { should match(/500000000/) }
-end
 
 # docker_container[cpu_shares]
 
@@ -942,37 +929,34 @@ describe command("docker inspect -f '{{ .Config.Cmd }}' cmd_change") do
   its(:stdout) { should match(/nc -ll -p 9/) }
 end
 
-# docker_container[memory], does not work on EL7
-unless os.family == 'redhat' && os.release.to_i < 8
-  describe command("docker inspect -f '{{ .HostConfig.KernelMemory }}' memory") do
-    its(:exit_status) { should eq 0 }
-    its(:stdout) { should match(/10485760/) }
-  end
+# docker_container[memory]
 
-  describe command("docker inspect -f '{{ .HostConfig.Memory }}' memory") do
-    its(:exit_status) { should eq 0 }
-    its(:stdout) { should match(/5242880/) }
-  end
+describe command("docker inspect -f '{{ .HostConfig.KernelMemory }}' memory") do
+  its(:exit_status) { should eq 0 }
+  its(:stdout) { should match(/10485760/) }
+end
 
-  describe command("docker inspect -f '{{ .HostConfig.MemorySwap }}' memory") do
-    its(:exit_status) { should eq 0 }
-    # TODO(ramereth): Failing with output of "-1"
-    # its(:stdout) { should match(/62914560/) }
-    its(:stdout) { should match(/-1/) }
-  end
+describe command("docker inspect -f '{{ .HostConfig.Memory }}' memory") do
+  its(:exit_status) { should eq 0 }
+  its(:stdout) { should match(/5242880/) }
+end
 
-  describe command("docker inspect -f '{{ .HostConfig.MemorySwappiness }}' memory") do
-    its(:exit_status) { should eq 0 }
-    its(:stdout) { should match(/50/) }
-  end
+describe command("docker inspect -f '{{ .HostConfig.MemorySwap }}' memory") do
+  its(:exit_status) { should eq 0 }
+  its(:stdout) { should match(/62914560/) }
+end
 
-  describe command("docker inspect -f '{{ .HostConfig.MemoryReservation }}' memory") do
-    its(:exit_status) { should eq 0 }
-    its(:stdout) { should match(/5242880/) }
-  end
+describe command("docker inspect -f '{{ .HostConfig.MemorySwappiness }}' memory") do
+  its(:exit_status) { should eq 0 }
+  its(:stdout) { should match(/50/) }
+end
 
-  describe command("docker inspect -f '{{ .HostConfig.ShmSize }}' memory") do
-    its(:exit_status) { should eq 0 }
-    its(:stdout) { should match(/33554432/) }
-  end
+describe command("docker inspect -f '{{ .HostConfig.MemoryReservation }}' memory") do
+  its(:exit_status) { should eq 0 }
+  its(:stdout) { should match(/5242880/) }
+end
+
+describe command("docker inspect -f '{{ .HostConfig.ShmSize }}' memory") do
+  its(:exit_status) { should eq 0 }
+  its(:stdout) { should match(/33554432/) }
 end

@@ -1,5 +1,5 @@
 #
-# Cookbook:: datadog
+# Cookbook Name:: datadog
 # Recipe:: gunicorn
 #
 
@@ -23,7 +23,7 @@
 #
 # - proc_name: my_web_app
 
-include_recipe '::dd-agent'
+include_recipe 'datadog::dd-agent'
 
 datadog_monitor 'gunicorn' do
   instances node['datadog']['gunicorn']['instances']

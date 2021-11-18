@@ -1,4 +1,4 @@
-# Copyright:: 2012-2019, Chef Software, Inc.
+# Copyright:: 2012-2017, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,15 +15,13 @@
 
 include_recipe 'postfix::_common'
 
-postmap_command = platform_family?('rhel') ? '/usr/sbin/postmap' : 'postmap'
-
 execute 'update-postfix-transport' do
-  command "#{postmap_command} #{node['postfix']['transport_db']}"
+  command "postmap #{node['postfix']['transport_db']}"
   environment PATH: "#{ENV['PATH']}:/opt/omni/bin:/opt/omni/sbin" if platform_family?('omnios')
   action :nothing
 end
 
 template node['postfix']['transport_db'] do
   source 'transport.erb'
-  notifies :run, 'execute[update-postfix-transport]', :immediately
+  notifies :run, 'execute[update-postfix-transport]'
 end

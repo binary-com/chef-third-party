@@ -1,6 +1,9 @@
 #
+# Author:: Sean OMeara (<someara@chef.io>)
 # Cookbook:: selinux
 # Recipe:: disabled
+#
+# Copyright:: 2011-2019, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,10 +17,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# this recipe will be deprecated in future releases
 
-selinux_install 'selinux'
+include_recipe 'selinux::_common'
 
-selinux_state 'disabled' do
-  automatic_reboot true
+selinux_state 'SELinux Disabled' do
   action :disabled
 end

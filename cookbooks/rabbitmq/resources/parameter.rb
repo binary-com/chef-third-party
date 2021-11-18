@@ -5,7 +5,6 @@
 #
 # Author: Sean Porter <portertech@gmail.com>
 # Copyright 2015 by Sean Porter
-# Copyright 2019-2021, VMware, Inc or its affiliates.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,8 +18,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-unified_mode true if respond_to?(:unified_mode)
 
 actions :set, :clear, :list
 default_action :set

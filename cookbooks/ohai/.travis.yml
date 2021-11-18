@@ -1,15 +1,14 @@
+sudo: required
 
 addons:
   apt:
     sources:
-      - chef-current-xenial
+      - chef-current-trusty
     packages:
-      - chef-workstation
+      - chefdk
 
+# Don't `bundle install` which takes about 1.5 mins
 install: echo "skip bundle install"
-
-env:
-  - CHEF_LICENSE=accept
 
 branches:
   only:
@@ -22,10 +21,11 @@ env:
   - INSTANCE=default-amazonlinux
   - INSTANCE=default-centos-6
   - INSTANCE=default-centos-7
+  - INSTANCE=default-debian-8
   - INSTANCE=default-debian-9
-  - INSTANCE=default-debian-10
   - INSTANCE=default-fedora-latest
   - INSTANCE=default-opensuse-leap
+  - INSTANCE=default-ubuntu-1404
   - INSTANCE=default-ubuntu-1604
   - INSTANCE=default-ubuntu-1804
   - INSTANCE=default-ubuntu-1604 CHEF_VERSION=12.7.2
@@ -34,6 +34,8 @@ before_script:
   - sudo iptables -L DOCKER || ( echo "DOCKER iptables chain missing" ; sudo iptables -N DOCKER )
   - eval "$(chef shell-init bash)"
   - chef --version
+  - cookstyle --version
+  - foodcritic --version
 
 script: KITCHEN_LOCAL_YAML=kitchen.dokken.yml CHEF_VERSION=${CHEF_VERSION} kitchen verify ${INSTANCE}
 
@@ -41,6 +43,4 @@ matrix:
   include:
     - script:
       - chef exec delivery local all
-      env:
-        - UNIT_AND_LINT=1
-        - CHEF_LICENSE=accept
+      env: UNIT_AND_LINT=1

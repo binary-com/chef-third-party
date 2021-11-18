@@ -5,24 +5,6 @@ This file is used to list changes made in each version of the etcd cookbook.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
-
-## 7.0.2 - *2021-08-30*
-
-- Standardise files with files in sous-chefs/repo-management
-
-## 7.0.1 - *2021-06-01*
-
-- Standardise files with files in sous-chefs/repo-management
-
-## 7.0.0 - *2021-05-12*
-
-- Chef 17 compatibility fixes
-  - Set `unified_mode true` on all resources
-  - Exclude `install_method` and `service_manager` methods when using `copy_properties_from`
-- Require Chef 15.3+
-- Remove backported `copy_properties_from` method library
-
 ## 6.3.0 - *2020-12-07*
 
 - Add configuration flag [listen-metrics-urls](https://github.com/etcd-io/etcd/blob/master/Documentation/op-guide/configuration.md#--listen-metrics-urls)

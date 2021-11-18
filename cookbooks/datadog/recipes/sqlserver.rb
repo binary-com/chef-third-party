@@ -1,4 +1,4 @@
-include_recipe '::dd-agent'
+include_recipe 'datadog::dd-agent'
 
 # see example configuration file here:
 # https://github.com/DataDog/integrations-core/blob/master/sqlserver/conf.yaml.example

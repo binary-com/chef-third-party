@@ -15,7 +15,6 @@
 # limitations under the License.
 #
 provides :mariadb_galera_configuration
-unified_mode true
 
 include MariaDBCookbook::Helpers
 

@@ -17,10 +17,7 @@ describe file(AGENT_CONFIG) do
     expected = {
       'instances' => [
         {
-          'hosts' => 'localhost:27017',
-          'username' => 'someuser',
-          'password' => 'somepassword',
-          'timeout' => 30
+          'server' => 'mongodb://localhost:27017'
         }
       ],
       'logs' => nil,

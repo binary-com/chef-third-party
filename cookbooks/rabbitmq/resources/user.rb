@@ -3,8 +3,7 @@
 # Cookbook Name:: rabbitmq
 # Resource:: user
 #
-# Copyright 2011-2019, Chef Software, Inc.
-# Copyright 2019-2021, VMware, Inc or its affiliates.
+# Copyright 2011-2013, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,8 +17,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-unified_mode true if respond_to?(:unified_mode)
 
 actions :add, :delete, :set_permissions, :clear_permissions, :set_tags, :clear_tags, :change_password
 default_action :add

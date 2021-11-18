@@ -2,44 +2,6 @@
 
 This file is used to list changes made in each version of the selinux cookbook.
 
-## Unreleased
-
-## 6.0.0 - *2021-09-02*
-
-- Import `selinux_policy` resources into this cookbook (`_fcontext`, `_permissive`, and `_port`)
-  - `selinux_policy_module` not imported since it is a duplicate of `selinux_module`
-
-### Deprecations
-
-- `selinux_fcontext` action `addormodify` renamed to `manage`
-- `selinux_port` action `addormodify` renamed to `manage`
-
-## 5.1.1 - *2021-08-30*
-
-- Standardise files with files in sous-chefs/repo-management
-
-## 5.1.0 - *2021-08-21*
-
-- Fix `selinux_install` on Alma Linux / Oracle Linux
-
-## 5.0.0 - *2021-08-10*
-
-### Note: With version 5.0.0 the default recipe has been removed
-
-- Major refactoring
-- Restore support for Debian based distros
-- All resources now use unified_mode
-- Added selinux_boolean resource
-- Remove attributes and default recipe
-  - Replaced with a set of bare recipes for the three selinux states
-- Add automatic restart function to `selinux_state` resource
-
-## 4.0.0 - *2021-07-21*
-
-- Sous Chefs adoption
-- Enable `unified_mode` for Chef 17 compatibility
-- Update test platforms
-
 ## 3.1.1 (2020-09-29)
 
 - Move `default['selinux']['status']` attribute to `default['selinux']['state']` to avoid conflicts with Ohai in Chef Infra Client 16 - [@shoekstra](https://github.com/shoekstra)

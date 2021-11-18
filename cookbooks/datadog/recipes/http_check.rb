@@ -1,4 +1,4 @@
-include_recipe '::dd-agent'
+include_recipe 'datadog::dd-agent'
 
 # Build a data structure with configuration.
 # @see http://docs.datadoghq.com/guides/network_checks/
@@ -11,6 +11,7 @@ include_recipe '::dd-agent'
 #       'content_match' => 'string to match',
 #       'include_content' => true,
 #       'collect_response_time' => true,
+#       'skip_event' => true,
 #       'tags' => [
 #        'myApp',
 #        'serviceName'

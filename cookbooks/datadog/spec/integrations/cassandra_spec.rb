@@ -387,12 +387,8 @@ describe 'datadog::cassandra' do
             domain: org.apache.cassandra.metrics
             type: ClientRequest
             name:
-              - Failures
               - Latency
-              - Timeouts
-              - Unavailables
             attribute:
-              - Count
               - 75thPercentile
               - 95thPercentile
               - OneMinuteRate

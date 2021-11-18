@@ -1,5 +1,5 @@
 #
-# Cookbook:: datadog
+# Cookbook Name:: datadog
 # Recipe:: windows_service
 #
 
@@ -53,7 +53,7 @@
 #   ]
 # }
 
-include_recipe '::dd-agent'
+include_recipe 'datadog::dd-agent'
 
 datadog_monitor 'windows_service' do
   instances node['datadog']['windows_service']['instances']

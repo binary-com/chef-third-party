@@ -1,6 +1,7 @@
 *.rbc
 .config
 InstalledFiles
+lib/bundler/man
 pkg
 test/tmp
 test/version_tmp
@@ -15,11 +16,11 @@ _Store
 *.bk
 *.bkup
 
-# editor files
+# editor temp files
 .idea
 .*.sw[a-z]
 
-# ruby/bundler/rspec files
+# ruby/bundler files
 .ruby-version
 .ruby-gemset
 .rvmrc

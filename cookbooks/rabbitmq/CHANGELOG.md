@@ -1,84 +1,12 @@
 # Change Log
-## [v5.9.2](https://github.com/rabbitmq/chef-cookbook/tree/v5.9.2) (in development)
 
-No changes yet.
-
-## [v5.9.1](https://github.com/rabbitmq/chef-cookbook/tree/v5.9.1) (2021-06-25)
-
- * `unified_mode` is now used only if provided by the Chef client.
-    This restores compatibility with Chef 14.
-
-    GitHub issue: [#577](https://github.com/rabbitmq/chef-cookbook/issues/577)
-
-
- * Change log corrections
-
-## [v5.9.0](https://github.com/rabbitmq/chef-cookbook/tree/v5.9.0) (2021-06-23)
-
-This release introduces **potentially breaking changes** due to a number of **significant changes in the RabbitMQ ecosystem**
-and beyond.
-
- * Switch from Bintray to [Cloudsmith](https://cloudsmith.io/~rabbitmq/repos/) for package provisioning.
-   Bintray has been permanently shut down.
-
-   GitHub issue: [#574](https://github.com/rabbitmq/chef-cookbook/pull/574)
-
- * RabbitMQ 3.7.x has been [entirely out of support since September 2020](https://www.rabbitmq.com/versions.html).
-   The package now provisions `3.8.17` by default instead of an unsupported version.
-   `3.8.x` series also address several CVEs.
-
-   GitHub issue: [#574](https://github.com/rabbitmq/chef-cookbook/pull/574)
-
- * This cookbook now can provision [Erlang 24](https://blog.rabbitmq.com/posts/2021/03/erlang-24-support-roadmap/) from Cloudsmith.
-
-   GitHub issue: [#574](https://github.com/rabbitmq/chef-cookbook/pull/574)
-
- * Support for Ubuntu versions prior to 16.04, Fedora prior to 31, Debian prior to Stretch
-   has been dropped as modern RabbitMQ and Erlang versions no longer support them
-   and assume OpenSSL 1.1 to be available.
-
-   Instead, integration tests now focus on more modern distributions such as Ubuntu 20.04 and 21.04,
-   CentOS Stream, Fedora 34, Debian 10 and 11.
-
-   GitHub issue: [#574](https://github.com/rabbitmq/chef-cookbook/pull/574)
-
-## [v5.8.5](https://github.com/rabbitmq/chef-cookbook/tree/v5.8.5) (2020-07-25)
-
- * Idempotency w.r.t. Ohai package state reloading.
-
-   Contributed by @Wing924 and @ramereth.
-
-   GitHub issue: [#554](https://github.com/rabbitmq/chef-cookbook/pull/554), [#562](https://github.com/rabbitmq/chef-cookbook/pull/562)
-
- * Chef 16 compatibility and cookbook style fixes.
-
-   Contributed by @tas50 and @ramereth.
-
-   GitHub issues: [#541](https://github.com/rabbitmq/chef-cookbook/pull/541), [#542](https://github.com/rabbitmq/chef-cookbook/pull/542), [#561](https://github.com/rabbitmq/chef-cookbook/pull/561)
-
- * Cluster status output parser failed with the new RabbitMQ 3.8-specific output format
-
-   Contributed by @DecoyJoe.
-
-   GitHub issue: [#560](https://github.com/rabbitmq/chef-cookbook/pull/560)
+## [v5.8.5](https://github.com/rabbitmq/chef-cookbook/tree/v5.8.5) (under development)
 
  * User tags are now set unconditionally by the `users` recipe.
 
    Contributed by @tophercullen.
 
    GitHub issue: [#538](https://github.com/rabbitmq/chef-cookbook/issues/538)
-
- * Compression enabled for logrotate.
-
-   Contributed by @drewhammond.
-
-   GitHub issue: [#557](https://github.com/rabbitmq/chef-cookbook/pull/557)
-
- * `File` is scoped explicitly to disambiguate.
-
-   Contributed by @tas50.
-
-   GitHub issue: [#542](https://github.com/rabbitmq/chef-cookbook/pull/542)
 
 
 ## [v5.8.4](https://github.com/rabbitmq/chef-cookbook/tree/v5.8.4) (2019-08-26)
@@ -223,7 +151,7 @@ and beyond.
       rabbitmq_erlang_apt_repository_on_bintray 'rabbitmq_erlang_repo_on_bintray' do
         distribution node['lsb']['codename'] unless node['lsb'].nil?
         # See https://www.rabbitmq.com/install-debian.html
-        components ['erlang-22.x']
+        components ['erlang-21.x']
 
         action :add
       end
@@ -244,8 +172,11 @@ and beyond.
       ``` ruby
       rabbitmq_erlang_package_from_bintray 'rabbitmq_erlang' do
         # This package version assumes a Debian-based distribution.
-        # On RHEL/CentOS/Fedora it would be '22.3.4.4'
-        version '1:22.3.4.4-1'
+        # On RHEL/CentOS/Fedora it would be '21.3.8.16'
+        version '1:21.3.8.16-1'
+
+        # provision a HiPE-enabled Erlang runtime if available
+        use_hipe true
 
         action :install
       end
