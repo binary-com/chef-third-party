@@ -36,7 +36,8 @@ This cookbook is maintained by the Sous Chefs. The Sous Chefs are a community of
 
 ### Chef version
 
-Chef Infra Client >= 15.3
+Since version 2.0.0 of this cookbook, chef 13 support is dropped. New chef 14 is the minimum version tested.
+If you can't upgrade your chef 13, please use the version 1.5.4 or earlier of this cookbook.
 
 ## Upgrading
 

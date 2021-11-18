@@ -1,20 +1,13 @@
-unified_mode true
+# frozen_string_literal: true
 
 PrimaryZone = Struct.new(:name, :options, :view, :file_name)
 
-property :bind_config, String,
-          default: 'default',
-          description: 'Name of the bind_config resource to notify actions on'
-property :file_name, String,
-          name_property: true,
-          description: 'Name of the file to store the zone in'
-property :options, Array,
-          default: [],
-          description: 'Array of option strings'
-property :view, String,
-          description: 'Name of the view to configure the zone in'
-property :zone_name, String,
-          description: 'The zone name of the zone'
+property :bind_config, String, default: 'default'
+property :options, Array, default: []
+property :view, String
+
+property :file_name, String, name_property: true
+property :zone_name, String
 
 action :create do
   do_create action

@@ -1,4 +1,4 @@
-include_recipe '::dd-agent'
+include_recipe 'datadog::dd-agent'
 
 # Monitor fluentd
 #

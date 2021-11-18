@@ -2,7 +2,6 @@ require 'etcd'
 
 resource_name :etcd_key
 provides :etcd_key
-unified_mode true
 
 property :key, String, name_property: true, desired_state: false
 property :value, String

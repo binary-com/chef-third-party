@@ -2,12 +2,7 @@ require 'spec_helper'
 
 describe 'chef-client::config' do
   cached(:chef_run) do
-    ChefSpec::ServerRunner.new(platform: 'ubuntu', version: '18.04').converge(described_recipe)
-  end
-
-  it 'does not accept the chef license by default' do
-    expect(chef_run).to render_file('/etc/chef/client.rb') \
-      .with_content { |content| expect(content).to_not match(/chef_license/) }
+    ChefSpec::ServerRunner.new(platform: 'ubuntu', version: '16.04').converge(described_recipe)
   end
 
   it 'contains the default chef_server_url setting' do
@@ -22,7 +17,7 @@ describe 'chef-client::config' do
 
   [
     '/var/run/chef',
-    # '/var/cache/chef',
+    '/var/cache/chef',
     '/var/lib/chef',
     '/var/log/chef',
     '/etc/chef',
@@ -45,10 +40,8 @@ describe 'chef-client::config' do
 
   context 'Custom Attributes' do
     cached(:chef_run) do
-      ChefSpec::ServerRunner.new(platform: 'ubuntu', version: '18.04') do |node|
-        node.normal['chef_client']['chef_license'] = 'accept-no-persist'
+      ChefSpec::ServerRunner.new(platform: 'ubuntu', version: '16.04') do |node|
         node.normal['ohai']['disabled_plugins'] = [:passwd, 'dmi']
-        node.normal['ohai']['optional_plugins'] = [:mdadm]
         node.normal['ohai']['plugin_path'] = '/etc/chef/ohai_plugins'
         node.normal['chef_client']['config']['log_level'] = ':debug'
         node.normal['chef_client']['config']['log_location'] = '/dev/null'
@@ -64,19 +57,9 @@ describe 'chef-client::config' do
       end.converge(described_recipe)
     end
 
-    it 'accepts the chef license' do
-      expect(chef_run).to render_file('/etc/chef/client.rb') \
-        .with_content(/chef_license "accept-no-persist"/)
-    end
-
     it 'disables ohai 6 & 7 plugins' do
       expect(chef_run).to render_file('/etc/chef/client.rb') \
         .with_content(/ohai.disabled_plugins =\s+\[:passwd,"dmi"\]/)
-    end
-
-    it 'enables ohai 6 & 7 plugins' do
-      expect(chef_run).to render_file('/etc/chef/client.rb') \
-        .with_content(/ohai.optional_plugins =\s+\[:mdadm\]/)
     end
 
     it 'specifies an ohai plugin path' do
@@ -128,7 +111,7 @@ describe 'chef-client::config' do
 
   context 'STDOUT Log Location' do
     cached(:chef_run) do
-      ChefSpec::ServerRunner.new(platform: 'ubuntu', version: '18.04') do |node|
+      ChefSpec::ServerRunner.new(platform: 'ubuntu', version: '16.04') do |node|
         node.normal['chef_client']['config']['log_level'] = ':debug'
         node.normal['chef_client']['config']['log_location'] = 'STDOUT'
         node.normal['chef_client']['config']['ssl_verify_mode'] = ':verify_none'
@@ -143,7 +126,7 @@ describe 'chef-client::config' do
 
   context 'Symbol-ized Log Location' do
     cached(:chef_run) do
-      ChefSpec::ServerRunner.new(platform: 'ubuntu', version: '18.04') do |node|
+      ChefSpec::ServerRunner.new(platform: 'ubuntu', version: '16.04') do |node|
         node.normal['chef_client']['config']['log_level'] = ':debug'
         node.normal['chef_client']['config']['log_location'] = :syslog
         node.normal['chef_client']['config']['ssl_verify_mode'] = ':verify_none'
@@ -153,39 +136,6 @@ describe 'chef-client::config' do
     it 'renders log_location as a symbol' do
       expect(chef_run).to render_file('/etc/chef/client.rb') \
         .with_content(/^log_location :syslog$/)
-    end
-  end
-
-  context 'Stringy Symbol-ized Log Location' do
-    # use let instead of cached because we're going to change an attribute
-    let(:chef_run) do
-      ChefSpec::ServerRunner.new(platform: 'ubuntu', version: '16.04') do |node|
-        node.normal['chef_client']['config']['log_level'] = ':debug'
-        node.normal['chef_client']['config']['log_location'] = log_location
-        node.normal['chef_client']['config']['ssl_verify_mode'] = ':verify_none'
-      end.converge(described_recipe)
-    end
-
-    %w(:syslog syslog).each do |string|
-      context "with #{string}" do
-        let(:log_location) { string }
-
-        it 'renders log_location as a symbol' do
-          expect(chef_run).to render_file('/etc/chef/client.rb') \
-            .with_content(/^log_location :syslog$/)
-        end
-      end
-    end
-
-    %w(:win_evt win_evt).each do |string|
-      context "with #{string}" do
-        let(:log_location) { string }
-
-        it 'renders log_location as a symbol' do
-          expect(chef_run).to render_file('/etc/chef/client.rb') \
-            .with_content(/^log_location :win_evt$/)
-        end
-      end
     end
   end
 end

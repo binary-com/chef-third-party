@@ -1,8 +1,8 @@
 #
-# Cookbook:: sshd
+# Cookbook Name:: sshd
 # Library:: helpers
 #
-# Copyright:: 2012, Chris Aumann
+# Copyright 2012, Chris Aumann
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,14 +35,12 @@ module Sshd
       # Generate the configuration file.
       # Sort the hash, so Chef doesn't restart if nothing changed but the order
       config.sort.each do |e|
-        key = e[0]
-        value = e[1]
+        key, value = e[0], e[1]
 
         # Hashes are conditional blocks, which have to be placed at the end of the file
         if value.is_a? Hash
           value.sort.each do |se|
-            k = se[0]
-            v = se[1]
+            k, v = se[0], se[1]
             conditional_blocks << "#{key} #{k}\n"
             Array(v).each { |x, y| conditional_blocks << "    #{x} #{y}\n" }
           end

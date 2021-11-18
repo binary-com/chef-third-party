@@ -1,5 +1,5 @@
 # Author:: Joshua Timberman <joshua@chef.io>
-# Copyright:: 2009-2019, Chef Software, Inc.
+# Copyright:: 2009-2017, Chef Software, Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,7 @@ default['postfix']['relayhost_role'] = 'relayhost'
 default['postfix']['relayhost_port'] = '25'
 default['postfix']['multi_environment_relay'] = false
 default['postfix']['use_procmail'] = false
-default['postfix']['use_alias_maps'] = platform?('freebsd')
+default['postfix']['use_alias_maps'] = (node['platform'] == 'freebsd')
 default['postfix']['use_transport_maps'] = false
 default['postfix']['use_access_maps'] = false
 default['postfix']['use_virtual_aliases'] = false
@@ -88,10 +88,6 @@ default['postfix']['main']['myorigin'] = '$myhostname'
 default['postfix']['main']['mydestination'] = [node['postfix']['main']['myhostname'], node['hostname'], 'localhost.localdomain', 'localhost'].compact
 default['postfix']['main']['smtpd_use_tls'] = 'yes'
 default['postfix']['main']['smtp_use_tls'] = 'yes'
-default['postfix']['main']['smtpd_tls_mandatory_protocols'] = '!SSLv2,!SSLv3'
-default['postfix']['main']['smtp_tls_mandatory_protocols'] = '!SSLv2,!SSLv3'
-default['postfix']['main']['smtpd_tls_protocols'] = '!SSLv2,!SSLv3'
-default['postfix']['main']['smtp_tls_protocols'] = '!SSLv2,!SSLv3'
 default['postfix']['main']['smtp_sasl_auth_enable'] = 'no'
 default['postfix']['main']['mailbox_size_limit'] = 0
 default['postfix']['main']['mynetworks'] = nil
@@ -109,9 +105,6 @@ when 'rhel'
   default['postfix']['cafile'] = '/etc/pki/tls/cert.pem'
 when 'amazon'
   default['postfix']['cafile'] = '/etc/pki/tls/cert.pem'
-when 'suse'
-  default['postfix']['main']['setgid_group'] = 'maildrop'
-  default['postfix']['main']['daemon_directory'] = '/usr/lib/postfix/bin'
 else
   default['postfix']['cafile'] = "#{node['postfix']['conf_dir']}/cacert.pem"
 end
@@ -387,7 +380,8 @@ default['postfix']['master']['bsmtp']['command'] = 'pipe'
 default['postfix']['master']['bsmtp']['args'] = ['flags=Fq. user=foo argv=/usr/local/sbin/bsmtp -f $sender $nexthop $recipient']
 
 # OS Aliases
-default['postfix']['aliases'] = if platform?('freebsd')
+default['postfix']['aliases'] = case node['platform']
+                                when 'freebsd'
                                   {
                                     'MAILER-DAEMON' => 'postmaster',
                                     'bin' => 'root',

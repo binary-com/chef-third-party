@@ -3,7 +3,7 @@
 # Cookbook:: git
 # Attributes:: default
 #
-# Copyright:: 2008-2019, Chef Software, Inc.
+# Copyright:: 2008-2016, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if platform_family?('windows')
+case node['platform_family']
+when 'windows'
   default['git']['version'] = '2.8.1'
   if node['kernel']['machine'] == 'x86_64'
     default['git']['architecture'] = '64'

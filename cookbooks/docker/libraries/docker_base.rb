@@ -127,21 +127,10 @@ module DockerCookbook
     alias_method :tlskey, :tls_server_key
     alias_method :tlsverify, :tls_verify
 
-    action_class do
+    declare_action_class.class_eval do
+      # https://github.com/docker/docker/blob/4fcb9ac40ce33c4d6e08d5669af6be5e076e2574/registry/auth.go#L231
       def parse_registry_host(val)
-        # example values for val, can be prefixed with http(s):// :
-        #   image                    (=> Docker Hub)
-        #   organization/image       (=> Docker Hub)
-        #   domain.ext/image         (=> 3rd party registry)
-        #   domain.ext/.../image     (=> 3rd party registry)
-        #
-        first_part = val.sub(%r{https?://}, '').split('/').first
-
-        # looks like a host name of a custom docker registry
-        return first_part if first_part.include?('.')
-
-        # default host
-        'index.docker.io'
+        val.sub(%r{https?://}, '').split('/').first
       end
     end
   end

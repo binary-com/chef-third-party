@@ -1,3 +1,4 @@
 docker_installation_tarball 'default' do
-  version '20.10.1'
+  version '19.03.5'
+  action :create
 end

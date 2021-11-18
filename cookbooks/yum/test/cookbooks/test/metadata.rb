@@ -1,3 +1,0 @@
-name 'test'
-
-depends 'yum'

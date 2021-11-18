@@ -12,7 +12,9 @@ Chef::Log.debug("Using chef-client binary at #{client_bin}")
 node.default['chef_client']['bin'] = client_bin
 create_chef_directories
 
-if platform_family?('freebsd')
+case node['platform_family']
+when 'freebsd'
+
   directory '/etc/rc.conf.d' do
     owner 'root'
     group 'wheel'
@@ -21,7 +23,6 @@ if platform_family?('freebsd')
   end
 
   template '/usr/local/etc/rc.d/chef-client' do
-    source 'freebsd/chef-client.erb'
     owner 'root'
     group 'wheel'
     variables client_bin: client_bin
@@ -34,7 +35,6 @@ if platform_family?('freebsd')
   end
 
   template '/etc/rc.conf.d/chef' do
-    source 'freebsd/chef.erb'
     mode '0644'
     notifies :start, 'service[chef-client]', :delayed
   end

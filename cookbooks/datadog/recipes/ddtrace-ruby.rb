@@ -1,5 +1,5 @@
 #
-# Cookbook:: datadog
+# Cookbook Name:: datadog
 # Recipe:: ddtrace-ruby.rb
 #
 

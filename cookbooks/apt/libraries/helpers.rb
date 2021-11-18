@@ -2,7 +2,7 @@
 # Cookbook:: apt
 # Library:: helpers
 #
-# Copyright:: 2013-2019, Chef Software, Inc.
+# Copyright:: 2013-2017, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,13 +24,13 @@ module Apt
     #
     # @return [Boolean]
     def apt_installed?
-      !apt_which('apt-get').nil?
+      !which('apt-get').nil?
     end
 
     # Finds a command in $PATH
     #
     # @return [String, nil]
-    def apt_which(cmd)
+    def which(cmd)
       ENV['PATH'] = '' if ENV['PATH'].nil?
       paths = (ENV['PATH'].split(::File::PATH_SEPARATOR) + %w(/bin /usr/bin /sbin /usr/sbin))
 
@@ -44,5 +44,6 @@ module Apt
   end
 end
 
-Chef::DSL::Recipe.include ::Apt::Helpers
-Chef::Resource.include ::Apt::Helpers
+Chef::Recipe.send(:include, ::Apt::Helpers)
+Chef::Resource.send(:include, ::Apt::Helpers)
+Chef::Provider.send(:include, ::Apt::Helpers)

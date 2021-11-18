@@ -3,7 +3,7 @@
 # Resource:: updater
 #
 # Copyright:: 2016-2018, Will Jordan
-# Copyright:: 2016-2020, Chef Software Inc.
+# Copyright:: 2016-2018, Chef Software Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 
 # NOTE: this cookbook uses Chef-11 backwards compatible syntax to support
 # upgrades from Chef 11.x and this pattern should not be copied for any modern
-# cookbook. This is a poor example cookbook of how to write Chef.
+# cookbook.  This is a poor example cookbook of how to write Chef.
 
 provides :chef_client_updater
 
@@ -43,7 +43,7 @@ attribute :install_timeout, kind_of: Integer, default: 600
 # Lowering upgrade_delay limit is not recommended.
 attribute :upgrade_delay, kind_of: Integer, default: 60
 attribute :product_name, kind_of: String, default: 'chef'
-attribute :rubygems_url, kind_of: String, default: lazy { Chef::Config[:rubygems_url] }
+attribute :rubygems_url, kind_of: String
 attribute :handle_zip_download_url, kind_of: String, default: 'https://download.sysinternals.com/files/Handle.zip'
 attribute :event_log_service_restart, kind_of: [TrueClass, FalseClass], default: true
 attribute :install_command_options, kind_of: Hash, default: {}

@@ -3,7 +3,7 @@
 # Cookbook:: postfix
 # Recipe:: sasl_auth
 #
-# Copyright:: 2009-2019, Chef Software, Inc.
+# Copyright:: 2009-2017, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +28,11 @@ case node['platform_family']
 when 'debian'
   sasl_pkgs = %w(libsasl2-2 libsasl2-modules ca-certificates)
 when 'rhel'
-  sasl_pkgs = %w(cyrus-sasl cyrus-sasl-plain ca-certificates)
+  sasl_pkgs = if node['platform_version'].to_i < 6
+                %w(cyrus-sasl cyrus-sasl-plain openssl)
+              else
+                %w(cyrus-sasl cyrus-sasl-plain ca-certificates)
+              end
 when 'amazon'
   sasl_pkgs = %w(cyrus-sasl cyrus-sasl-plain ca-certificates)
 when 'fedora'

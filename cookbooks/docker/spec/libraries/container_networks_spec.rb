@@ -1,18 +1,20 @@
 require 'spec_helper'
 require 'docker'
-require_relative '../../libraries/helpers_network'
+require_relative '../../libraries/docker_base'
+require_relative '../../libraries/docker_container'
 
-describe 'docker_container' do
-  step_into :docker_container
-  platform 'ubuntu'
+describe DockerCookbook::DockerContainer do
+  let(:resource) { DockerCookbook::DockerContainer.new('hello_world') }
+
+  it 'has a default action of [:run]' do
+    expect(resource.action).to eql([:run])
+  end
 
   describe 'gets ip_address_from_container_networks' do
-    include DockerCookbook::DockerHelpers::Network
     let(:options) { { 'id' => rand(10_000).to_s } }
     subject do
       Docker::Container.send(:new, Docker.connection, options)
     end
-
     # https://docs.docker.com/engine/api/version-history/#v121-api-changes
     context 'when docker API < 1.21' do
       let(:ip_address) { '10.0.0.1' }
@@ -22,14 +24,12 @@ describe 'docker_container' do
           'IPAddress' => ip_address,
         }
       end
-
       it 'gets ip_address as nil' do
-        actual = ip_address_from_container_networks(subject)
-        expect { ip_address_from_container_networks(subject) }.not_to raise_error
+        actual = resource.ip_address_from_container_networks(subject)
+        expect { resource.ip_address_from_container_networks(subject) }.not_to raise_error
         expect(actual).to eq(nil)
       end
     end
-
     context 'when docker API > 1.21' do
       let(:ip_address) { '10.0.0.1' }
       let(:options) do
@@ -46,9 +46,8 @@ describe 'docker_container' do
           },
         }
       end
-
       it 'gets ip_address' do
-        actual = ip_address_from_container_networks(subject)
+        actual = resource.ip_address_from_container_networks(subject)
         expect(actual).to eq(ip_address)
       end
     end

@@ -1,9 +1,7 @@
----
 driver:
   name: dokken
-  privileged: true # because Docker and SystemD
+  privileged: true # because Docker and SystemD/Upstart
   chef_version: <%= ENV['CHEF_VERSION'] || 'current' %>
-  chef_license: accept-no-persist
 
 transport:
   name: dokken
@@ -11,7 +9,6 @@ transport:
 provisioner:
   name: dokken
   deprecations_as_errors: true
-  chef_license: accept-no-persist
 
 verifier:
   name: inspec
@@ -27,16 +24,16 @@ platforms:
     image: dokken/amazonlinux-2
     pid_one_command: /usr/lib/systemd/systemd
 
-- name: debian-9
+- name: debian-8
   driver:
-    image: dokken/debian-9
+    image: dokken/debian-8
     pid_one_command: /bin/systemd
     intermediate_instructions:
       - RUN /usr/bin/apt-get update
 
-- name: debian-10
+- name: debian-9
   driver:
-    image: dokken/debian-10
+    image: dokken/debian-9
     pid_one_command: /bin/systemd
     intermediate_instructions:
       - RUN /usr/bin/apt-get update
@@ -49,26 +46,6 @@ platforms:
 - name: centos-7
   driver:
     image: dokken/centos-7
-    pid_one_command: /usr/lib/systemd/systemd
-
-- name: centos-8
-  driver:
-    image: dokken/centos-8
-    pid_one_command: /usr/lib/systemd/systemd
-
-- name: oraclelinux-6
-  driver:
-    image: dokken/oraclelinux-6
-    pid_one_command: /sbin/init
-
-- name: oraclelinux-7
-  driver:
-    image: dokken/oraclelinux-7
-    pid_one_command: /usr/lib/systemd/systemd
-
-- name: oraclelinux-8
-  driver:
-    image: dokken/oraclelinux-8
     pid_one_command: /usr/lib/systemd/systemd
 
 - name: fedora-latest
@@ -90,50 +67,36 @@ platforms:
     intermediate_instructions:
       - RUN /usr/bin/apt-get update
 
-- name: ubuntu-20.04
+- name: opensuse-leap
   driver:
-    image: dokken/ubuntu-20.04
-    pid_one_command: /bin/systemd
-    intermediate_instructions:
-      - RUN /usr/bin/apt-get update
-
-- name: opensuse-leap-15
-  driver:
-    image: dokken/opensuse-leap-15
+    image: dokken/opensuse-leap-42
     pid_one_command: /bin/systemd
 
 suites:
-- name: service-init
+- name: service_init
   run_list:
     - recipe[test::service]
-  includes: ["oraclelinux-6", "amazonlinux", "centos-6"]
+  includes: ["centos-6", "amazonlinux"]
 
-- name: service-systemd
+- name: service_systemd
   run_list:
     - recipe[test::service]
-  excludes: ["oraclelinux-6", "amazonlinux", "centos-6"]
+  includes: ["centos-7", "debian-8", "debian-9", "opensuse-leap", "fedora-latest", "ubuntu-16.04", "amazonlinux-2"]
 
-- name: systemd-timer-resource
+- name: timer_systemd
   run_list:
-    - recipe[test::systemd_timer_resource]
-  excludes: ["oraclelinux-6", "amazonlinux", "centos-6"]
-
-- name: timer-systemd
-  run_list:
-    - recipe[chef-client::systemd_service]
+  - recipe[chef-client::systemd_service]
   attributes:
     chef_client:
+      interval: 30
+      splay: 5
       systemd:
         timer: true
-  excludes: ["oraclelinux-6", "amazonlinux", "centos-6"]
+  includes: ["centos-7", "debian-8", "debian-9", "opensuse-leap", "fedora-latest", "ubuntu-16.04", "amazonlinux-2"]
 
 - name: cron
   run_list:
     - recipe[test::cron]
-
-- name: cron-resource
-  run_list:
-    - recipe[test::cron_resource]
 
 - name: config
   run_list:

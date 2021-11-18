@@ -1,8 +1,8 @@
 #
-# Cookbook:: sshd
+# Cookbook Name:: sshd
 # Spec:: default
 #
-# Copyright:: (c) 2016 The Authors, All Rights Reserved.
+# Copyright (c) 2016 The Authors, All Rights Reserved.
 
 require 'spec_helper'
 
@@ -28,7 +28,7 @@ describe 'sshd::default' do
     end
 
     it 'executes custom resource' do
-      expect(chef_run).to create_sshd_server('/etc/ssh/sshd_config')
+      expect(chef_run).to create_openssh_server('/etc/ssh/sshd_config')
     end
   end
 end

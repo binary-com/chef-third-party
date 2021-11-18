@@ -2,7 +2,7 @@
 # Cookbook:: postfix
 # Recipe:: client
 #
-# Copyright:: 2009-2019, Chef Software, Inc.
+# Copyright:: 2009-2017, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,6 +39,6 @@ else
   relayhost = results.map { |n| n['ipaddress'] }.first
 end
 
-node.default['postfix']['main']['relayhost'] = "[#{relayhost}]#{relayhost_port}"
+node.normal['postfix']['main']['relayhost'] = "[#{relayhost}]#{relayhost_port}"
 
 include_recipe 'postfix'

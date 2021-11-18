@@ -9,12 +9,12 @@ node.default['chef_client']['bin'] = client_bin
 create_chef_directories
 
 dist_dir, conf_dir, env_file = value_for_platform_family(
-  ['amazon'] => %w(redhat sysconfig chef-client),
-  ['fedora'] => %w(fedora sysconfig chef-client),
-  ['rhel'] => %w(redhat sysconfig chef-client),
-  ['suse'] => %w(redhat sysconfig chef-client),
-  ['debian'] => %w(debian default chef-client),
-  ['clearlinux'] => %w(clearlinux chef chef-client)
+  ['amazon'] => ['redhat', 'sysconfig', 'chef-client'],
+  ['fedora'] => ['fedora', 'sysconfig', 'chef-client'],
+  ['rhel'] => ['redhat', 'sysconfig', 'chef-client'],
+  ['suse'] => ['redhat', 'sysconfig', 'chef-client'],
+  ['debian'] => ['debian', 'default', 'chef-client'],
+  ['clearlinux'] => ['clearlinux', 'chef', 'chef-client']
 )
 
 timer = node['chef_client']['systemd']['timer']
@@ -26,7 +26,7 @@ exec_options = if timer
                end
 
 env_file = template "/etc/#{conf_dir}/#{env_file}" do
-  source "default/#{dist_dir}/#{conf_dir}/chef-client.erb"
+  source "#{dist_dir}/#{conf_dir}/chef-client.erb"
   mode '0644'
   notifies :restart, 'service[chef-client]', :delayed unless timer
 end
@@ -41,7 +41,7 @@ end
 
 service_unit_content = {
   'Unit' => {
-    'Description' => 'Chef Infra Client',
+    'Description' => 'Chef Client daemon',
     'After' => 'network.target auditd.service',
   },
   'Service' => {
@@ -55,9 +55,6 @@ service_unit_content = {
   'Install' => { 'WantedBy' => 'multi-user.target' },
 }
 
-# add "daemon to the description when we're creating a timer unit
-service_unit_content['Unit']['Description'] << ' daemon' unless timer
-
 service_unit_content['Service'].delete('Restart') if timer
 
 if node['chef_client']['systemd']['timeout']
@@ -65,15 +62,15 @@ if node['chef_client']['systemd']['timeout']
     node['chef_client']['systemd']['timeout']
 end
 
-if node['chef_client']['systemd']['killmode']
-  service_unit_content['Service']['KillMode'] =
-    node['chef_client']['systemd']['killmode']
-end
-
 systemd_unit 'chef-client.service' do
   content service_unit_content
   action :create
   notifies(:restart, 'service[chef-client]', :delayed) unless timer
+end
+
+service 'chef-client' do
+  supports status: true, restart: true
+  action(timer ? [:disable, :stop] : [:enable, :start])
 end
 
 systemd_unit 'chef-client.timer' do
@@ -87,10 +84,5 @@ systemd_unit 'chef-client.timer' do
     }
   )
   action(timer ? [:create, :enable, :start] : [:stop, :disable, :delete])
-  notifies :restart, to_s, :delayed unless timer
-end
-
-service 'chef-client' do
-  supports status: true, restart: true
-  action(timer ? [:disable, :stop] : [:enable, :start])
+  notifies :restart, to_s, :delayed
 end

@@ -3,36 +3,6 @@ sshd CHANGELOG
 
 This file is used to list changes made in each version of the sshd cookbook.
 
-3.1.0
------
-
-- Add Arch and Amazon linux platforms. Replace foodcritic in Gemfile in favor of cookstyle - [@jhboricua](https://github.com/jhboricua)
-
-
-3.0.0
------
-
-- Rename resource from `openssh_server` to `sshd_server`
-- Add platforms: centos-8 debian-10 and ubuntu-20
-- Apply cookstyle linting
-
-```ruby
-# Old notation
-sshd_server '/etc/sshd_config' do
-  Port 1234
-  X11Forward 'no'
-end
-
-# New notation
-sshd_server '/etc/sshd_config' do
-  sshd_config(
-    Port: 1234,
-    X11Forward: 'no'
-  )
-end
-```
-
-
 2.0.0
 -----
 
@@ -44,7 +14,7 @@ end
 
 ```ruby
 # Old notation
-open_server '/etc/sshd_config' do
+openssh_server '/etc/sshd_config' do
   Port 1234
   X11Forward 'no'
 end

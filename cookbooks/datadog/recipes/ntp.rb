@@ -1,4 +1,4 @@
-include_recipe '::dd-agent'
+include_recipe 'datadog::dd-agent'
 
 # Build a data structure with configuration.
 # @note NTP check is enabled by default since datadog-agent 5.3.0.

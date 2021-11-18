@@ -1,8 +1,8 @@
 #
-# Cookbook:: chef_client_updater
+# Cookbook::  chef_client_updater
 # Attributes:: default
 #
-# Copyright:: 2016-2020, Chef Software Inc.
+# Copyright:: 2016-2018, Chef Software Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ default['chef_client_updater']['checksum'] = nil
 # Defaults to 'C:/opscode/chef' on Windows and '/opt/chef' for everything else.
 default['chef_client_updater']['chef_install_path'] = nil
 
-# delay for triggering Chef Infra Client upgrade in seconds
+# delay for triggering Chef client upgrade in seconds
 default['chef_client_updater']['upgrade_delay'] = nil
 
 # name of the product to upgrade (chef or chefdk)
@@ -59,4 +59,5 @@ default['chef_client']['chef_license'] = nil
 # Set this to use internal or custom rubygems server.
 # Use the same attribute from the chef-client cookbook to avoid duplication.
 # Example "http://localhost:8808/"
-default['chef_client_updater']['rubygems_url'] = Chef::Config[:rubygems_url]
+#
+default['chef_client']['config']['rubygems_url'] = nil

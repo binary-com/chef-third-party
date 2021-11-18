@@ -1,8 +1,8 @@
 #
-# Cookbook:: datadog
+# Cookbook Name:: datadog
 # Recipe:: system-probe
 #
-# Copyright:: 2011-2019, Datadog
+# Copyright 2011-2019, Datadog
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,27 +17,12 @@
 # limitations under the License.
 #
 
-is_windows = platform_family?('windows')
-
 # Set the correct agent startup action
-sysprobe_enabled = if is_windows
-                     node['datadog']['system_probe']['network_enabled']
-                   else
-                     node['datadog']['system_probe']['enabled'] || node['datadog']['system_probe']['network_enabled']
-                   end
-sysprobe_agent_start = sysprobe_enabled ? :start : :stop
+sysprobe_agent_start = node['datadog']['system_probe']['enabled'] ? :start : :stop
 
 #
 # Configures system-probe agent
-system_probe_config_file =
-  if is_windows
-    'C:/ProgramData/Datadog/system-probe.yaml'
-  else
-    '/etc/datadog-agent/system-probe.yaml'
-  end
-
-system_probe_config_file_exists = ::File.exist?(system_probe_config_file)
-
+system_probe_config_file = '/etc/datadog-agent/system-probe.yaml'
 template system_probe_config_file do
   extra_config = {}
   if node['datadog']['extra_config'] && node['datadog']['extra_config']['system_probe']
@@ -56,41 +41,27 @@ template system_probe_config_file do
     enable_conntrack: node['datadog']['system_probe']['enable_conntrack'],
     extra_config: extra_config
   )
-
-  if is_windows
-    owner 'Administrators'
-    rights :full_control, 'Administrators'
-    inherits false
-  else
-    owner 'root'
-    group 'dd-agent'
-    mode '640'
-  end
-
-  notifies :restart, 'service[datadog-agent-sysprobe]', :delayed if sysprobe_enabled
+  owner 'root'
+  group 'dd-agent'
+  mode '640'
+  notifies :restart, 'service[datadog-agent-sysprobe]', :delayed unless node['datadog']['system_probe']['enabled'] == false
   # since process-agent collects network info through system-probe, enabling system-probe should also restart process-agent
-  notifies :restart, 'service[datadog-agent]', :delayed if sysprobe_enabled
-
-  # System probe is not enabled and the file doesn't exists, don't create it
-  not_if { !sysprobe_enabled && !system_probe_config_file_exists }
+  notifies :restart, 'service[datadog-agent]', :delayed unless node['datadog']['system_probe']['enabled'] == false
 end
 
 # Common configuration
-service_provider = Chef::Datadog.service_provider(node)
-
-service_name = is_windows ? 'datadog-system-probe' : 'datadog-agent-sysprobe'
+service_provider = nil
+if Chef::Datadog.agent_major_version(node) > 5 &&
+   (((node['platform'] == 'amazon' || node['platform_family'] == 'amazon') && node['platform_version'].to_i != 2) ||
+    (node['platform'] == 'ubuntu' && node['platform_version'].to_f < 15.04) || # chef <11.14 doesn't use the correct service provider
+   (node['platform'] != 'amazon' && node['platform_family'] == 'rhel' && node['platform_version'].to_i < 7))
+  # use Upstart provider explicitly for Agent 6 on Amazon Linux < 2.0 and RHEL < 7
+  service_provider = Chef::Provider::Service::Upstart
+end
 
 service 'datadog-agent-sysprobe' do
-  service_name service_name
   action [sysprobe_agent_start]
   provider service_provider unless service_provider.nil?
-  if is_windows
-    supports :restart => true, :start => true, :stop => true
-    restart_command "powershell restart-service #{service_name} -Force"
-    stop_command "powershell stop-service #{service_name} -Force"
-  else
-    supports :restart => true, :status => true, :start => true, :stop => true
-  end
   supports :restart => true, :status => true, :start => true, :stop => true
-  subscribes :restart, "template[#{system_probe_config_file}]", :delayed if sysprobe_enabled
+  subscribes :restart, "template[#{system_probe_config_file}]", :delayed unless node['datadog']['system_probe']['enabled'] == false
 end

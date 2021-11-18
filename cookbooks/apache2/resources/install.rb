@@ -51,25 +51,6 @@ property :server_name, String,
          default: 'localhost',
          description: 'Sets the ServerName directive'
 
-property :server_signature, String,
-         equal_to: %w(On Off EMail),
-         default: 'On',
-         description: 'Sets the ServerSignature directive'
-
-property :server_tokens, String,
-         equal_to: %w(Major Minor Min Minimal Prod ProductOnly OS Full),
-         default: 'Prod',
-         description: 'Sets the ServerTokens directive'
-
-property :trace_enable, String,
-         equal_to: %w(On Off extended),
-         default: 'Off',
-         description: 'Sets the TraceEnable directive'
-
-property :default_charset, [String, Array],
-         coerce: proc { |p| p.is_a?(Array) ? p : Array(p) },
-         description: 'Sets the AddDefaultCharset directive for each element provided'
-
 property :httpd_t_timeout, Integer,
          default: 10,
          description: 'Service timeout setting. Defaults to 10 seconds'
@@ -127,9 +108,6 @@ property :timeout, [Integer, String],
          coerce: proc { |m| m.is_a?(Integer) ? m.to_s : m },
          default: 300,
          description: 'The number of seconds before receives and sends time out'
-
-property :envvars_additional_params, Hash,
-         description: 'Hash of additional environment variables to add to the envvars file'
 
 property :sysconfig_additional_params, Hash,
          description: 'Hash of additional sysconfig parameters to apply to the system'
@@ -287,10 +265,16 @@ action :install do
       pid_file: apache_pid_file,
       apache_locale: new_resource.apache_locale,
       status_url: new_resource.status_url,
-      run_dir: new_resource.run_dir,
-      envvars_additional_params: new_resource.envvars_additional_params
+      run_dir: new_resource.run_dir
     )
     only_if { platform_family?('debian') }
+  end
+
+  service 'apache2' do
+    service_name apache_platform_service_name
+    supports [:start, :restart, :reload, :status, :graceful, :reload]
+    action [:enable]
+    only_if "#{apachectl} -t", environment: { 'APACHE_LOG_DIR' => new_resource.log_dir }, timeout: new_resource.httpd_t_timeout
   end
 
   apache2_config 'apache2.conf' do
@@ -309,19 +293,8 @@ action :install do
     template_cookbook new_resource.template_cookbook
   end
 
-  apache2_conf 'security' do
-    options(
-      server_signature: new_resource.server_signature,
-      server_tokens: new_resource.server_tokens,
-      trace_enable: new_resource.trace_enable
-    )
-  end
-
-  apache2_conf 'charset' do
-    options(
-      default_charset: new_resource.default_charset
-    )
-  end
+  apache2_conf 'security'
+  apache2_conf 'charset'
 
   template 'ports.conf' do
     path     "#{apache_dir}/ports.conf"
