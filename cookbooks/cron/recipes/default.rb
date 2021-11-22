@@ -1,6 +1,8 @@
 #
 # Cookbook:: cron
-# Resource:: service
+# Recipe:: default
+#
+# Copyright:: 2010-2019, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,19 +17,9 @@
 # limitations under the License.
 #
 
-unified_mode true if respond_to?(:unified_mode)
+package node['cron']['package_name']
 
-include ::Cron::Cookbook::Helpers
-
-property :service_name, String,
-          default: lazy { default_cron_service }
-
-action_class do
-  def do_service_action(action)
-    service new_resource.service_name do
-      action action
-    end
-  end
+service 'cron' do
+  service_name node['cron']['service_name']
+  action [:enable, :start]
 end
-
-%i(start stop reload restart disable enable).each { |action_type| send(:action, action_type) { do_service_action(action) } }
