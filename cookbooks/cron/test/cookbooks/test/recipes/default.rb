@@ -19,7 +19,10 @@
 
 apt_update
 
-include_recipe 'cron'
+cron_package 'cron'
+cron_service 'cron' do
+  action %i(enable start)
+end
 
 ##########################
 # Test the cron_d resource
@@ -27,7 +30,7 @@ include_recipe 'cron'
 
 # create a file with periods as if the older version of this cookbook raspbian
 # the provider should clean it up and we'll test that it doesn't exists
-file '/etc/cron.d/job.with.periods' do
+file '/etc/cron.d/job.with.periods' do # rubocop:disable Chef/Modernize/CronDFileOrTemplate
   content 'old junk'
   action :create
 end
@@ -110,7 +113,7 @@ cron_d 'with_random_delay' do
 end
 
 cron_d 'test-weekday-usage-report2' do
-  name 'test-weekday-usage-report'
+  name 'test-weekday-usage-report' # rubocop:disable Chef/Correctness/ResourceSetsNameProperty
   minute '1'
   hour '1'
   weekday '1'
@@ -119,7 +122,7 @@ cron_d 'test-weekday-usage-report2' do
   action :create_if_missing
 end
 
-file '/etc/cron.d/delete_cron' do
+file '/etc/cron.d/delete_cron' do # rubocop:disable Chef/Modernize/CronDFileOrTemplate
   content '* * * * * appuser /bin/true'
 end
 
@@ -144,7 +147,7 @@ cron_access 'tom' do
 end
 
 # legacy resource name
-cron_manage 'Bill breaks things. Take away cron' do # rubocop: disable ChefModernize/CronManageResource
+cron_manage 'Bill breaks things. Take away cron' do # rubocop: disable Chef/Modernize/CronManageResource
   user 'bill'
   action :deny
 end
