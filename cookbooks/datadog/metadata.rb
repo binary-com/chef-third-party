@@ -25,3 +25,15 @@ end
 #depends    'chef_handler', '>= 1.2'
 depends    'apt' # Use '< 6.0.0' with Chef < 12.9
 depends    'yum', '>= 3.0' # Use '< 5.0' with Chef < 12.14
+
+recipe 'datadog::default', 'Default'
+recipe 'datadog::dd-agent', 'Installs the Datadog Agent'
+recipe 'datadog::dd-handler', 'Installs a Chef handler for Datadog'
+recipe 'datadog::repository', 'Installs the Datadog package repository'
+recipe 'datadog::dogstatsd-ruby', 'Installs the Ruby dogstatsd package for custom metrics'
+recipe 'datadog::ddtrace-ruby', 'Installs the Ruby ddtrace package for APM'
+
+# integration-specific
+recipe 'datadog::cassandra', 'Installs and configures the Cassandra integration'
+recipe 'datadog::couchdb', 'Installs and configures the CouchDB integration'
+recipe 'datadog::postfix', 'Installs and configures the Postfix integration'
