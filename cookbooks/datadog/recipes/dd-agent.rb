@@ -1,8 +1,8 @@
 #
-# Cookbook Name:: datadog
+# Cookbook:: datadog
 # Recipe:: dd-agent
 #
-# Copyright 2011-2015, Datadog
+# Copyright:: 2011-2015, Datadog
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+require 'yaml' # Our erb templates need this
 
 if node['datadog'].include?('agent6')
   Chef::Log.warn('The boolean "agent6" is no longer used by this cookbook since version 4.0.0. Use "agent_major_version" instead. To keep the previous behaviour pin a 3.x version of the cookbook.')
@@ -35,13 +37,23 @@ ruby_block 'datadog-api-key-unset' do
   only_if { Chef::Datadog.api_key(node).nil? }
 end
 
-is_windows = node['platform_family'] == 'windows'
+agent_major_version = Chef::Datadog.agent_major_version(node)
+agent_minor_version = Chef::Datadog.agent_minor_version(node)
+is_windows = platform_family?('windows')
 
 # Install the agent
 if is_windows
-  include_recipe 'datadog::_install-windows'
+  include_recipe '::_install-windows'
 else
-  include_recipe 'datadog::_install-linux'
+  include_recipe '::_install-linux'
+end
+
+if !node['datadog']['agent_enable'] && node['datadog']['enable_process_agent']
+  Chef::Log.warn("'agent_enable' is set to 'false', but 'enable_process_agent' is set to 'true'. This will cause the datadog-agent to start, since the process-agent depends on it.")
+end
+
+if !node['datadog']['agent_enable'] && node['datadog']['enable_trace_agent']
+  Chef::Log.warn("'agent_enable' is set to 'false', but 'enable_trace_agent' is set to 'true'. This will cause the datadog-agent to start, since the trace-agent depends on it.")
 end
 
 # Set the Agent service enable or disable
@@ -54,8 +66,8 @@ agent_start = node['datadog']['agent_start'] ? :start : :stop
 # To add integration-specific configurations, add 'datadog::config_name' to
 # the node's run_list and set the relevant attributes
 #
-if Chef::Datadog.agent_major_version(node) > 5
-  include_recipe 'datadog::_agent6_config'
+if agent_major_version > 5
+  include_recipe '::_agent6_config'
   agent_config_dir = is_windows ? "#{ENV['ProgramData']}/Datadog" : '/etc/datadog-agent'
   directory agent_config_dir do
     if is_windows
@@ -122,22 +134,7 @@ else
 end
 
 # Common configuration
-service_provider = nil
-if Chef::Datadog.agent_major_version(node) > 5 &&
-   (((node['platform'] == 'amazon' || node['platform_family'] == 'amazon') && node['platform_version'].to_i != 2) ||
-    (node['platform'] == 'ubuntu' && node['platform_version'].to_f < 15.04) || # chef <11.14 doesn't use the correct service provider
-   (node['platform'] != 'amazon' && node['platform_family'] == 'rhel' && node['platform_version'].to_i < 7))
-  # use Upstart provider explicitly for Agent 6 on Amazon Linux < 2.0 and RHEL < 7
-  service_provider = Chef::Provider::Service::Upstart
-end
-
-if node['datadog']['service_provider']
-  specified_provider = node['datadog']['service_provider']
-
-  if Chef::Provider::Service.constants.include?(specified_provider.to_sym)
-    service_provider = Chef::Provider::Service.const_get(specified_provider)
-  end
-end
+service_provider = Chef::Datadog.service_provider(node)
 
 service_name = is_windows ? 'DatadogAgent' : 'datadog-agent'
 
@@ -152,7 +149,7 @@ service 'datadog-agent' do
   else
     supports :restart => true, :status => true, :start => true, :stop => true
   end
-  subscribes :restart, "template[#{agent_config_file}]", :delayed unless node['datadog']['agent_start'] == false
+  subscribes :restart, "template[#{agent_config_file}]", :delayed if node['datadog']['agent_start']
   # HACK: the restart can fail when we hit systemd's restart limits (by default, 5 starts every 10 seconds)
   # To workaround this, retry once after 5 seconds, and a second time after 10 seconds
   retries 2
@@ -160,21 +157,17 @@ service 'datadog-agent' do
 end
 
 system_probe_managed = node['datadog']['system_probe']['manage_config']
-if system_probe_managed
-  ruby_block 'include system-probe' do
-    block do
-      # only load system-probe recipe if an agent 6/7 installation comes with it
-      system_probe_supported = !is_windows && Chef::Datadog.agent_major_version(node) > 5
-      system_probe_installed = ::File.exist?('/opt/datadog-agent/embedded/bin/system-probe')
-      if system_probe_supported && system_probe_installed
-        run_context.include_recipe 'datadog::system-probe'
-      end
-    end
-  end
-end
+agent_version_greater_than_6_11 = agent_major_version > 5 && (agent_minor_version.nil? || agent_minor_version > 11) || agent_major_version > 6
+agent_version_greater_than_6_26 = agent_major_version > 5 && (agent_minor_version.nil? || agent_minor_version > 26)
+
+# System probe requires at least agent 6.12 on Linux or 6.27 on Windows, before that it was called the network-tracer or unsupported.
+system_probe_supported = (agent_version_greater_than_6_11 && !is_windows) || (agent_version_greater_than_6_26 && is_windows)
+
+# system-probe is a dependency of the agent on Linux or Windows
+include_recipe '::system-probe' if system_probe_managed && system_probe_supported
 
 # Installation metadata to let know the agent about installation method and its version
-include_recipe 'datadog::install_info'
+include_recipe '::install_info'
 
 # Install integration packages
-include_recipe 'datadog::integrations' unless is_windows
+include_recipe '::integrations' unless is_windows

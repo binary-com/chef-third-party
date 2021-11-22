@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: datadog
+# Cookbook:: datadog
 # Recipe:: postfix
 #
 
@@ -23,7 +23,7 @@
 # ]
 #
 
-include_recipe 'datadog::dd-agent'
+include_recipe '::dd-agent'
 include_recipe 'sudo' # ~FC007 uses `suggests`
 
 postfix_instances = Array(node['datadog']['postfix']['instances'])
