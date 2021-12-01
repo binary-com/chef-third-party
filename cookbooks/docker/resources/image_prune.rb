@@ -8,8 +8,8 @@ property :host, [String, nil], default: lazy { ENV['DOCKER_HOST'] }, desired_sta
 property :dangling, [true, false], default: true
 property :prune_until, String
 # https://docs.docker.com/engine/reference/builder/#label
-property :with_label, String
-property :without_label, String
+#property :with_label, String
+#property :without_label, String
 
 action :prune do
   # Have to call this method ourselves due to
