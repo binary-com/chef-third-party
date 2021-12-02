@@ -1,6 +1,6 @@
 #
 # Cookbook:: cron
-# Recipe:: default
+# Resource:: package
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,17 +17,18 @@
 
 unified_mode true if respond_to?(:unified_mode)
 
-#include ::Cron::Cookbook::Helpers
+include ::Cron::Cookbook::Helpers
 
-property :service_name, String,
-          default: lazy { default_cron_service }
+property :packages, [String, Array],
+          default: lazy { default_cron_package }
 
 action_class do
-  def do_service_action(action)
-    service new_resource.service_name do
+  def do_package_action(action)
+    package 'cron' do
+      package_name new_resource.packages
       action action
     end
   end
 end
 
-%i(start stop reload restart disable enable).each { |action_type| send(:action, action_type) { do_service_action(action) } }
+%i(install remove upgrade).each { |action_type| send(:action, action_type) { do_package_action(action) } }
