@@ -1,8 +1,5 @@
 require 'spec_helper'
 
-require_relative '../../libraries/docker_base'
-require_relative '../../libraries/docker_registry'
-
 describe 'docker_registry' do
   step_into :docker_registry
   platform 'ubuntu'
@@ -22,7 +19,7 @@ describe 'docker_registry' do
     # for multiple docker apis and docker-api gems
     # https://github.com/excon/excon#stubs
     Excon.defaults[:mock] = true
-    Excon.stub({ method: :post, path: '/v1.16/auth' }, body: auth, status: 200)
+    Excon.stub({ method: :post, path: '/auth' }, body: auth, status: 200)
   end
 
   context 'logs into a docker registry with default options' do
@@ -33,7 +30,8 @@ describe 'docker_registry' do
         username 'chefspec_username'
       end
     end
-    it {
+
+    it do
       expect { chef_run }.to_not raise_error
       expect(chef_run).to login_docker_registry('chefspec_custom_registry').with(
         email: 'chefspec_email',
@@ -41,7 +39,7 @@ describe 'docker_registry' do
         username: 'chefspec_username',
         host: nil
       )
-    }
+    end
   end
 
   context 'logs into a docker registry with host' do

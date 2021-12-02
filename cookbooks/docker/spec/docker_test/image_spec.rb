@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe 'docker_test::image' do
-  cached(:chef_run) { ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '16.04').converge(described_recipe) }
+  cached(:chef_run) { ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '18.04').converge(described_recipe) }
 
   before do
     stub_command('/usr/bin/test -f /tmp/registry/tls/ca-key.pem').and_return(true)
@@ -57,9 +57,9 @@ describe 'docker_test::image' do
   context 'testing specifying a tag and read/write timeouts' do
     it 'pulls docker_image[alpine]' do
       expect(chef_run).to pull_docker_image('alpine').with(
-        tag: '3.1',
-        read_timeout: 60,
-        write_timeout: 60
+        tag: '2.7',
+        read_timeout: 120,
+        write_timeout: nil
       )
     end
   end
