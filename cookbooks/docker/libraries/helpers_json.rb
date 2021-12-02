@@ -1,12 +1,12 @@
 module DockerCookbook
   module DockerHelpers
     module Json
-      def generate_json(dangling, prune_until, with_label, without_label)
-        opts = { dangling: { "#{dangling}": true } }
-        opts['until'] = { "#{prune_until}": true } unless prune_until == nil?
-        opts['label'] = { "#{with_label}": true } unless with_label == nil?
-        opts['label!'] = { "#{without_label}": true } unless without_label == nil?
-        'filters=' + URI.encode_www_form_component(opts.to_json)
+      def generate_json(new_resource)
+      opts = { filters: ["dangling=#{new_resource.dangling}"] }
+      opts[:filters].push("until=#{new_resource.prune_until}") if new_resource.property_is_set?(:prune_until)
+      opts[:filters].push("label=#{new_resource.with_label}") if new_resource.property_is_set?(:with_label)
+      opts[:filters].push("label!=#{new_resource.without_label}") if new_resource.property_is_set?(:without_label)
+      opts.to_json
       end
     end
   end
