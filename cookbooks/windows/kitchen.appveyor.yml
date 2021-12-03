@@ -15,7 +15,7 @@ provisioner:
   name: chef_zero
   deprecations_as_errors: true
   product_name: chef
-  product_version: 13
+  product_version: 14
 
 platforms:
   - name: windows-2012R2
@@ -33,6 +33,9 @@ suites:
   - name: certificate
     run_list:
       - recipe[test::certificate]
+  - name: schannel
+    run_list:
+      - recipe[test::schannel]
   - name: share
     run_list:
       - recipe[test::share]
