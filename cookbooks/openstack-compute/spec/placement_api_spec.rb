@@ -11,7 +11,7 @@ describe 'openstack-compute::placement_api' do
     include_examples 'expect_runs_nova_apache_recipe'
 
     it do
-      expect(chef_run).to upgrade_package %w(python3-placement libapache2-mod-wsgi-py3)
+      expect(chef_run).to upgrade_package %w(python3-placement)
     end
 
     it do
@@ -31,7 +31,7 @@ describe 'openstack-compute::placement_api' do
     end
 
     it do
-      expect(chef_run).to enable_apache2_module('wsgi')
+      expect(chef_run).to create_apache2_mod_wsgi 'placement'
     end
 
     it do
@@ -112,7 +112,7 @@ describe 'openstack-compute::placement_api' do
           server_entry: '/usr/bin/placement-api',
           server_host: '127.0.0.1',
           server_port: '8778',
-          threads: 10,
+          threads: 1,
           user: 'placement',
           use_ssl: false,
         }
@@ -120,7 +120,7 @@ describe 'openstack-compute::placement_api' do
     end
     [
       /<VirtualHost 127.0.0.1:8778>$/,
-      /WSGIDaemonProcess placement-api processes=2 threads=10 user=placement group=placement display-name=%{GROUP}$/,
+      /WSGIDaemonProcess placement-api processes=2 threads=1 user=placement group=placement display-name=%{GROUP}$/,
       /WSGIProcessGroup placement-api$/,
       %r{WSGIScriptAlias / /usr/bin/placement-api$},
       /WSGIApplicationGroup %{GLOBAL}$/,

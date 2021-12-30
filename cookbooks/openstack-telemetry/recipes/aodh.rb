@@ -2,7 +2,7 @@
 # Cookbook:: openstack-telemetry
 # Recipe:: aodh
 #
-# Copyright:: 2019-2020, Oregon State University
+# Copyright:: 2019-2021, Oregon State University
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ else
   end
 end
 
-apache2_module 'wsgi'
+apache2_mod_wsgi 'aodh'
 apache2_module 'ssl' if node['openstack']['aodh']['ssl']['enabled']
 
 # create the aodh-api apache directory
@@ -114,7 +114,7 @@ directory aodh_apache_dir do
 end
 
 aodh_server_entry = "#{aodh_apache_dir}/app"
-# Note: Using lazy here as the wsgi file is not available until after
+# NOTE: Using lazy here as the wsgi file is not available until after
 # the aodh-common package is installed during execution phase.
 file aodh_server_entry do
   content lazy { IO.read(platform['aodh-api_wsgi_file']) }
