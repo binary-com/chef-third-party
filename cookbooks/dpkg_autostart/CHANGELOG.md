@@ -2,6 +2,16 @@
 
 This file is used to list changes made in each version of the dpkg_autostart cookbook.
 
+## Unreleased
+
+## 0.4.4 - *2021-08-31*
+
+- Standardise files with files in sous-chefs/repo-management
+
+## 0.4.3 - *2021-06-01*
+
+- resolved cookstyle error: test/cookbooks/test/metadata.rb:4:25 convention: `Layout/TrailingEmptyLines`
+
 ## 0.4.2 - *2020-11-27*
 
 - Fix regression introduced in 0.4.1, of undefined method `action` being received

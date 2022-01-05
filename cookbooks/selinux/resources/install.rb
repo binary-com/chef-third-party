@@ -17,25 +17,12 @@
 # limitations under the License.
 
 action :install do
-  package package_list
+  package %w(policycoreutils selinux-policy selinux-policy-targeted libselinux-utils mcstrans)
 
   directory '/etc/selinux' do
     owner 'root'
     group 'root'
     mode '0755'
     action :create
-  end
-end
-
-action_class do
-  #
-  # The complete list of package
-  #
-  # @return [Array<string>]
-  #
-  def package_list
-    list = %w(policycoreutils selinux-policy selinux-policy-targeted libselinux-utils)
-    list << 'mcstrans' if node['selinux']['install_mcstrans_package']
-    list
   end
 end

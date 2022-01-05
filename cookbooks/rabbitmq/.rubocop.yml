@@ -1,0 +1,53 @@
+AsciiComments:
+  Enabled: false
+
+ChefStyle/CommentFormat:
+  Enabled: false
+
+ChefModernize/FoodcriticComments:
+  Enabled: false
+
+ChefModernize/ExecuteSleep:
+  Enabled: false
+
+Layout/ParameterAlignment:
+  Enabled: false
+
+Layout/ElseAlignment:
+  Enabled: false
+
+Layout/EndAlignment:
+  Enabled: false
+
+Layout/IndentationWidth:
+  Enabled: false
+
+Layout/LineLength:
+  Max: 200
+
+Naming/FileName:
+  Enabled: false
+
+Metrics/AbcSize:
+  Max: 16
+
+Metrics/MethodLength:
+  Max: 18
+
+Style/Encoding:
+  Enabled: false
+
+Style/RegexpLiteral:
+  Enabled: false
+
+Style/IfUnlessModifier:
+  Enabled: false
+
+Style/HashSyntax:
+  Enabled: false
+
+Style/TrailingCommaInHashLiteral:
+  Enabled: false
+
+Style/WordArray:
+  Enabled: false

@@ -2,15 +2,6 @@
 
 This file is used to list changes made in each version of the selinux cookbook.
 
-## 3.1.1 (2020-09-29)
-
-- Move `default['selinux']['status']` attribute to `default['selinux']['state']` to avoid conflicts with Ohai in Chef Infra Client 16 - [@shoekstra](https://github.com/shoekstra)
-
-## 3.1.0 (2020-09-29)
-
-- Cookstyle Bot Auto Corrections with Cookstyle 6.16.8 - [@cookstyle](https://github.com/cookstyle)
-- Add a new `node['selinux']['install_mcstrans_package']` attribute to control installation of the mcdtrans package. This default to true to maintain existing functionality. - [@kapilchouhan99](https://github.com/kapilchouhan99)
-
 ## 3.0.2 (2020-08-25)
 
 - Fix failures in CI- [@shoekstra](https://github.com/shoekstra)
