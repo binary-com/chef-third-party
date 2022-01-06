@@ -2,6 +2,70 @@
 
 This file is used to list changes made in each version of the apache2 cookbook.
 
+## Unreleased
+
+## 8.14.1 - *2021-11-03*
+
+- Add CentOS Stream 8 to CI pipeline
+
+## 8.14.0 - *2021-08-31*
+
+- Add `envvars_additional_params` property to install resource
+
+## 8.13.1 - *2021-08-30*
+
+- Standardise files with files in sous-chefs/repo-management
+
+## 8.13.0 - *2021-07-09*
+
+- Add `default_charset`, `server_signature`, `server_tokens`, and `trace_enable` to `install` resource
+- Add `install_override` test suite
+
+## 8.12.0 - *2021-07-08*
+
+- Add `variables` property to `default_site` resource
+- Convert test suites `basic_site` and `mod_wsgi` to use updated `default_site` resource
+
+## 8.11.2 - *2021-07-06*
+
+- Fixed error with delivery where it was expecting string interpolation incorrectly
+- Fix EL8 welcome page
+
+## 8.11.1 - *2021-06-01*
+
+- Standardise files with files in sous-chefs/repo-management
+
+## 8.11.0 - *2021-05-06*
+
+- Add missing unified_mode from mod_php and mod_wscgi
+- Fix service resource restarting the service every run
+- Bump minimum Chef version to 15.3 to support unified_mode
+
+## 8.10.0 - *2021-04-09*
+
+- Fix `apache2_mod_auth_cas` resource for all supported platforms
+- Fix apache devel package name on SUSE platforms
+- Fix `libexec_dir` variable in `auth_cas.load` template
+- Add Integration tests for `apache2_mod_auth_cas` resource
+- Add docs for `apache2_mod_auth_cas`
+- Add `:source_checksum`, `:login_url`, `:validate_url`, `:directives` properties to `apache2_mod_auth_cas` resource
+- Allow `apache2_mod_auth_cas` resource to be nameless
+- Update `mod_auth_cas` source version to 1.2 and other various updates for source installations
+- Install `mod_auth_cas` by source on CentOS 8 and SUSE platforms (distro package is not currently available)
+- Include yum-epel recipe on RHEL/Amazon platforms
+
+## 8.9.1 - *2021-03-03*
+
+- Fix url in README
+
+## 8.9.0 - *2021-01-27*
+
+- Enable `options` property to pass arbitrary variables to the conf template
+
+## 8.8.0 - *2021-01-26*
+
+- Remove support and testing for Ubuntu 16.04
+
 ## 8.7.0 - *2020-11-20*
 
 - Add `template_cookbook` property to `install`

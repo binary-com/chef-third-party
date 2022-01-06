@@ -1,0 +1,61 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_solo
+  product_name: chef
+  enforce_idempotency: true
+  multiple_converge: 2
+  deprecations_as_errors: true
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: amazonlinux-2
+  - name: centos-7
+  - name: centos-8
+  - name: centos-stream-8
+  - name: debian-9
+  - name: debian-10
+  - name: opensuse-leap-15
+  - name: ubuntu-18.04
+  - name: ubuntu-20.04
+
+suites:
+  - name: default
+    run_list:
+      - recipe[test::default]
+  - name: custom_template
+    run_list:
+      - recipe[test::custom_template]
+  - name: basic_site
+    run_list:
+      - recipe[test::basic_site]
+  - name: ssl
+    run_list:
+      - recipe[test::mod_ssl]
+  - name: ports
+    run_list:
+      - recipe[test::ports]
+  - name: module_template
+    run_list:
+      - recipe[test::module_template]
+  - name: mod_php
+    run_list:
+      - recipe[test::php]
+  - name: pkg_name
+    run_list:
+      - recipe[test::pkg_name]
+    includes:
+      - centos-7
+  - name: mod_wsgi
+    run_list:
+      - recipe[test::wsgi]
+  - name: mod_auth_cas
+    run_list:
+      - recipe[test::auth_cas]
+  - name: install_override
+    run_list:
+      - recipe[test::install_override]
