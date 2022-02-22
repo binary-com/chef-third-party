@@ -1,8 +1,8 @@
 #
-# Cookbook Name:: datadog
+# Cookbook:: datadog
 # Recipe:: system_core
 #
-# Copyright 2015, Datadog
+# Copyright:: 2015, Datadog
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-include_recipe 'datadog::dd-agent'
+include_recipe '::dd-agent'
 
 datadog_monitor 'system_core'

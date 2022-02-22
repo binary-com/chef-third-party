@@ -1,11 +1,13 @@
-include_recipe 'datadog::dd-agent'
+include_recipe '::dd-agent'
 
 # Monitor mongo
 #
 # node.set['datadog']['mongo']['instances'] = [
 #   {
 #     'host' => 'localhost',
-#     'port' => '27017'
+#     'port' => '27017',
+#     'username' => 'someuser',
+#     'password' => 'somepassword'
 #   }
 # ]
 
