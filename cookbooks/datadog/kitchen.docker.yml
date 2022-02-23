@@ -3,6 +3,12 @@ driver:
   name: docker
   use_sudo: false
 
+provisioner:
+  deprecations_as_errors: true
+  solo_rb:
+    silence_deprecation_warnings:
+    - chef-25
+
 platforms:
   # Exclude this OS for now, due to some odd behavior with the NTP check on CircleCI systems.
   # See https://circleci.com/gh/DataDog/chef-datadog/19
@@ -23,6 +29,11 @@ platforms:
   - name: centos-7.7
     driver_config:
       require_chef_omnibus: 14.12
+      image: 'datadog/docker-library:chef_kitchen_systemd_centos_7'
+      run_command: /root/start.sh
+  - name: centos-7.7
+    driver_config:
+      require_chef_omnibus: 16.5
       image: 'datadog/docker-library:chef_kitchen_systemd_centos_7'
       run_command: /root/start.sh
   - name: debian-8.11
