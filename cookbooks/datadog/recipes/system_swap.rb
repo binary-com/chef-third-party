@@ -1,7 +1,7 @@
 #
-# Cookbook Name:: datadog
+# Cookbook:: datadog
 # Recipe:: system_swap
 #
-include_recipe 'datadog::dd-agent'
+include_recipe '::dd-agent'
 
 datadog_monitor 'system_swap'

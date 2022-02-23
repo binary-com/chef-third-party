@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: datadog
+# Cookbook:: datadog
 # Recipe:: hdfs
 #
 
@@ -22,7 +22,7 @@
 #   }
 # ]
 
-include_recipe 'datadog::dd-agent'
+include_recipe '::dd-agent'
 
 datadog_monitor 'hdfs' do
   instances node['datadog']['hdfs']['instances']
