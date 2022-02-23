@@ -1,5 +1,13 @@
 # Configure a service via its yaml file
 
+# enable unified mode on specific Chef versions.
+# See CHEF-33 Deprecation warning:
+# https://docs.chef.io/deprecations_unified_mode/
+
+unified_mode true if respond_to?(:unified_mode)
+
+require 'yaml' # Our erb templates need this
+
 default_action :add
 
 property :cookbook, String, default: 'datadog'
@@ -18,7 +26,7 @@ action :add do
 
   if Chef::Datadog.agent_major_version(node) != 5
     directory ::File.join(yaml_dir, "#{new_resource.name}.d") do
-      if node['platform_family'] == 'windows'
+      if platform_family?('windows')
         inherits true # Agent 6/7 rely on inheritance being enabled. Reset it in case it was disabled when installing Agent 5.
       else
         owner 'dd-agent'
@@ -33,7 +41,7 @@ action :add do
 
   template yaml_file do
     # On Windows Agent v5, set the permissions on conf files to Administrators.
-    if node['platform_family'] == 'windows'
+    if platform_family?('windows')
       if Chef::Datadog.agent_major_version(node) > 5
         inherits true # Agent 6/7 rely on inheritance being enabled. Reset it in case it was disabled when installing Agent 5.
       else
@@ -87,7 +95,7 @@ end
 
 def yaml_dir
   is_agent5 = Chef::Datadog.agent_major_version(node) == 5
-  is_windows = node['platform_family'] == 'windows'
+  is_windows = platform_family?('windows')
   if is_windows
     "#{ENV['ProgramData']}/Datadog/conf.d"
   else
