@@ -1,9 +1,9 @@
 #
-# Cookbook Name:: datadog
+# Cookbook:: datadog
 # Recipe:: zookeeper
 #
 
-include_recipe 'datadog::dd-agent'
+include_recipe '::dd-agent'
 
 datadog_monitor 'zk' do
   instances node['datadog']['zookeeper']['instances']
