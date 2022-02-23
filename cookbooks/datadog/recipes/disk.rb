@@ -1,6 +1,6 @@
 #
-# Cookbook Name: datadog
-# Recipe: disk
+# Cookbook:: datadog
+# Recipe:: disk
 #
 # This recipe exists to apply (optional) configuration to the disk integration
 # This recipe does not need to be included to use the disk integration,
@@ -9,7 +9,7 @@
 # For more information on the integration itself, see:
 # https://docs.datadoghq.com/integrations/disk/
 
-include_recipe 'datadog::dd-agent'
+include_recipe '::dd-agent'
 
 # example configuration:
 # node['datadog']['disk']['instances'] = [
