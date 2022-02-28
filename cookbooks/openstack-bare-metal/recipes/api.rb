@@ -1,10 +1,9 @@
-# Encoding: utf-8
 #
 # Cookbook:: openstack-bare-metal
 # Recipe:: api
 #
-# Copyright:: 2015, IBM Corp.
-# Copyright:: 2020, Oregon State University
+# Copyright:: 2015-2021, IBM Corp.
+# Copyright:: 2020-2021, Oregon State University
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -72,7 +71,7 @@ service 'apache2' do
   action :nothing
 end
 
-apache2_module 'wsgi'
+apache2_mod_wsgi 'bare-metal'
 apache2_module 'ssl' if node['openstack']['bare_metal']['ssl']['enabled']
 
 template "#{apache_dir}/sites-available/ironic-api.conf" do

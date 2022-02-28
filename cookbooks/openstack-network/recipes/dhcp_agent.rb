@@ -2,8 +2,8 @@
 # Cookbook:: openstack-network
 # Recipe:: dhcp_agent
 #
-# Copyright:: 2013, AT&T
-# Copyright:: 2020, Oregon State University
+# Copyright:: 2013-2021, AT&T
+# Copyright:: 2020-2021, Oregon State University
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -50,11 +50,9 @@ end
 
 # TODO: (jklare) this should be refactored and probably pull in the some dnsmasq
 # cookbook to do the proper configuration
-if platform?('centos')
-  rpm_package 'dnsmasq' do
-    action :upgrade
-  end
-end
+package 'dnsmasq' do
+  action :upgrade
+end if platform_family?('rhel')
 
 service 'neutron-dhcp-agent' do
   service_name platform_options['neutron_dhcp_agent_service']
@@ -64,6 +62,6 @@ service 'neutron-dhcp-agent' do
     'template[/etc/neutron/neutron.conf]',
     'template[/etc/neutron/dnsmasq.conf]',
     "template[#{node['openstack']['network_dhcp']['config_file']}]",
-    'rpm_package[dnsmasq]',
+    'package[dnsmasq]',
   ]
 end
