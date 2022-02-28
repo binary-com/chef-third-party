@@ -16,6 +16,7 @@
 # limitations under the License.
 #
 provides :mariadb_server_install
+unified_mode true
 
 include MariaDBCookbook::Helpers
 
@@ -28,6 +29,7 @@ property :external_pid_file, String,        default: lazy { "/var/run/mysql/#{ve
 property :password,          [String, nil], default: 'generate'
 property :port,              Integer,       default: 3306
 property :initdb_locale,     String,        default: 'UTF-8'
+property :install_sleep,     Integer,       default: 5, desired_state: false
 
 action :install do
   node.run_state['mariadb'] ||= {}
@@ -40,8 +42,10 @@ action :install do
 
   package server_pkg_name
 
+  selinux_install 'mariadb' if selinux_enabled?
+
   %w(mariadb-server mariadb).each do |m|
-    selinux_policy_module m do
+    selinux_module m do
       content lazy { ::File.read("/usr/share/mysql/policy/selinux/#{m}.te") }
       only_if { selinux_enabled? }
     end
@@ -69,15 +73,21 @@ action :create do
   # Generate a random password or set a password defined with node['mariadb']['server_root_password'].
   # The password is set or change at each run. It is good for security if you choose to set a random password and
   # allow you to change the root password if needed.
+  set_password_command = "USE mysql;\n"
+  set_password_command += if new_resource.version.to_f <= 10.3
+                            "UPDATE user SET password=PASSWORD('#{mariadb_root_password}') WHERE User='root';\n"
+                          else
+                            "ALTER USER root@localhost IDENTIFIED VIA unix_socket OR mysql_native_password USING PASSWORD('#{mariadb_root_password}');\n"
+                          end
+  set_password_command += "FLUSH PRIVILEGES;\n"
+
   file 'generate-mariadb-root-password' do
     path "#{data_dir}/recovery.conf"
     owner 'mysql'
     group 'root'
     mode '640'
     sensitive true
-    content "use mysql;
-update user set password=PASSWORD('#{mariadb_root_password}') where User='root';
-flush privileges;"
+    content set_password_command
     action :nothing
   end
 
@@ -97,7 +107,7 @@ flush privileges;"
   execute 'apply-mariadb-root-password' do
     user 'mysql'
     # TODO, I really dislike the sleeps here, should come up with a better way to do this
-    command "(test -f #{pid_file} && kill `cat #{pid_file}` && sleep 3); /usr/sbin/mysqld -u root --pid-file=#{pid_file} --init-file=#{data_dir}/recovery.conf&>/dev/null& sleep 2 && (test -f #{pid_file} && kill `cat #{pid_file}`)"
+    command "(test -f #{pid_file} && kill `cat #{pid_file}` && sleep #{new_resource.install_sleep}); /usr/sbin/mysqld -u root --pid-file=#{pid_file} --init-file=#{data_dir}/recovery.conf&>/dev/null& sleep #{new_resource.install_sleep} && (test -f #{pid_file} && kill `cat #{pid_file}`)"
     notifies :enable, "service[#{platform_service_name}]", :before
     notifies :stop, "service[#{platform_service_name}]", :before
     notifies :create, 'file[generate-mariadb-root-password]', :before
@@ -110,6 +120,5 @@ end
 
 action_class do
   include MariaDBCookbook::Helpers
-
-  Chef::Resource.include Chef::Util::Selinux
+  include Chef::Util::Selinux
 end
