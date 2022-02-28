@@ -19,7 +19,7 @@ RSpec.configure do |config|
   # @see https://github.com/chef-cookbooks/yum/issues/140
   config.log_level = :error
 
-  config.file_cache_path = '/var/chef/cache'
+  config.file_cache_path = Chef::Config[:file_cache_path]
 
   config.before do
     # recipes/dd-agent.rb
@@ -27,7 +27,11 @@ RSpec.configure do |config|
     stub_command('apt-cache policy datadog-agent-base | grep "Installed: (none)"').and_return(false)
 
     # recipes/repository.rb
+    stub_command('rpm -q gpg-pubkey-current').and_return(false)
     stub_command('rpm -q gpg-pubkey-e09422b3').and_return(false)
+    stub_command('rpm -q gpg-pubkey-fd4bf915').and_return(false)
+    stub_command('rpm -q gpg-pubkey-4172a230').and_return(false)
+    stub_command('apt-key adv --list-public-keys --with-fingerprint --with-colons | grep 382E94DE | grep pub').and_return(false)
   end
 
   Ohai::Config[:log_level] = :warn

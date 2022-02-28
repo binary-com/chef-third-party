@@ -78,11 +78,27 @@ shared_examples_for 'rhellions datadog-agent v5' do
   end
 end
 
+shared_examples_for 'rhellions dnf datadog-agent v5' do
+  it_behaves_like 'datadog-agent v5'
+
+  it 'installs the datadog-agent' do
+    expect(chef_run).to install_dnf_package 'datadog-agent'
+  end
+end
+
 shared_examples_for 'rhellions datadog-agent' do
   it_behaves_like 'datadog-agent'
 
   it 'installs the datadog-agent' do
     expect(chef_run).to install_yum_package 'datadog-agent'
+  end
+end
+
+shared_examples_for 'rhellions dnf datadog-agent' do
+  it_behaves_like 'datadog-agent'
+
+  it 'installs the datadog-agent' do
+    expect(chef_run).to install_dnf_package 'datadog-agent'
   end
 end
 
@@ -119,7 +135,7 @@ end
 shared_examples_for 'windows Datadog Agent v5' do |installer_extension|
   it_behaves_like 'common windows resources v5'
 
-  agent_installer = "C:/chef/cache/ddagent-cli.#{installer_extension}"
+  agent_installer = ::File.join(Chef::Config[:file_cache_path], "ddagent-cli.#{installer_extension}")
 
   it 'downloads the remote file only if it\'s changed' do
     expect(chef_run).to create_remote_file(agent_installer)
@@ -146,7 +162,7 @@ end
 shared_examples_for 'windows Datadog Agent' do |installer_extension|
   it_behaves_like 'common windows resources'
 
-  agent_installer = "C:/chef/cache/ddagent-cli.#{installer_extension}"
+  agent_installer = ::File.join(Chef::Config[:file_cache_path], "ddagent-cli.#{installer_extension}")
 
   it 'downloads the remote file only if it\'s changed' do
     expect(chef_run).to create_remote_file(agent_installer)
