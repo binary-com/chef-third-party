@@ -2,12 +2,12 @@
 # Cookbook:: openstack-block-storage
 # Attributes:: default
 #
-# Copyright:: 2012, DreamHost
-# Copyright:: 2012, Rackspace US, Inc.
-# Copyright:: 2012-2013, AT&T Services, Inc.
-# Copyright:: 2013, Opscode, Inc.
-# Copyright:: 2013-2014, IBM, Corp
-# Copyright:: 2020, Oregon State University
+# Copyright:: 2012-2021, DreamHost
+# Copyright:: 2012-2021, Rackspace US, Inc.
+# Copyright:: 2012-2021, AT&T Services, Inc.
+# Copyright:: 2013-2021, Chef Software, Inc.
+# Copyright:: 2013-2021, IBM, Corp
+# Copyright:: 2020-2021, Oregon State University
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -87,15 +87,20 @@ when 'rhel' # :pragma-foodcritic: ~FC024 - won't fix this
   default['openstack']['block-storage']['volume']['iscsi_helper'] = 'lioadm'
   default['openstack']['block-storage']['platform'] = {
     'cinder_common_packages' => ['openstack-cinder'],
-    'cinder_api_packages' => %w(openstack-cinder mod_wsgi),
+    'cinder_api_packages' => %w(openstack-cinder),
     'cinder_api_service' => 'openstack-cinder-api',
-    'cinder_volume_packages' => %w(qemu-img-ev),
+    'cinder_volume_packages' => node['platform_version'].to_i >= 8 ? %w(qemu-img) : %w(qemu-img-ev),
     'cinder_volume_service' => 'openstack-cinder-volume',
     'cinder_scheduler_packages' => [],
     'cinder_scheduler_service' => 'openstack-cinder-scheduler',
     'cinder_backup_packages' => [],
     'cinder_backup_service' => 'openstack-cinder-backup',
-    'cinder_iscsitarget_packages' => %w(targetcli dbus-python),
+    'cinder_iscsitarget_packages' =>
+      if node['platform_version'].to_i >= 8
+        %w(targetcli python3-dbus)
+      else
+        %w(targetcli dbus-python)
+      end,
     'cinder_iscsitarget_service' => 'target',
     'cinder_lvm_packages' => %w(lvm2),
     'package_overrides' => '',
@@ -106,7 +111,6 @@ when 'debian'
     'cinder_common_packages' => %w(cinder-common),
     'cinder_api_packages' =>
       %w(
-        libapache2-mod-wsgi-py3
         python3-cinder
         cinder-api
       ),

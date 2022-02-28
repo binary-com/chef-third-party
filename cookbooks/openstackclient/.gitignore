@@ -1,7 +1,11 @@
+.bundle/
+berks-cookbooks/
+.kitchen
+.vagrant
+.coverage/
+*.swp
 Berksfile.lock
-*~
-*#
-.#*
-\#*#
-.*.sw[a-z]
-*.un~
+Vagrantfile
+Gemfile.lock
+local-mode-cache
+nodes/
