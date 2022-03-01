@@ -4,6 +4,42 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+
+## 5.2.1 - *2021-11-03*
+
+- Add CentOS Stream 8 to CI pipeline
+
+## 5.2.0 - *2021-10-29*
+
+- Testing MariaDB 10.4 server install
+- Fix root password cannot be manually set on 10.4+
+
+## 5.1.0 - *2021-10-13*
+
+- Migrate to using `selinux` cookbook which incorporates `selinux_policy` cookbook resources
+
+## 5.0.2 - *2021-08-30*
+
+- Standardise files with files in sous-chefs/repo-management
+
+## 5.0.1 - *2021-06-01*
+
+- Standardise files with files in sous-chefs/repo-management
+
+## 5.0.0 - *2021-05-14*
+
+- Chef 17 updates: enable `unified_mode` on all resources
+- Bump required Chef Infra Client to >= 15.3
+
+## 4.3.0 - *2021-02-15*
+
+- Make sleep configurable in `apply-mariadb-root-password`
+
+## 4.2.1 - *2021-01-25*
+
+- Ensure we run `selinux_policy_install` if selinux is enabled
+
 ## 4.2.0 - *2020-12-01*
 
 - Add `bootstrap` and `join` actions to `mariadb_galera_configuration` to bootstrap and join clusters
