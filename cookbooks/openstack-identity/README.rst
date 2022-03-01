@@ -21,8 +21,8 @@ https://docs.openstack.org/keystone/latest/
 Requirements
 ============
 
-- Chef 16 or higher
-- Chef Workstation 21.10.640 for testing (also includes Berkshelf for
+- Chef 15 or higher
+- Chef Workstation 20.8.111 for testing (also includes Berkshelf for
   cookbook dependency resolution)
 
 Platform
@@ -37,7 +37,7 @@ Cookbooks
 
 The following cookbooks are dependencies:
 
-- 'apache2', '~> 8.6'
+- 'apache2', '~> 8.1'
 - 'openstack-common', '>= 20.0.0'
 - 'openstackclient'
 
@@ -151,7 +151,7 @@ License and Author
 +---------------+----------------------------------------------+
 | **Copyright** | GmbH Copyright 2013-2014, IBM, Corp.         |
 +---------------+----------------------------------------------+
-| **Copyright** | Copyright 2016-2021, Oregon State University |
+| **Copyright** | Copyright 2016-2020, Oregon State University |
 +---------------+----------------------------------------------+
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may

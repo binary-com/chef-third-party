@@ -13,7 +13,7 @@ describe 'openstack-telemetry::gnocchi_configure' do
     end
 
     it do
-      expect(chef_run).to create_apache2_mod_wsgi 'gnocchi'
+      expect(chef_run).to enable_apache2_module('wsgi')
     end
 
     it do

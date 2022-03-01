@@ -42,11 +42,8 @@ property :apache_root_group, String,
 
 property :template_source, String,
          default: lazy { default_site_template_source },
-         description: 'Source for the template.'
-
-property :variables, Hash,
-         default: {},
-         description: 'A hash to pass to the template'
+         description: 'Source for the template.'\
+'defaults to #{new_resource.default_site_name}.conf on Debian flavours and welcome.conf on all other platforms'
 
 action :enable do
   template "#{new_resource.default_site_name}.conf" do
@@ -56,7 +53,7 @@ action :enable do
     group new_resource.apache_root_group
     mode '0644'
     cookbook new_resource.template_cookbook
-    variables new_resource.variables.merge({
+    variables(
       access_log: default_access_log,
       cgibin_dir: default_cgibin_dir,
       docroot_dir: new_resource.docroot_dir,
@@ -64,13 +61,12 @@ action :enable do
       log_dir: default_log_dir,
       log_level: new_resource.log_level,
       port: new_resource.port,
-      server_admin: new_resource.server_admin,
-      site_name: new_resource.default_site_name,
-    })
+      server_admin: new_resource.server_admin
+    )
   end
 
   apache2_site new_resource.default_site_name do
-    action new_resource.site_action
+    action :enable
   end
 end
 

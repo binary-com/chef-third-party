@@ -1,12 +1,6 @@
 # SELinux Cookbook
 
-[![Cookbook Version](https://img.shields.io/cookbook/v/selnux.svg)](https://supermarket.chef.io/cookbooks/selinux)
-[![CI State](https://github.com/sous-chefs/selinux/workflows/ci/badge.svg)](https://github.com/sous-chefs/selinux/actions?query=workflow%3Aci)
-[![OpenCollective](https://opencollective.com/sous-chefs/backers/badge.svg)](#backers)
-[![OpenCollective](https://opencollective.com/sous-chefs/sponsors/badge.svg)](#sponsors)
-[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
-
-## Description
+[![Build Status](https://travis-ci.org/chef-cookbooks/selinux.svg?branch=master)](https://travis-ci.org/chef-cookbooks/selinux) [![Cookbook Version](https://img.shields.io/cookbook/v/selinux.svg)](https://supermarket.chef.io/cookbooks/selinux)
 
 The SELinux (Security Enhanced Linux) cookbook provides recipes for manipulating SELinux policy enforcement state.
 
@@ -29,53 +23,192 @@ Disable SELinux only if you plan to not use it. Use `Permissive` mode if you jus
 
 ## Requirements
 
-- Chef 15.3 or higher
+- Chef 13 or higher
 
-## Platform
+## Platform:
 
-- RHEL 7+
-- CentOS 7+
-- Fedora
-- Ubuntu
-- Debian
+- RHEL 6/7
 
-## Resources
+## Attributes
 
-The following resources are provided:
+- `node['selinux']['state']` - The SELinux policy enforcement state. The state to set by default, to match the default SELinux state on RHEL. Can be "enforcing", "permissive", "disabled"
+- `node['selinux']['booleans']` - A hash of SELinux boolean names and the values they should be set to. Values can be off, false, or 0 to disable; or on, true, or 1 to enable.
+- `node['selinux']['install_mcstrans_package']` - Install mcstrans package, Default is `true`. If don't want to install mcstrans package, sets as a `false`
 
-- [selinux_boolean](documentation/selinux_boolean.md)
-- [selinux_fcontext](documentation/selinux_fcontext.md)
-- [selinux_install](documentation/selinux_install.md)
-- [selinux_module](documentation/selinux_module.md)
-- [selinux_permissive](documentation/selinux_permissive.md)
-- [selinux_port](documentation/selinux_port.md)
-- [selinux_state](documentation/selinux_state.md)
+## Resources Overview
 
-## Maintainers
+### selinux_state
 
-This cookbook is maintained by the Sous Chefs. The Sous Chefs are a community of Chef cookbook maintainers working together to maintain important cookbooks. If you’d like to know more please visit [sous-chefs.org](https://sous-chefs.org/) or come chat with us on the Chef Community Slack in [#sous-chefs](https://chefcommunity.slack.com/messages/C2V7B88SF).
+The `selinux_state` resource is used to manage the SELinux state on the system. It does this by using the `setenforce` command and rendering the `/etc/selinux/config` file from a template.
 
-## Contributors
+## selinux_module
 
-This project exists thanks to all the people who [contribute.](https://opencollective.com/sous-chefs/contributors.svg?width=890&button=false)
+This provider is intended to be part of the SELinux analysis workflow using tools like `audit2allow`.
 
-### Backers
+### Actions
 
-Thank you to all our backers!
+- `:create`: install the module;
+- `:remove`: remove the module;
 
-![https://opencollective.com/sous-chefs#backers](https://opencollective.com/sous-chefs/backers.svg?width=600&avatarHeight=40)
+### Options
 
-### Sponsors
+- `source`: SELinux `.te` file, to be parsed, compiled and deployed as module. If simple basename informed, the provider will first look into `files/default/selinux` directory;
+- `base_dir`: Base directory to create and manage SELinux files, by default is `/etc/selinux/local`;
+- `force`: Boolean. Indicates if provider should re-install the same version of SELinux module already installed, in case the source `.te` file changes;
 
-Support this project by becoming a sponsor. Your logo will show up here with a link to your website.
+### Attributes
 
-![https://opencollective.com/sous-chefs/sponsor/0/website](https://opencollective.com/sous-chefs/sponsor/0/avatar.svg?avatarHeight=100)
-![https://opencollective.com/sous-chefs/sponsor/1/website](https://opencollective.com/sous-chefs/sponsor/1/avatar.svg?avatarHeight=100)
-![https://opencollective.com/sous-chefs/sponsor/2/website](https://opencollective.com/sous-chefs/sponsor/2/avatar.svg?avatarHeight=100)
-![https://opencollective.com/sous-chefs/sponsor/3/website](https://opencollective.com/sous-chefs/sponsor/3/avatar.svg?avatarHeight=100)
-![https://opencollective.com/sous-chefs/sponsor/4/website](https://opencollective.com/sous-chefs/sponsor/4/avatar.svg?avatarHeight=100)
-![https://opencollective.com/sous-chefs/sponsor/5/website](https://opencollective.com/sous-chefs/sponsor/5/avatar.svg?avatarHeight=100)
-![https://opencollective.com/sous-chefs/sponsor/6/website](https://opencollective.com/sous-chefs/sponsor/6/avatar.svg?avatarHeight=100)
-![https://opencollective.com/sous-chefs/sponsor/7/website](https://opencollective.com/sous-chefs/sponsor/7/avatar.svg?avatarHeight=100)
-![https://opencollective.com/sous-chefs/sponsor/8/website](https://opencollective.com/sous-chefs/sponsor/8/avatar.svg?avatarHeight=100)
-![https://opencollective.com/sous-chefs/sponsor/9/website](https://opencollective.com/sous-chefs/sponsor/9/avatar.svg?avatarHeight=100)
+LWRP interface, recipe attributes are not applicable here.
+
+## selinux_state
+
+The `selinux_state` resource is used to manage the SELinux state on the system. It does this by using the `setenforce` command and rendering the `/etc/selinux/config` file from a template.
+
+### Actions
+
+- `:nothing`: default action, does nothing
+- `:enforcing`: Sets SELinux to enforcing.
+- `:disabled`: Sets SELinux to disabled.
+- `:permissive`: Sets SELinux to permissive.
+
+### Properties
+
+- `temporary` - true, false, default false. Allows the temporary change between permissive and enabled states which don't require a reboot.
+- `selinuxtype` - targeted, mls, default targeted. Determines the policy that will be configured in the `/etc/selinux/config` file. The default value is `targeted` which enables selinux in a mode where only selected processes are protected. `mls` is multilevel security which enables selinux in a mode where all processes are protected.
+
+### Examples
+
+#### Managing SELinux State (`selinux_state`)
+
+Simply set SELinux to enforcing or permissive:
+
+```ruby
+selinux_state "SELinux Enforcing" do
+  action :enforcing
+end
+
+selinux_state "SELinux Permissive" do
+  action :permissive
+end
+```
+
+The action here is based on the value of the `node['selinux']['state']` attribute, which we convert to lower-case and make a symbol to pass to the action.
+
+```ruby
+selinux_state "SELinux #{node['selinux']['state'].capitalize}" do
+  action node['selinux']['state'].downcase.to_sym
+end
+```
+
+The action here is based on the value of the `node['selinux']['status']` attribute, which we convert to lower-case and make a symbol to pass to the action.
+
+```ruby
+selinux_state "SELinux #{node['selinux']['status'].capitalize}" do
+  action node['selinux']['status'].downcase.to_sym
+end
+```
+
+#### Managing SELinux Modules (`selinux_module`)
+
+Consider the following steps to obtain a `.te` file, the rule description format employed on SELinux
+
+1. Add `selinux` to your `metadata.rb`, as for instance: `depends 'selinux', '>= 0.10.0'`;
+2. Run your SELinux workflow, and add `.te` files on your cookbook files, preferably under `files/default/selinux` directory;
+3. Write recipes using `selinux_module` provider;
+
+#### SELinux `audit2allow` Workflow
+
+This provider was written with the intention of matching the workflow of `audit2allow` (provided by package `policycoreutils`), which basically will be:
+
+1. Test application and inspect `/var/log/audit/audit.log` log-file with a command like this basic example: `grep AVC /var/log/audit/audit.log |audit2allow -M my_application`;
+2. Save `my_application.te` SELinux module source, copy into your cookbook under `files/default/selinux/my_application.te`;
+3. Make use of `selinux` provider on a recipe, after adding it as a dependency;
+
+For example, add the following on the recipe level:
+
+```ruby
+selinux_module 'MyApplication SELinux Module' do
+  source 'my_application.te'
+  action :create
+end
+```
+
+Module name is defined on `my_application.te` file contents, please note this input, is used during `:remove` action. For instance:
+
+```ruby
+selinux_module 'my_application' do
+  action :remove
+end
+```
+
+### selinux_install
+
+The `selinux_install` resource is used to encapsulate the set of selinux packages to install in order to manage selinux. It also ensures the directory `/etc/selinux` is created.
+
+## Recipes
+
+All recipes will deprecate in the near future as they are just using the `selinux_state` resource.
+
+### default
+
+The default recipe will use the attribute `node['selinux']['status']` in the `selinux_state` resource's action. By default, this will be `:enforcing`.
+
+### enforcing
+
+This recipe will use `:enforcing` as the `selinux_state` action.
+
+### permissive
+
+This recipe will use `:permissive` as the `selinux_state` action.
+
+### disabled
+
+This recipe will use `:disabled` as the `selinux_state` action.
+
+## Usage
+
+By default, this cookbook will have SELinux enforcing by default, as the default recipe uses the `node['selinux']['status']` attribute, which is "enforcing." This is in line with the policy of enforcing by default on RHEL family distributions.
+
+You can simply set the attribute in a role applied to the node:
+
+```
+name "base"
+description "Base role applied to all nodes."
+default_attributes(
+  "selinux" => {
+    "status" => "permissive"
+  }
+)
+```
+
+Or, you can apply the recipe to the run list (e.g., in a role):
+
+```
+name "base"
+description "Base role applied to all nodes."
+run_list(
+  "recipe[selinux::permissive]",
+)
+```
+
+## License & Authors
+
+- **Author:** Sean OMeara ([sean@sean.io](mailto:sean@sean.io))
+- **Author:** Joshua Timberman ([joshua@chef.io](mailto:joshua@chef.io))
+- **Author:** Jennifer Davis ([sigje@chef.io](mailto:sigje@chef.io))
+
+**Copyright:** 2008-2018, Chef Software, Inc.
+
+```
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```

@@ -22,8 +22,8 @@ https://gnocchi.xyz/
 Requirements
 ============
 
-- Chef 16 or higher
-- Chef Workstation 21.10.640 for testing (also includes Berkshelf for
+- Chef 15 or higher
+- Chef Workstation 20.8.111 for testing (also includes Berkshelf for
   cookbook dependency resolution)
 
 Platform
@@ -38,7 +38,7 @@ Cookbooks
 
 The following cookbooks are dependencies:
 
-- 'apache2', '~> 8.6'
+- 'apache2', '~> 8.1'
 - 'openstackclient'
 - 'openstack-common', '>= 20.0.0'
 - 'openstack-identity', '>= 20.0.0'
@@ -143,7 +143,7 @@ License and Author
 +-----------------+--------------------------------------------------+
 | **Copyright**   | Copyright (c) 2013-2014, SUSE Linux GmbH         |
 +-----------------+--------------------------------------------------+
-| **Copyright**   | Copyright (c) 2019-2021, Oregon State University |
+| **Copyright**   | Copyright (c) 2019-2020, Oregon State University |
 +-----------------+--------------------------------------------------+
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may
