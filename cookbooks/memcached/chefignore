@@ -9,7 +9,10 @@ ehthumbs.db
 Icon?
 nohup.out
 Thumbs.db
-.envrc
+
+# SASS #
+########
+.sass-cache
 
 # EDITORS #
 ###########
@@ -23,11 +26,10 @@ Thumbs.db
 *.tmproj
 *~
 \#*
+mkmf.log
 REVISION
 TAGS*
 tmtags
-.vscode
-.editorconfig
 
 ## COMPILED ##
 ##############
@@ -40,29 +42,22 @@ tmtags
 *.so
 */rdoc/
 a.out
-mkmf.log
 
 # Testing #
 ###########
 .circleci/*
 .codeclimate.yml
-.delivery/*
 .foodcritic
 .kitchen*
-.mdlrc
-.overcommit.yml
 .rspec
 .rubocop.yml
 .travis.yml
 .watchr
-.yamllint
 azure-pipelines.yml
-Dangerfile
 examples/*
 features/*
 Guardfile
 kitchen.yml*
-mlc_config.json
 Procfile
 Rakefile
 spec/*
@@ -75,7 +70,6 @@ test/*
 .gitconfig
 .github/*
 .gitignore
-.gitkeep
 .gitmodules
 .svn
 */.bzr/*
@@ -101,13 +95,12 @@ Gemfile.lock
 Policyfile.rb
 Policyfile.lock.json
 
-# Documentation #
+# Cookbooks #
 #############
-CODE_OF_CONDUCT*
+CHANGELOG*
 CONTRIBUTING*
-documentation/*
 TESTING*
-UPGRADING*
+CODE_OF_CONDUCT*
 
 # Vagrant #
 ###########

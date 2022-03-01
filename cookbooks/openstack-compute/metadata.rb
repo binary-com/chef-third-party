@@ -7,13 +7,13 @@ license          'Apache-2.0'
 description      'The OpenStack Compute service Nova.'
 version          '20.0.0'
 
-chef_version '>= 16.0'
+chef_version '>= 15.0'
 
 %w(ubuntu redhat centos).each do |os|
   supports os
 end
 
-depends 'apache2', '~> 8.6'
+depends 'apache2', '~> 8.1'
 depends 'openstack-common', '>= 20.0.0'
 depends 'openstack-identity', '>= 20.0.0'
 depends 'openstack-image', '>= 20.0.0'

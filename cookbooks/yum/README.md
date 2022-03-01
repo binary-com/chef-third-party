@@ -1,16 +1,8 @@
 # yum Cookbook
 
-[![Cookbook Version](https://img.shields.io/cookbook/v/yum.svg)](https://supermarket.chef.io/cookbooks/yum)
-[![CI State](https://github.com/sous-chefs/yum/workflows/ci/badge.svg)](https://github.com/sous-chefs/yum/actions?query=workflow%3Aci)
-[![OpenCollective](https://opencollective.com/sous-chefs/backers/badge.svg)](#backers)
-[![OpenCollective](https://opencollective.com/sous-chefs/sponsors/badge.svg)](#sponsors)
-[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Build Status](https://travis-ci.org/chef-cookbooks/yum.svg?branch=master)](http://travis-ci.org/chef-cookbooks/yum) [![Cookbook Version](https://img.shields.io/cookbook/v/yum.svg)](https://supermarket.chef.io/cookbooks/yum)
 
-The Yum cookbook exposes the `yum_globalconfig` resource which allows a user to control global yum behavior. This resources aims to allow the user to configure all options listed in the `yum.conf` man page, found at <http://man7.org/linux/man-pages/man5/yum.conf.5.html>
-
-## Maintainers
-
-This cookbook is maintained by the Sous Chefs. The Sous Chefs are a community of Chef cookbook maintainers working together to maintain important cookbooks. If you’d like to know more please visit [sous-chefs.org](https://sous-chefs.org/) or come chat with us on the Chef Community Slack in [#sous-chefs](https://chefcommunity.slack.com/messages/C2V7B88SF).
+The Yum cookbook exposes the `yum_globalconfig` resource which allows a user to control global yum behavior. This resources aims to allow the user to configure all options listed in the `yum.conf` man page, found at <http://linux.die.net/man/5/yum.conf>
 
 ## Requirements
 
@@ -21,7 +13,7 @@ This cookbook is maintained by the Sous Chefs. The Sous Chefs are a community of
 
 ### Chef
 
-- Chef 15.3+
+- Chef 12.14+
 
 ### Cookbooks
 
@@ -29,12 +21,43 @@ This cookbook is maintained by the Sous Chefs. The Sous Chefs are a community of
 
 ## Resources
 
-- [`yum_globalconfig`](documentation/yum_globalconfig.md)
-- [`dnf_module`](documentation/dnf_module.md)
+### yum_globalconfig
 
-## Recipes (deprecated)
+This renders a template with global yum configuration parameters. The default recipe uses it to render `/etc/yum.conf`. It is flexible enough to be used in other scenarios, such as building RPMs in isolation by modifying `installroot`.
+
+#### Example
+
+```ruby
+yum_globalconfig '/my/chroot/etc/yum.conf' do
+  cachedir '/my/chroot/etc/yum.conf'
+  keepcache 'yes'
+  debuglevel '2'
+  installroot '/my/chroot'
+  action :create
+end
+```
+
+#### Properties
+
+`yum_globalconfig` can take most of the same parameters as a `yum_repository`, plus more, too numerous to describe here. Below are a few of the more commonly used ones. For a complete list, please consult the `yum.conf` man page, found here: <http://linux.die.net/man/5/yum.conf>
+
+- `cachedir` - Directory where yum should store its cache and db files. The default is '/var/cache/yum'.
+- `keepcache` - Either `true` or `false`. Determines whether or not yum keeps the cache of headers and packages after successful installation. Default is `false`
+- `debuglevel` - Debug message output level. Practical range is 0-10\. Default is '2'.
+- `exclude` - List of packages to exclude from updates or installs. This should be a space separated list. Shell globs using wildcards (eg. * and ?) are allowed.
+- `installonlypkgs` = List of package provides that should only ever be installed, never updated. Kernels in particular fall into this category. Defaults to kernel, kernel-bigmem, kernel-enterprise, kernel-smp, kernel-debug, kernel-unsupported, kernel-source, kernel-devel, kernel-PAE, kernel-PAE-debug.
+- `logfile` - Full directory and file name for where yum should write its log file.
+- `exactarch` - Either `true` or `false`. Set to `true` to make 'yum update' only update the architectures of packages that you have installed. ie: with this enabled yum will not install an i686 package to update an x86_64 package. Default is `true`
+- `gpgcheck` - Either `true` or `false`. This tells yum whether or not it should perform a GPG signature check on the packages gotten from this repository.
+
+### yum_repository
+
+This resource is now provided by chef-client 12.14 and later and has been removed from this cookbook. If you require this resource we highly recommend upgrading your chef-client, but if that is not an option you can pin the 4.X yum cookbook.
+
+## Recipes
 
 - `default` - Configures `yum_globalconfig[/etc/yum.conf]` with values found in node attributes at `node['yum']['main']`
+- `dnf_yum_compat` - Installs the yum package using dnf on Fedora systems to provide support for the package resource in recipes. This is necessary on chef-client < 12.18\. This recipe should be 1st on a Fedora runlist
 
 ## Attributes
 
@@ -83,27 +106,26 @@ Recipes from older versions of this cookbook have been moved individual cookbook
 
 Put `depends 'yum'` in your metadata.rb to gain access to the yum_repository resource.
 
-## Contributors
+## License & Authors
 
-This project exists thanks to all the people who [contribute.](https://opencollective.com/sous-chefs/contributors.svg?width=890&button=false)
+- Author:: Eric G. Wolfe
+- Author:: Matt Ray ([matt@chef.io](mailto:matt@chef.io))
+- Author:: Joshua Timberman ([joshua@chef.io](mailto:joshua@chef.io))
+- Author:: Sean OMeara ([someara@chef.io](mailto:someara@chef.io))
 
-### Backers
+```text
+Copyright:: 2011 Eric G. Wolfe
+Copyright:: 2013-2017 Chef Software, Inc.
 
-Thank you to all our backers!
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-![https://opencollective.com/sous-chefs#backers](https://opencollective.com/sous-chefs/backers.svg?width=600&avatarHeight=40)
+    http://www.apache.org/licenses/LICENSE-2.0
 
-### Sponsors
-
-Support this project by becoming a sponsor. Your logo will show up here with a link to your website.
-
-![https://opencollective.com/sous-chefs/sponsor/0/website](https://opencollective.com/sous-chefs/sponsor/0/avatar.svg?avatarHeight=100)
-![https://opencollective.com/sous-chefs/sponsor/1/website](https://opencollective.com/sous-chefs/sponsor/1/avatar.svg?avatarHeight=100)
-![https://opencollective.com/sous-chefs/sponsor/2/website](https://opencollective.com/sous-chefs/sponsor/2/avatar.svg?avatarHeight=100)
-![https://opencollective.com/sous-chefs/sponsor/3/website](https://opencollective.com/sous-chefs/sponsor/3/avatar.svg?avatarHeight=100)
-![https://opencollective.com/sous-chefs/sponsor/4/website](https://opencollective.com/sous-chefs/sponsor/4/avatar.svg?avatarHeight=100)
-![https://opencollective.com/sous-chefs/sponsor/5/website](https://opencollective.com/sous-chefs/sponsor/5/avatar.svg?avatarHeight=100)
-![https://opencollective.com/sous-chefs/sponsor/6/website](https://opencollective.com/sous-chefs/sponsor/6/avatar.svg?avatarHeight=100)
-![https://opencollective.com/sous-chefs/sponsor/7/website](https://opencollective.com/sous-chefs/sponsor/7/avatar.svg?avatarHeight=100)
-![https://opencollective.com/sous-chefs/sponsor/8/website](https://opencollective.com/sous-chefs/sponsor/8/avatar.svg?avatarHeight=100)
-![https://opencollective.com/sous-chefs/sponsor/9/website](https://opencollective.com/sous-chefs/sponsor/9/avatar.svg?avatarHeight=100)
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```

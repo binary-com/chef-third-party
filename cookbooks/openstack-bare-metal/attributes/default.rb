@@ -1,9 +1,10 @@
+# encoding: UTF-8
 #
 # Cookbook:: openstack-bare-metal
 # Attributes:: default
 #
-# Copyright:: 2015-2021, IBM, Corp
-# Copyright:: 2019-2021, Oregon State University
+# Copyright:: 2015, IBM, Corp
+# Copyright:: 2019-2020, Oregon State University
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -104,11 +105,11 @@ default['openstack']['bare_metal']['ssl']['ciphers'] = ''
 case node['platform_family']
 when 'fedora', 'rhel'
   default['openstack']['bare_metal']['platform'] = {
-    'ironic_api_packages' => %w(openstack-ironic-api),
+    'ironic_api_packages' => %w(openstack-ironic-api mod_wsgi),
     'ironic_api_service' => 'openstack-ironic-api',
     'ironic_conductor_packages' => %w(openstack-ironic-conductor ipmitool),
     'ironic_conductor_service' => 'openstack-ironic-conductor',
-    'ironic_common_packages' => node['platform_version'].to_i >= 8 ? %w(openstack-ironic-common python3-ironicclient) : %w(openstack-ironic-common python-ironicclient),
+    'ironic_common_packages' => %w(openstack-ironic-common python-ironicclient),
   }
 when 'debian'
   default['openstack']['bare_metal']['platform'] = {

@@ -23,8 +23,7 @@ default['openstack']['placement']['ssl']['protocol'] = ''
 default['openstack']['placement']['ssl']['ciphers'] = ''
 
 # Apache wsgi settings for vhost
-# https://docs.openstack.org/releasenotes/nova/stein.html#known-issues
-default['openstack']['placement']['threads'] = 1
+default['openstack']['placement']['threads'] = 10
 default['openstack']['placement']['processes'] = 2
 
 # Platform specific settings
@@ -36,7 +35,7 @@ when 'rhel' # :pragma-foodcritic: ~FC024 - won't fix this
   }
 when 'debian'
   default['openstack']['placement']['platform'] = {
-    'placement_packages' => %w(python3-placement),
+    'placement_packages' => %w(python3-placement libapache2-mod-wsgi-py3),
     'placement_service' => 'placement-api',
   }
 end
