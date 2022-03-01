@@ -1,12 +1,9 @@
-unified_mode true
-
+# frozen_string_literal: true
 ACL = Struct.new(:name, :entries)
 
-property :bind_config, String,
-          default: 'default',
-          description: 'Name of the bind_config resource to notify actions on'
-property :entries, Array,
-          description: 'An array of strings representing each acl entry'
+property :bind_config, String, default: 'default'
+
+property :entries, Array
 
 action :create do
   options_template.variables[:acls] << ACL.new(

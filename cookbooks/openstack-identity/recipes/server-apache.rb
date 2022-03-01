@@ -2,8 +2,8 @@
 # Cookbook:: openstack-identity
 # Recipe:: server-apache
 #
-# Copyright:: 2015-2021, IBM Corp. Inc.
-# Copyright:: 2016-2021, Oregon State University
+# Copyright:: 2015, IBM Corp. Inc.
+# Copyright:: 2016-2020, Oregon State University
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ service 'keystone' do
 end
 
 # disable default keystone config file from UCA package
-apache2_site platform_options['keystone_apache2_site'] do
+apache2_site 'keystone' do
   action :disable
   only_if { platform_family?('debian') }
 end
@@ -228,7 +228,7 @@ apache2_install 'openstack' do
   listen "#{bind_address}:#{bind_service['port']}"
 end
 
-apache2_mod_wsgi 'openstack'
+apache2_module 'wsgi'
 apache2_module 'ssl' if node['openstack']['identity']['ssl']['enabled']
 
 # create the keystone apache directory

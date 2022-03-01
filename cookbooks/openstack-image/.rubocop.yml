@@ -1,4 +1,1 @@
-Chef/Modernize/FoodcriticComments:
-  Enabled: true
-Chef/Style/CopyrightCommentFormat:
-  Enabled: true
+inherit_from: .rubocop_todo.yml
