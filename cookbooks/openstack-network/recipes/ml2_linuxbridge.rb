@@ -2,8 +2,8 @@
 # Cookbook:: openstack-network
 # Recipe:: ml2_linuxbridge
 #
-# Copyright:: 2013-2021, AT&T
-# Copyright:: 2016-2021, Oregon State University
+# Copyright:: 2013, AT&T
+# Copyright:: 2016-2020, Oregon State University
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,8 +37,14 @@ package platform_options['neutron_linuxbridge_agent_packages'] do
 end
 
 node.default['openstack']['network']['plugins']['linuxbridge'].tap do |lb|
-  lb['path'] = '/etc/neutron/plugins/ml2'
-  lb['filename'] = 'linuxbridge_agent.ini'
+  case node['platform_family']
+  when 'fedora', 'rhel'
+    lb['path'] = '/etc/neutron/plugins/ml2'
+    lb['filename'] = 'linuxbridge_agent.ini'
+  when 'debian'
+    lb['path'] = '/etc/neutron/plugins/linuxbridge'
+    lb['filename'] = 'linuxbridge_conf.ini'
+  end
   lb['conf']['securitygroup']['firewall_driver'] = 'neutron.agent.linux.iptables_firewall.IptablesFirewallDriver'
 end
 

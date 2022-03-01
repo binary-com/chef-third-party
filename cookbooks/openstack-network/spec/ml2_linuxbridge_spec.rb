@@ -44,13 +44,19 @@ describe 'openstack-network::ml2_linuxbridge' do
       end
     end
 
+    pkgs =
+      %w(
+        neutron-plugin-linuxbridge
+        neutron-plugin-linuxbridge-agent
+      )
+
     it do
-      expect(chef_run).to upgrade_package 'neutron-linuxbridge-agent'
+      expect(chef_run).to upgrade_package(pkgs)
     end
 
     it do
       expect(chef_run).to enable_service('neutron-plugin-linuxbridge-agent').with(
-        service_name: 'neutron-linuxbridge-agent',
+        service_name: 'neutron-plugin-linuxbridge-agent',
         supports: {
           status: true,
           restart: true,

@@ -42,7 +42,7 @@ On ArchLinux, if you are using the `apache2::mod_auth_openid` recipe, you also n
 
 The following platforms and versions are tested and supported using [test-kitchen](http://kitchen.ci/)
 
-- Ubuntu 18.04 / 20.04
+- Ubuntu 16.04 / 18.04
 - Debian 9/10
 - CentOS 7+
 - Fedora Latest
@@ -54,7 +54,7 @@ Apache2.4 support for Centos 6 is not officially supported.
 
 ## Usage
 
-It is recommended to create a project or organization specific [wrapper cookbook](https://blog.chef.io/doing-wrapper-cookbooks-right) and add the desired custom resources to the run list of a node. Depending on your environment, you may have multiple roles that use different recipes from this cookbook. Adjust any attributes as desired.
+It is recommended to create a project or organization specific [wrapper cookbook](https://www.chef.io/blog/2013/12/03/doing-wrapper-cookbooks-right/) and add the desired custom resources to the run list of a node. Depending on your environment, you may have multiple roles that use different recipes from this cookbook. Adjust any attributes as desired.
 
 ```ruby
 # service['apache2'] is defined in the apache2_default_install resource but other resources are currently unable to reference it.  To work around this issue, define the following helper in your cookbook:
@@ -92,7 +92,6 @@ Example wrapper cookbooks:
 - [module](https://github.com/sous-chefs/apache2/blob/master/documentation/resource_apache2_module.md)
 - [mod_php](https://github.com/sous-chefs/apache2/blob/master/documentation/resource_apache2_mod_php.md)
 - [mod_wsgi](https://github.com/sous-chefs/apache2/blob/master/documentation/resource_apache2_mod_wsgi.md)
-- [mod_auth_cas](https://github.com/sous-chefs/apache2/blob/master/documentation/resource_apache2_mod_auth_cas.md)
 
 ## Contributors
 

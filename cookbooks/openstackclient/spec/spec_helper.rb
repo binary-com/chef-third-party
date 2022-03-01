@@ -1,22 +1,29 @@
-# Encoding: utf-8
-require 'rspec/expectations'
+
+#
+# Copyright:: 2016 cloudbau GmbH
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 require 'chefspec'
 require 'chefspec/berkshelf'
-require 'chef/application'
+require 'fog/openstack'
 
-LOG_LEVEL = :fatal
+RSpec.configure do |config|
+  config.color = true
+  config.log_level = :error
+end
+
 UBUNTU_OPTS = {
   platform: 'ubuntu',
-  version: '14.04',
-  log_level: ::LOG_LEVEL
-}
-REDHAT_OPTS = {
-  platform: 'redhat',
-  version: '7.1',
-  log_level: LOG_LEVEL
-}
-::CHEFSPEC_OPTS = {
-  log_level: ::LOG_LEVEL
-}
-
-at_exit { ChefSpec::Coverage.report! }
+  version: '18.04',
+}.freeze

@@ -41,15 +41,17 @@ platforms:
       image: dokken/centos-8
       pid_one_command: /usr/lib/systemd/systemd
 
-  - name: centos-stream-8
-    driver:
-      image: dokken/centos-stream-8
-      pid_one_command: /usr/lib/systemd/systemd
-
   - name: fedora-latest
     driver:
       image: dokken/fedora-latest
       pid_one_command: /usr/lib/systemd/systemd
+
+  - name: ubuntu-16.04
+    driver:
+      image: dokken/ubuntu-16.04
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - RUN /usr/bin/apt-get update
 
   - name: ubuntu-18.04
     driver:
@@ -65,6 +67,11 @@ platforms:
       intermediate_instructions:
         - RUN /usr/bin/apt-get update
 
+  - name: opensuse-leap-15
+    driver:
+      image: dokken/opensuse-leap-15
+      pid_one_command: /bin/systemd
+
 suites:
   - name: service-docker
     run_list:
@@ -79,7 +86,9 @@ suites:
     run_list:
       - recipe[etcd_test::service_systemd_multi]
   - name: keys
-    includes: ['centos-7']
+    includes: [
+      'centos-7'
+    ]
     run_list:
       - recipe[etcd_test::keys]
   - name: auto

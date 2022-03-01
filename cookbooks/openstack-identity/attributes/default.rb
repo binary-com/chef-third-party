@@ -2,13 +2,13 @@
 # Cookbook:: openstack-identity
 # Recipe:: default
 #
-# Copyright:: 2012-2021, AT&T Services, Inc.
-# Copyright:: 2013-2021, Chef Software, Inc.
-# Copyright:: 2013-2021, IBM Corp.
-# Copyright:: 2017-2021, x-ion GmbH
-# Copyright:: 2018-2021, Workday, Inc.
-# Copyright:: 2019-2021, x-ion GmbH
-# Copyright:: 2016-2021, Oregon State University
+# Copyright:: 2012-2013, AT&T Services, Inc.
+# Copyright:: 2013, Opscode, Inc.
+# Copyright:: 2013, IBM Corp.
+# Copyright:: 2017, x-ion GmbH
+# Copyright:: 2018, Workday, Inc.
+# Copyright:: 2019, x-ion GmbH
+# Copyright:: 2016-2020, Oregon State University
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -106,8 +106,6 @@ default['openstack']['identity']['ssl']['chainfile'] = nil
 default['openstack']['identity']['ssl']['ca_certs'] = "#{node['openstack']['identity']['ssl']['basedir']}/certs/sslca.pem"
 # path of the CA cert files for SSL (Apache)
 default['openstack']['identity']['ssl']['ca_certs_path'] = "#{node['openstack']['identity']['ssl']['basedir']}/certs/"
-# (optional) path to certificate-revocation lists (Apache)
-default['openstack']['identity']['ssl']['ca_revocation_path'] = nil
 
 # Fernet keys to read from databags/vaults. This should be changed in the
 # environment when rotating keys (with the defaults below, the items
@@ -139,46 +137,25 @@ default['openstack']['identity']['group'] = 'keystone'
 
 # platform defaults
 case node['platform_family']
-when 'rhel'
+when 'fedora', 'rhel' # :pragma-foodcritic: ~FC024 - won't fix this
   # platform specific package and service name options
-  case node['platform_version'].to_i
-  when 8
-    default['openstack']['identity']['platform'] = {
-      'memcache_python_packages' => ['python3-memcached'],
-      # TODO(ramereth): python3-urllib3 is here to workaround an issue if
-      # it's already been installed from the base repository which is
-      # incompatible with what's shipped with RDO. This should be removed
-      # once fixed upstream.
-      'keystone_packages' =>
-        %w(
-          openstack-keystone
-          openstack-selinux
-          python3-urllib3
-        ),
-      'keystone_apache2_site' => 'keystone', # currently unused on RHEL
-      'keystone_service' => 'openstack-keystone',
-      'keystone_process_name' => 'keystone-all',
-      'package_options' => '',
-    }
-  when 7
-    default['openstack']['identity']['platform'] = {
-      'memcache_python_packages' => ['python-memcached'],
-      # TODO(ramereth): python2-urllib3 is here to workaround an issue if
-      # it's already been installed from the base repository which is
-      # incompatible with what's shipped with RDO. This should be removed
-      # once fixed upstream.
-      'keystone_packages' =>
-        %w(
-          openstack-keystone
-          openstack-selinux
-          python2-urllib3
-        ),
-      'keystone_apache2_site' => 'keystone', # currently unused on RHEL
-      'keystone_service' => 'openstack-keystone',
-      'keystone_process_name' => 'keystone-all',
-      'package_options' => '',
-    }
-  end
+  default['openstack']['identity']['platform'] = {
+    'memcache_python_packages' => ['python-memcached'],
+    # TODO(ramereth): python2-urllib3 is here to workaround an issue if
+    # it's already been installed from the base repository which is
+    # incompatible with what's shipped with RDO. This should be removed
+    # once fixed upstream.
+    'keystone_packages' =>
+      %w(
+        mod_wsgi
+        openstack-keystone
+        openstack-selinux
+        python2-urllib3
+      ),
+    'keystone_service' => 'openstack-keystone',
+    'keystone_process_name' => 'keystone-all',
+    'package_options' => '',
+  }
 when 'debian'
   # platform specific package and service name options
   default['openstack']['identity']['platform'] = {
@@ -186,9 +163,9 @@ when 'debian'
     'keystone_packages' =>
       %w(
         keystone
+        libapache2-mod-wsgi-py3
         python3-keystone
       ),
-    'keystone_apache2_site' => platform?('ubuntu') ? 'keystone' : 'wsgi-keystone',
     'keystone_service' => 'keystone',
     'keystone_process_name' => 'keystone-all',
     'package_overrides' => '',
