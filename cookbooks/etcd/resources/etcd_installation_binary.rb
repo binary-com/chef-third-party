@@ -1,11 +1,23 @@
+include EtcdCookbook::EtcdCommonProperties
+
+resource_name :etcd_installation_binary
 provides :etcd_installation_binary
+
 provides :etcd_installation
-unified_mode true
-use 'partial/_common'
+
+#####################
+# resource properties
+#####################
 
 property :checksum, String, default: lazy { default_checksum }, desired_state: false
 property :source, String, default: lazy { default_source }, desired_state: false
 property :version, String, default: '3.2.15', desired_state: false
+
+default_action :create
+
+#########
+# actions
+#########
 
 action :create do
   package 'tar'
@@ -39,6 +51,10 @@ action :delete do
     action :delete
   end
 end
+
+################
+# helper methods
+################
 
 def file_cache_path
   Chef::Config[:file_cache_path]

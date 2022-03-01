@@ -1,48 +1,39 @@
----
 driver:
   name: dokken
-  privileged: true  # because Docker and SystemD/Upstart
+  chef_version: 12.14.89
+  privileged: true # because Docker and SystemD/Upstart
 
 transport:
   name: dokken
 
 provisioner:
   name: dokken
-  chef_version: <%= ENV['CHEF_VERSION'] || 'current' %>
-  chef_license: accept-no-persist
+  deprecations_as_errors: true
+
+verifier:
+  name: inspec
 
 platforms:
-  - name: amazonlinux-2
-    driver:
-      image: dokken/amazonlinux-2
-      pid_one_command: /usr/lib/systemd/systemd
+- name: centos-6
+  driver:
+    image: centos:6
 
-  - name: centos-7
-    driver:
-      image: dokken/centos-7
-      pid_one_command: /usr/lib/systemd/systemd
+- name: centos-7
+  driver:
+    image: centos:7
 
-  - name: centos-8
-    driver:
-      image: dokken/centos-8
-      pid_one_command: /usr/lib/systemd/systemd
+- name: fedora-latest
+  driver:
+    image: fedora:latest
 
-  - name: centos-stream-8
-    driver:
-      image: dokken/centos-stream-8
-      pid_one_command: /usr/lib/systemd/systemd
-
-  - name: oraclelinux-7
-    driver:
-      image: dokken/oraclelinux-7
-      pid_one_command: /usr/lib/systemd/systemd
-
-  - name: oraclelinux-8
-    driver:
-      image: dokken/oraclelinux-8
-      pid_one_command: /usr/lib/systemd/systemd
-
-  - name: fedora-latest
-    driver:
-      image: dokken/fedora-latest
-      pid_one_command: /usr/lib/systemd/systemd
+suites:
+  - name: default
+    run_list:
+      - recipe[yum::default]
+      - recipe[yum_test::test_globalconfig_two]
+    excludes: fedora-latest
+  - name: dnf_compat
+    run_list:
+      - recipe[yum::dnf_yum_compat]
+      - recipe[yum_test::test_dnf_compat]
+    includes: fedora-latest

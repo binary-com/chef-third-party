@@ -9,24 +9,17 @@ RSpec.configure do |config|
   config.log_level = :warn
 end
 
-REDHAT_7 = {
+REDHAT_OPTS = {
   platform: 'redhat',
   version: '7',
 }.freeze
-
-REDHAT_8 = {
-  platform: 'redhat',
-  version: '8',
-}.freeze
-
-ALL_RHEL = [
-  REDHAT_7,
-  REDHAT_8,
-].freeze
-
 UBUNTU_OPTS = {
   platform: 'ubuntu',
   version: '18.04',
+}.freeze
+CENTOS_OPTS = {
+  platform: 'centos',
+  version: '7',
 }.freeze
 
 shared_context 'neutron-stubs' do

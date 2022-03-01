@@ -2,36 +2,6 @@
 
 This file is used to list changes made in each version of the lvm cookbook.
 
-## Unreleased
-
-## 5.2.1 - *2021-11-23*
-
-- Add CentOS Stream 8 to CI pipeline
-- Update chef-ruby-lvm-attrib gem to 0.3.9
-
-## 5.2.0 - *2021-10-22*
-
-- Use default Chef source for gems
-
-## 5.1.0 - *2021-10-14*
-
-- Sous Chefs adoption
-- Standardise files with files in sous-chefs/repo-management
-- Enable `unified_mode` if supported
-- resolved cookstyle error: test/fixtures/cookbooks/test/resources/loop_devices.rb:1:1 refactor: `Chef/Deprecations/ResourceWithoutUnifiedTrue`
-- Move resource documentation into individual files out of README
-- Migrate to InSpec tests
-- Install thin-provisioning-tools on Debian-based systems
-- Add GitHub CI
-
-## 5.0.7 (2021-07-22)
-
-- Update the attributes gem version from 0.3.6 to 0.3.7 [@wheatevo](https://github.com/wheatevo)
-
-## 5.0.6 (2021-02-09)
-
-- Need to add explicit parameters for super called from action methods - [@b-dean](https://github.com/b-dean)
-
 ## 5.0.5 (2020-11-13)
 
 - Update the attributes gem version from 0.3.5 to 0.3.6 [@gaelik](https://github.com/gaelik)
@@ -206,8 +176,8 @@ The 5.0 release of this cookbook no longer cleans up the legacy di-ruby-lvm-attr
 
 - fix false coerce float error
 
-## 4.0.4 (2016-12-20)
 
+## 4.0.4 (2016-12-20)
 - Remove deprecation notices introduced in 4.0.1
 
 ## 4.0.3 (2016-12-19)
@@ -230,19 +200,16 @@ The 5.0 release of this cookbook no longer cleans up the legacy di-ruby-lvm-attr
 - This cookbook has switched from the di-ruby-lvm/di-ruby-lvm-attrib gems to chef-ruby-lvm/chef-ruby-lvm-attrib forks. This was done to ensure that the latest lvm releases are always supported by the cookbooks and brings with it support for RHEL 7.3. If you have previously pinned gem versions you will need to update to the new attributes.
 
 ## Other changes
-
 - Added "yes_flag" also to PV and LV create"
 - Format and reword the readme
 - Remove need for apt for testing
 - Fix Suse support if using ext filesystems by installing the e2fsprogs package if necessary
 
 ## 3.1.0 (2016-10-26)
-
 - Remove chef 11 compatibility from chef_gem install
 - Update to di-ruby-lvm-attrib 0.0.27
 
 ## 3.0.0 (2016-09-16)
-
 - Testing updates
 - update to add chefspec runner methods
 - Require Chef 12.1+

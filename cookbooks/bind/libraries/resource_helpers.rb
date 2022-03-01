@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 module BindCookbook
   module ResourceHelpers
@@ -22,12 +23,6 @@ module BindCookbook
     def config_template
       with_run_context :root do
         find_resource!(:template, find_bind_config.conf_file)
-      end
-    end
-
-    def apparmor_template
-      with_run_context :root do
-        find_resource!(:template, '/etc/apparmor.d/local/usr.sbin.named')
       end
     end
 

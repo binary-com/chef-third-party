@@ -2,10 +2,10 @@
 # Cookbook:: openstack-compute
 # Recipe:: nova-common
 #
-# Copyright:: 2012-2021, Rackspace US, Inc.
-# Copyright:: 2013-2021, Craig Tracey <craigtracey@gmail.com>
-# Copyright:: 2014-2021, SUSE Linux, GmbH.
-# Copyright:: 2019-2021, Oregon State University
+# Copyright:: 2012, Rackspace US, Inc.
+# Copyright:: 2013, Craig Tracey <craigtracey@gmail.com>
+# Copyright:: 2014, SUSE Linux, GmbH.
+# Copyright:: 2019-2020, Oregon State University
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -104,13 +104,6 @@ vnc_bind = node['openstack']['bind_service']['all']['compute-vnc']
 vnc_bind_address = bind_address vnc_bind
 vnc_proxy_bind = node['openstack']['bind_service']['all']['compute-vnc-proxy']
 vnc_proxy_bind_address = bind_address vnc_proxy_bind
-spicehtml5_endpoint = public_endpoint 'compute-spicehtml5'
-spicehtml5_bind = node['openstack']['bind_service']['all']['compute-spicehtml5']
-spicehtml5_bind_address = bind_address spicehtml5_bind
-spice_bind = node['openstack']['bind_service']['all']['compute-spice']
-spice_bind_address = bind_address spice_bind
-spice_proxy_bind = node['openstack']['bind_service']['all']['compute-spice-proxy']
-spice_proxy_bind_address = bind_address spice_proxy_bind
 compute_api_endpoint = internal_endpoint 'compute-api'
 compute_metadata_api_bind = node['openstack']['bind_service']['all']['compute-metadata-api']
 compute_metadata_api_bind_address = bind_address compute_metadata_api_bind
@@ -122,7 +115,6 @@ image_endpoint = internal_endpoint 'image_api'
 
 Chef::Log.debug("openstack-compute::nova-common:identity_endpoint|#{identity_endpoint}")
 Chef::Log.debug("openstack-compute::nova-common:novnc_endpoint|#{novnc_endpoint}")
-Chef::Log.debug("openstack-compute::nova-common:spicehtml5_endpoint|#{spicehtml5_endpoint}")
 Chef::Log.debug("openstack-compute::nova-common:compute_api_endpoint|#{compute_api_endpoint}")
 Chef::Log.debug("openstack-compute::nova-common:network_endpoint|#{network_endpoint}")
 Chef::Log.debug("openstack-compute::nova-common:image_endpoint|#{image_endpoint}")
@@ -144,10 +136,6 @@ node.default['openstack']['compute']['conf_secrets']
   get_password 'service', 'openstack-compute'
 
 node.default['openstack']['compute']['conf_secrets']
-  .[]('service_user')['password'] =
-  get_password 'service', 'openstack-compute'
-
-node.default['openstack']['compute']['conf_secrets']
   .[]('placement')['password'] =
   get_password 'service', 'openstack-placement'
 
@@ -156,22 +144,21 @@ node.default['openstack']['compute']['conf'].tap do |conf|
 
   conf['DEFAULT']['metadata_listen'] = compute_metadata_api_bind_address
   conf['DEFAULT']['metadata_listen_port'] = compute_metadata_api_bind['port']
-
+  conf['vnc']['novncproxy_base_url'] = novnc_endpoint.to_s
+  conf['vnc']['novncproxy_host'] = novnc_bind_address
+  conf['vnc']['novncproxy_port'] = novnc_bind['port']
+  conf['vnc']['server_listen'] = vnc_bind_address
+  conf['vnc']['server_proxyclient_address'] = vnc_proxy_bind_address
   unless memcache_servers.empty?
     # Need to set the backend explicitly, see LP bug #1572062
     conf['cache']['backend'] = 'oslo_cache.memcache_pool'
     conf['cache']['enabled'] = 'true'
     conf['cache']['memcache_servers'] = memcache_servers
-    # keystonemiddleware needs its own key for this
-    conf['keystone_authtoken']['memcached_servers'] = memcache_servers
   end
 
   # [keystone_authtoken] section
   conf['keystone_authtoken']['auth_url'] = auth_url
   conf['keystone_authtoken']['www_authenticate_uri'] = auth_url
-
-  # [service_user] section
-  conf['service_user']['auth_url'] = auth_url
 
   # [placement] section
   conf['placement']['auth_url'] = auth_url
@@ -186,29 +173,6 @@ node.default['openstack']['compute']['conf'].tap do |conf|
   # [serial_console] section
   conf['serial_console']['base_url'] = "#{serial_proxy_endpoint.scheme}://#{serial_proxy_endpoint.host}:#{serial_proxy_endpoint.port}"
   conf['serial_console']['proxyclient_address'] = serial_console_bind_address
-
-  # Non-serial consoles
-  case node['openstack']['compute']['console_type']
-  when 'spice'
-    conf['vnc']['enabled'] = false
-    conf['spice']['enabled'] = true
-    conf['spice']['html5proxy_base_url'] = spicehtml5_endpoint.to_s
-    conf['spice']['html5proxy_host'] = spicehtml5_bind_address
-    conf['spice']['html5proxy_port'] = spicehtml5_bind['port']
-    conf['spice']['server_listen'] = spice_bind_address
-    conf['spice']['server_proxyclient_address'] = spice_proxy_bind_address
-  when 'vnc'
-    # No need to explicitly disable other types, according to Nova documentation
-    # VNC takes precedence if enabled.
-    conf['vnc']['enabled'] = true
-    conf['vnc']['novncproxy_base_url'] = novnc_endpoint.to_s
-    conf['vnc']['novncproxy_host'] = novnc_bind_address
-    conf['vnc']['novncproxy_port'] = novnc_bind['port']
-    conf['vnc']['server_listen'] = vnc_bind_address
-    conf['vnc']['server_proxyclient_address'] = vnc_proxy_bind_address
-  else
-    Chef::Log.debug("openstack-compute::nova-common:console_type #{node['openstack']['compute']['console_type']} unknown, no auto-configuration")
-  end
 end
 
 # merge all config options and secrets to be used in nova.conf

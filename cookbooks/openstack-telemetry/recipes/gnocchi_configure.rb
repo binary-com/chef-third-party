@@ -2,7 +2,7 @@
 # Cookbook:: openstack-telemetry
 # Recipe:: gnocchi_configure
 #
-# Copyright:: 2019-2021, Oregon State University
+# Copyright:: 2019-2020, Oregon State University
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -127,7 +127,7 @@ else
   end
 end
 
-apache2_mod_wsgi 'gnocchi'
+apache2_module 'wsgi'
 apache2_module 'ssl' if node['openstack']['telemetry_metric']['ssl']['enabled']
 
 # create the gnocchi-api apache directory
@@ -139,7 +139,7 @@ directory gnocchi_apache_dir do
 end
 
 gnocchi_server_entry = "#{gnocchi_apache_dir}/app"
-# NOTE: Using lazy here as the wsgi file is not available until after
+# Note: Using lazy here as the wsgi file is not available until after
 # the gnocchik-api package is installed during execution phase.
 file gnocchi_server_entry do
   content lazy { IO.read(platform['gnocchi-api_wsgi_file']) }
