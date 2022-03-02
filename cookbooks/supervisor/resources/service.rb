@@ -49,7 +49,7 @@ property :stderr_capture_maxbytes, kind_of: String, default: '0'
 property :stderr_events_enabled, kind_of: [TrueClass, FalseClass], default: false
 property :environment, kind_of: Hash, default: {}
 property :directory, kind_of: [String, NilClass], default: nil
-property :umask, kind_of: [NilClass, String], default: nil
+property :umask, kind_of: [NilClass, String], default: '0644'
 property :serverurl, kind_of: String, default: 'AUTO'
 
 property :eventlistener, kind_of: [TrueClass, FalseClass], default: false
