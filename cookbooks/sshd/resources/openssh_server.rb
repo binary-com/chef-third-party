@@ -19,6 +19,7 @@
 #
 
 resource_name :openssh_server
+provides :openssh_server
 
 property :name, String
 property :sshd_config, Hash, default: {}
