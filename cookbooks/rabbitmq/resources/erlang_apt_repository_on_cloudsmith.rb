@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 #
 # Cookbook Name:: rabbitmq
-# Resource:: erlang_apt_repository_on_bintray
+# Resource:: erlang_apt_repository_on_cloudsmith
 #
-# Copyright 2019, Pivotal Software, Inc.
+# Copyright 2019-2021, VMware, Inc. or its affiliates
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,15 +18,15 @@
 # limitations under the License.
 #
 
+unified_mode true if respond_to?(:unified_mode)
+
 actions :add, :remove
 default_action :add
 
-attribute :uri, String, default: 'https://dl.bintray.com/rabbitmq-erlang/debian'
+attribute :uri, String, default: ''
 attribute :distribution, String
-# Available values: 'erlang', 'erlang-21.x', 'erlang-20.x', 'erlang-19.x'
-# 'erlang' means "the latest release"
-attribute :components, Array, default: ['erlang'], required: true
-attribute :key, String, default: '6B73A36E6026DFCA', required: true
+attribute :components, Array, default: ['erlang']
+attribute :key, String, default: ''
 attribute :keyserver, String
 
-attribute :trusted, [TrueClass, FalseClass], default: false
+attribute :trusted, [true, false], default: false

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 #
 # Cookbook Name:: rabbitmq
-# Resource:: erlang_yum_repository_on_bintray
+# Resource:: erlang_yum_repository_on_cloudsmith
 #
-# Copyright 2019, Pivotal Software, Inc.
+# Copyright 2019-2021, VMware, Inc. or its affiliates
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,17 +18,19 @@
 # limitations under the License.
 #
 
+unified_mode true if respond_to?(:unified_mode)
+
 actions :create, :remove
 default_action :create
 
 attribute :baseurl, String, required: true
 
-attribute :gpgcheck, [TrueClass, FalseClass], default: true
+attribute :gpgcheck, [true, false], default: true
 attribute :gpgkey, String
 
-attribute :repo_gpgcheck, [TrueClass, FalseClass], default: true
+attribute :repo_gpgcheck, [true, false], default: true
 attribute :repositoryid, String
-attribute :enabled, [TrueClass, FalseClass], default: true
+attribute :enabled, [true, false], default: true
 attribute :priority, String
 
 attribute :proxy, String
@@ -38,6 +40,6 @@ attribute :proxy_password, String
 attribute :sslcacert, String
 attribute :sslclientcert, String
 attribute :sslclientkey, String
-attribute :sslverify, [TrueClass, FalseClass]
+attribute :sslverify, [true, false]
 
 attribute :timeout

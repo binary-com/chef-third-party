@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 #
 # Cookbook Name:: rabbitmq
-# Provider:: erlang_apt_repository_on_bintray
+# Provider:: erlang_apt_repository_on_cloudsmith
 #
-# Copyright 2019, Pivotal Software, Inc.
+# Copyright 2019-2021, VMware, Inc. or its affiliates
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ action :add do
 
   apt_preference(new_resource.name) do
     glob 'erlang*'
-    pin 'release o=Bintray'
+    pin 'release o=cloudsmith'
     pin_priority '800'
 
     action :add
