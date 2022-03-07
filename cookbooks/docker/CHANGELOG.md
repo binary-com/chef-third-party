@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 10.1.7 - *2022-02-04*
+
+- Remove delivery and move to calling RSpec directly via a reusable workflow
+- Update tested platforms
+
+## 10.1.6 - *2022-01-05*
+
+- Add debian 11 support
+
+## 10.1.5 - *2021-12-20*
+
+- Fix `generate_json` not accepting a variable number of arguments
+
 ## 10.1.4 - *2021-12-05*
 
 - Fix raise when using mixed address families with a network
