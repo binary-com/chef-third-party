@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 KeyOptions = Struct.new(:name, :algorithm, :secret)
 
+unified_mode true
 property :algorithm, String
 property :bind_config, String, default: 'default'
 property :secret, String

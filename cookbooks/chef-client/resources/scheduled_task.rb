@@ -17,7 +17,9 @@
 # limitations under the License.
 #
 
+unified_mode true
 resource_name :chef_client_scheduled_task
+provides :chef_client_scheduled_task
 
 property :user, String, default: 'System', sensitive: true
 property :password, String, sensitive: true

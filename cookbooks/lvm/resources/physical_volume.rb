@@ -17,6 +17,7 @@
 # limitations under the License.
 #
 
+unified_mode true
 property :volume_name, String, name_property: true
 
 # whether to automatically wipe any preexisting signatures

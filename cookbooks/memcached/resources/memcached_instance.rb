@@ -20,6 +20,8 @@
 #
 include Memcached::Helpers
 
+unified_mode true
+
 resource_name :memcached_instance
 provides :memcached_instance
 provides :memcached_instance_systemd # legacy name

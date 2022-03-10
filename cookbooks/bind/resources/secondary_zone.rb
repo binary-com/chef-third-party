@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+unified_mode true
 
 SecondaryZone = Struct.new(:name, :primaries, :options, :view, :file_name)
 

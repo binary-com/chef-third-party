@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+unified_mode true
 property :bind_config, String, default: 'default'
 
 property :destination, String, equal_to: %w(

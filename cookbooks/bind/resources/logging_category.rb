@@ -2,6 +2,7 @@
 
 LoggingCategory = Struct.new(:name, :channels)
 
+unified_mode true
 property :bind_config, String, default: 'default'
 
 property :channels, [Array, String], required: true,

@@ -2,6 +2,7 @@
 
 PrimaryZone = Struct.new(:name, :options, :view, :file_name)
 
+unified_mode true
 property :bind_config, String, default: 'default'
 property :options, Array, default: []
 property :view, String

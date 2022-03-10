@@ -17,6 +17,8 @@
 # limitations under the License.
 #
 
+unified_mode true
+
 property :source, String
 property :base_dir, String, default: '/etc/selinux/local'
 property :force, [true, false], default: false

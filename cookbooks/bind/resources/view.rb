@@ -8,6 +8,7 @@ View = Struct.new(
   :match_recursive_only
 )
 
+unified_mode true
 property :bind_config, String, default: 'default'
 property :options, Array, default: []
 

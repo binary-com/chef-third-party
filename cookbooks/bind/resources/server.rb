@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 ServerOptions = Struct.new(:name, :options)
 
+unified_mode true
 property :bind_config, String, default: 'default'
 property :options, Array, default: []
 

@@ -1,5 +1,7 @@
 include EtcdCookbook::EtcdCommonProperties
 
+unified_mode true
+
 resource_name :etcd_service
 provides :etcd_service
 

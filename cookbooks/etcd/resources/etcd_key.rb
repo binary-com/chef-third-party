@@ -1,5 +1,7 @@
 require 'etcd'
 
+unified_mode true
+
 resource_name :etcd_key
 provides :etcd_key
 

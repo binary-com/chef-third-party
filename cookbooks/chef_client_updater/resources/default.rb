@@ -22,6 +22,8 @@
 # upgrades from Chef 11.x and this pattern should not be copied for any modern
 # cookbook.  This is a poor example cookbook of how to write Chef.
 
+unified_mode true
+
 provides :chef_client_updater
 
 actions [:update]

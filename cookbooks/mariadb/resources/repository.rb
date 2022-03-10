@@ -15,6 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+unified_mode true
+
 provides :mariadb_repository
 
 property :version,            String, default: '10.3'

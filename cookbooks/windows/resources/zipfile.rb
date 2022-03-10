@@ -23,6 +23,8 @@
 
 require 'chef/util/path_helper'
 
+unified_mode true
+
 property :path, String, name_property: true
 property :source, String
 property :overwrite, [true, false], default: false

@@ -3,6 +3,7 @@ require 'digest'
 
 PrimaryZone = Struct.new(:name, :options, :view, :file_name)
 
+unified_mode true
 property :bind_config, String, default: 'default'
 
 property :soa, Hash, default: {}

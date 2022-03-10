@@ -2,6 +2,7 @@
 
 ForwardZone = Struct.new(:name, :forwarders, :forward, :view)
 
+unified_mode true
 property :bind_config, String, default: 'default'
 property :forward, String, default: 'only', equal_to: %w(only first)
 property :forwarders, Array, default: []

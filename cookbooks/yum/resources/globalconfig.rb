@@ -19,6 +19,9 @@
 #
 
 # http://linux.die.net/man/5/yum.conf
+
+unified_mode true
+
 property :alwaysprompt, [true, false]
 property :assumeyes, [true, false]
 property :bandwidth, String, regex: /^\d+/

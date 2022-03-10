@@ -22,6 +22,9 @@
 include Chef::Mixin::PowershellOut
 include Windows::Helper
 
+
+unified_mode true
+
 property :cert_name, String, name_property: true
 property :name_kind, Symbol, equal_to: [:hash, :subject], default: :subject
 property :address, String, default: '0.0.0.0'

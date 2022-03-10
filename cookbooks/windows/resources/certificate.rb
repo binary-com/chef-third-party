@@ -21,6 +21,8 @@
 
 require 'chef/util/path_helper'
 
+unified_mode true
+
 chef_version_for_provides '< 14.7' if respond_to?(:chef_version_for_provides)
 resource_name :windows_certificate
 

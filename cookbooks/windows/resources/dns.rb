@@ -18,6 +18,8 @@
 # limitations under the License.
 #
 
+unified_mode true
+
 actions :create, :delete
 default_action :create
 

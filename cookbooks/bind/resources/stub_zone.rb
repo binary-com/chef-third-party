@@ -2,6 +2,7 @@
 
 StubZone = Struct.new(:name, :primaries, :options, :view, :file_name)
 
+unified_mode true
 property :bind_config, String, default: 'default'
 property :options, Array, default: []
 property :primaries, Array, required: true

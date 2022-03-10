@@ -2,6 +2,7 @@
 
 LinkedZone = Struct.new(:name, :in_view, :view)
 
+unified_mode true
 property :bind_config, String, default: 'default'
 property :in_view, String
 property :view, String

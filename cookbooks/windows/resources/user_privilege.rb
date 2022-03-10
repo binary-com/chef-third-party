@@ -4,6 +4,8 @@
 # Resource:: user_privilege
 #
 
+unified_mode true
+
 property :principal, String, name_property: true
 property :privilege, [Array, String], required: true, coerce: proc { |v| [*v].sort }
 

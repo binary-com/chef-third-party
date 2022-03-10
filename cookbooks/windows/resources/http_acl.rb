@@ -20,6 +20,8 @@
 
 include Windows::Helper
 
+unified_mode true
+
 property :url, String, name_property: true
 property :user, String
 property :sddl, String
