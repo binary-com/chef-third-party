@@ -2,8 +2,8 @@
 # Cookbook:: openstack-integration-test
 # Recipe:: setup
 #
-# Copyright:: 2014, Rackspace US, Inc.
-# Copyright:: 2017-2020, Oregon State university
+# Copyright:: 2014-2021, Rackspace US, Inc.
+# Copyright:: 2017-2021, Oregon State university
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -94,6 +94,11 @@ end
 execute 'create virtualenv for tempest' do
   command "#{venv_cmd} #{venv_path}"
   creates venv_path
+end
+
+if platform_family?('rhel') && node['platform_version'].to_i == 7
+  # TODO(ramereth): RDO Train ships a cacert.pem which contains the expired LetsEncrypt root cert
+  cookbook_file "#{venv_path}/lib/python2.7/site-packages/pip/_vendor/requests/cacert.pem"
 end
 
 # Note(jh): Make sure to keep the constraint definition in sync with

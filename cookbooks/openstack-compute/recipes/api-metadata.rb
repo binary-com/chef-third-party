@@ -2,10 +2,10 @@
 # Cookbook:: openstack-compute
 # Recipe:: api-metadata
 #
-# Copyright:: 2012, Rackspace US, Inc.
-# Copyright:: 2013, Craig Tracey <craigtracey@gmail.com>
-# Copyright:: 2018, Workday, Inc.
-# Copyright:: 2019-2020, Oregon State University
+# Copyright:: 2012-2021, Rackspace US, Inc.
+# Copyright:: 2013-2021, Craig Tracey <craigtracey@gmail.com>
+# Copyright:: 2018-2021, Workday, Inc.
+# Copyright:: 2019-2021, Oregon State University
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ else
   end
 end
 
-apache2_module 'wsgi'
+apache2_mod_wsgi 'api-metadata'
 apache2_module 'ssl' if node['openstack']['compute']['metadata']['ssl']['enabled']
 
 template "#{apache_dir}/sites-available/nova-metadata.conf" do
