@@ -6,7 +6,7 @@ module DockerCookbook
     property :checksum, String, default: lazy { default_checksum }, desired_state: false
     property :source, String, default: lazy { default_source }, desired_state: false
     property :channel, String, default: 'stable', desired_state: false
-    property :version, String, default: '19.03.13', desired_state: false
+    property :version, String, default: '20.10.11', desired_state: false
 
     ##################
     # Property Helpers
@@ -44,14 +44,16 @@ module DockerCookbook
         when '18.03.1' then 'bbfb9c599a4fdb45523496c2ead191056ff43d6be90cf0e348421dd56bc3dcf0'
         when '18.06.3' then 'f7347ef27db9a438b05b8f82cd4c017af5693fe26202d9b3babf750df3e05e0c'
         when '18.09.9' then 'ed83a3d51fef2bbcdb19d091ff0690a233aed4bbb47d2f7860d377196e0143a0'
-        when '19.03.13' then 'd035d468218c26973710b35101b55dcf82c25d43a0a88aaa9f667b1782ec6ea4'
+        when '19.03.15' then '61672045675798b2075d4790665b74336c03b6d6084036ef22720af60614e50d'
+        when '20.10.11' then '8f338ba618438fa186d1fa4eae32376cca58f86df2b40b5027c193202fad2acf'
         end
       when 'Linux'
         case version
         when '18.03.1' then '0e245c42de8a21799ab11179a4fce43b494ce173a8a2d6567ea6825d6c5265aa'
         when '18.06.3' then '346f9394393ee8db5f8bd1e229ee9d90e5b36931bdd754308b2ae68884dd6822'
         when '18.09.9' then '82a362af7689038c51573e0fd0554da8703f0d06f4dfe95dd5bda5acf0ae45fb'
-        when '19.03.13' then 'ddb13aff1fcdcceb710bf71a210169b9c1abfd7420eeaf42cf7975f8fae2fcc8'
+        when '19.03.15' then '5504d190eef37355231325c176686d51ade6e0cabe2da526d561a38d8611506f'
+        when '20.10.11' then 'dd6ff72df1edfd61ae55feaa4aadb88634161f0aa06dbaaf291d1be594099ff3'
         end
       end
     end
@@ -81,6 +83,7 @@ module DockerCookbook
 
       group 'docker' do
         system true
+        append true
       end
     end
 
@@ -97,7 +100,7 @@ module DockerCookbook
     ################
     # Action Helpers
     ################
-    declare_action_class.class_eval do
+    action_class do
       def docker_bin_prefix
         '/usr/bin'
       end
