@@ -2,6 +2,56 @@
 
 This file is used to list changes made in each version of the postfix cookbook.
 
+## Unreleased
+
+## 6.0.4 - *2021-08-19*
+
+## 6.0.3 - *2021-08-19*
+
+- Fixed TLS configuration
+
+## 6.0.2 - *2021-06-30*
+
+- Make sure we write the main.conf and master.conf before we try to use any commands (like postmap)
+
+## 6.0.1 - *2021-06-01*
+
+## 6.0.0 - *2020-11-23*
+
+- Disabled SSLv3 by default
+
+## 5.4.1 - 2020-10-20
+
+- Ensure all postmap files are rebuilt immediately if needed
+
+## 5.4.0 - 2020-10-11
+
+### Changed
+
+- Sous Chefs Adoption
+- Update to use Sous Chefs GH workflow
+- Update README to sous-chefs
+- Update metadata.rb to Sous Chefs
+- Update test-kitchen to Sous Chefs
+
+### Added
+
+- Standardise files with files in sous-chefs/repo-management
+- Add Ubuntu 20.04 testing
+
+### Fixed
+
+- Cookstyle fixes
+- ChefSpec fixes
+- Yamllint fixes
+- MDL fixes
+- Fix OpenSUSE installation issues
+
+### Removed
+
+- Remove EL 6 testing
+- Remove Amazon Linux 1 testing
+
 ## 5.3.1 (2018-07-24)
 
 - Fixed sbin issue with Chef13
