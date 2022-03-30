@@ -1,0 +1,93 @@
+driver:
+  name: dokken
+  chef_version: latest
+  privileged: true # because Docker and SystemD/Upstart
+  volumes:
+    - /sys/fs/cgroup:/sys/fs/cgroup
+
+transport:
+  name: dokken
+
+provisioner:
+  name: dokken
+
+verifier:
+  root_path: '/opt/verifier'
+  sudo: false
+
+platforms:
+  - name: centos-8
+    driver:
+      image: dokken/centos-stream-8
+      platform: rhel
+      pid_one_command: /usr/lib/systemd/systemd
+      intermediate_instructions:
+        - RUN yum -y install sudo lsof which systemd-sysv initscripts openssl net-tools
+
+  - name: fedora-34
+    driver:
+      image: dokken/fedora-34
+      pid_one_command: /usr/lib/systemd/systemd
+      intermediate_instructions:
+        - RUN dnf -y install sudo
+
+  - name: ubuntu-20.04
+    driver:
+      image: dokken/ubuntu-20.04
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - ENV DEBIAN_FRONTEND noninteractive
+        - RUN /usr/bin/apt-get update -y
+        - RUN /usr/bin/apt-get install -y ca-certificates sudo apt-transport-https lsb-release procps net-tools
+
+  - name: debian-10
+    driver:
+      image: dokken/debian-10
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - ENV DEBIAN_FRONTEND noninteractive
+        - RUN /usr/bin/apt-get update -y
+        - RUN /usr/bin/apt-get install -y ca-certificates sudo apt-transport-https lsb-release procps net-tools
+
+#
+# Suites
+#
+
+suites:
+  - name: default-deb-alpha
+    run_list:
+      - recipe[erlang::default]
+      - recipe[rabbitmq::plugins]
+    attributes:
+      erlang:
+        install_method: "esl"
+        esl:
+          version: "1:24.0.2-1"
+      rabbitmq:
+        # export RABBITMQ_VERSION="3.9.0~alpha.543"
+        version: <%= ENV['RABBITMQ_VERSION'] %>
+        deb_package_url: "https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-server-all-dev/raw/versions/<%= ENV['RABBITMQ_VERSION'] %>"
+        deb_package: "rabbitmq-server_<%= ENV['RABBITMQ_VERSION'].to_s.gsub(/\-alpha/, "~alpha") %>-1_all.deb"
+
+    verifier:
+      inspec_tests:
+        - test/integration/default
+    includes: ["ubuntu-20.04", "debian-10"]
+
+  - name: default-rpm-el8-alpha
+    run_list:
+      - recipe[rabbitmq::erlang_package]
+      - recipe[rabbitmq::plugins]
+    attributes:
+      rabbitmq:
+        erlang:
+          enabled: true
+        # export RABBITMQ_VERSION="3.8.18-alpha.8"
+        version: <%= ENV['RABBITMQ_VERSION'] %>
+
+        rpm_package_url: "https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-server-all-dev/raw/versions/<%= ENV['RABBITMQ_VERSION'] %>/"
+        rpm_package: "rabbitmq-server-<%= ENV['RABBITMQ_VERSION'].to_s.gsub(/\-alpha/, "~alpha") %>-1.el8.noarch.rpm"
+    verifier:
+      inspec_tests:
+        - test/integration/default
+    includes: ["centos-8", "fedora-34"]

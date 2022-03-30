@@ -2,6 +2,155 @@
 
 This file is used to list changes made in each version of the chef-client cookbook.
 
+## Unreleased
+
+- resolved cookstyle error: test/integration/cron/cron_spec.rb:5:35 convention: `Style/RegexpLiteral`
+
+## 12.3.4 (2021-04-24)
+
+- Fixed logging to /dev/null. - [@gholtiii](https://github.com/gholtiii)
+
+## 12.3.3 (2020-10-30)
+
+- Fixed stop init.d service stopping other process issue. - [@antima-gupta](https://github.com/antima-gupta)
+
+## 12.3.2 (2020-10-04)
+
+- Standardise files with files in chef-cookbooks/repo-management - [@xorimabot](https://github.com/xorimabot)
+- Cookstyle Bot Auto Corrections with Cookstyle 6.18.8 - [@cookstyle](https://github.com/cookstyle)
+- Simplify and correct chef-client path determination in cron recipe - [@tas50](https://github.com/tas50)
+
+## 12.3.1 (2020-09-01)
+
+- Fix an accidental rename of client.rb - [@tas50](https://github.com/tas50)
+
+## 12.3.0 (2020-09-01)
+
+- Eliminate some extra spaces in the client.rb template that led to odd trailing lines for many users
+- Simplify the launchd recipe to launchd resource directly for better logging - [@tas50](https://github.com/tas50)
+- Pull in the chef_client_launchd from Chef Infra Client 16.5. This includes greatly expanded functionality over the existing recipe including the ability to set a splay time and customize config/logging directories  - [@tas50](https://github.com/tas50)
+- chef_client_scheduled_task: Only create the log dir if it doesn't exist. Backport from Chef Infra Client - [@tas50](https://github.com/tas50)
+- chef_client_scheduled_task: cooerce splay and fix the frequency_modifier default. Backport from Chef Infra Client - [@tas50](https://github.com/tas50)
+- Fix setting env vars using cron_d in the cron recipe (resolves #701) - [@ramereth](https://github.com/ramereth)
+- Fix functionality of append_log_file parameter for Chef 15 and below - [@ramereth](https://github.com/ramereth)
+
+## 12.2.0 (2020-08-26)
+
+- chef_client_cron: Add nice property to control nice level of the chef-client process - [@tas50](https://github.com/tas50)
+- chef_client_cron: Fix the log dir mode to be 750 not 640 - [@tas50](https://github.com/tas50)
+- chef_client_cron: Fix cron vs. crond_d determination in the :remove action - [@tas50](https://github.com/tas50)
+
+## 12.1.0 (2020-08-19)
+
+- Remove the `file_staging_uses_destdir` since this should not be set for most users - [@lamont-granquist](https://github.com/lamont-granquist)
+- Add new `chef_client_trusted_certificate` resource for adding certificates for use within the client - [@tas50](https://github.com/tas50)
+
+## 12.0.1 (2020-08-07)
+
+- Ensure that client config reloads in kitchen across multiple runs. - [@jjustice6](https://github.com/jjustice6)
+- Fix quoting behavior in Windows Scheduled Task jobs - [@patcable](https://github.com/patcable)
+- Fix systemd_timer_resource :remove action failures - [@tas50](https://github.com/tas50)
+- Fix the location of the FreeBSD templates - [@tas50](https://github.com/tas50)
+
+## 12.0.0 (2020-08-05)
+
+### Breaking Changes
+
+- Default cron times have been updated to run every 30 minutes instead of every 4 hours
+- The default binary path on Linux, macOS and other *nix operating systems has been changed from `/usr/bin/chef-client` to `/opt/chef/bin/chef-client`
+- The upstart service recipe has been removed as Ubuntu 14.04 is now EOL
+- Support for non-RHEL platforms in the init service recipe has been removed as only RHEL 6 / Amazon 201x should need sys-v init support at this point
+- The `node['chef_client']['cache_path']` attribute has been renamed to `node['chef_client']['file_cache_path']` and will properly be set in the client.rb if changed now. However, this attribute is unset by default as it causes issues on first client runs. Enable it at your own risk.
+- The `node['chef_client']['backup_path']` attribute has been renamed to `node['chef_client']['file_backup_path']` and will properly be set in the client.rb if changed now.
+- The `chef_client_scheduled_task` resource no longer uses the `node['chef_client']['log_file']` to set the log file name and intead had a new `log_file_name` property that defaults to `chef-client.log` matching the attributes default value.
+- A new `client.rb` configuration option `file_staging_uses_destdir` is set via `node['chef_client']['file_staging_uses_destdir']`, which defaults to true.
+- Enable cron_d support on Linux by default - [@tas50](https://github.com/tas50)
+- Append to the chef-client log by default - [@tas50](https://github.com/tas50)
+
+### Other changes
+
+- Add `chef_client_cron` and `chef_client_systemd_timer` resources from Chef Infra Client 16 - [@tas50](https://github.com/tas50)
+- Use `random_delay` property in windows_task for splay
+- Update the cron recipe to use chef_client_cron resource - [@tas50](https://github.com/tas50)
+- Simplify how we disable the existing service in cron recipe - [@tas50](https://github.com/tas50)
+- Prevent chef-client launchd from unloading itself and add Catalina workaround (#651) - [@jazaval](https://github.com/jazaval)
+- Additional space removed from cron recipe - [@sanga1794](https://github.com/sanga1794)
+- Add log_file_name property to chef_client_scheduled_task to match Chef Infra Client 16  - [@tas50](https://github.com/tas50)
+- Make sure to create the log directory in chef_client_scheduled_task - [@tas50](https://github.com/tas50)
+- Update the task recipe to use the log_file attribute - [@tas50](https://github.com/tas50)
+- chef_client_cron: Don't cleanup legacy cron entries. The legacy recipe code we're cleaning up here was replaced many years ago - [@tas50](https://github.com/tas50)
+- Add a new property `accept_chef_license` to the resources - [@tas50](https://github.com/tas50)
+- Prevent failures when setting certain frequency types - [@tas50](https://github.com/tas50)
+- Add `run_on_battery` property to scheduled_task - [@tas50](https://github.com/tas50)
+- Remove the legacy service name cleanup for launchd - [@tas50](https://github.com/tas50)
+- Ensure we have resource_name in addition to provides in resources - [@tas50](https://github.com/tas50)
+- Use windows? helper where we can - [@tas50](https://github.com/tas50)
+- Switch testing from Travis to GitHub Actions
+- Various Cookstyle fixes
+
+### Other Changes
+
+- The splay time generation for cron jobs has been corrected
+- The `chef_client_scheduled_task` resource will no longer fail if the `frequency` property is set to a value other than `once`, `minute`, `hourly`, `daily`, `weekly`, or `monthly`
+- The `chef_client_scheduled_task` resource now creates the log directory specified in the resource.
+- A new `chef_client_cron` has been added for setting up Chef Infra Client to run as a cron job.
+
+## 11.5.0 (2020-01-22)
+
+- Simplify platform checks by using platform? helper - [@tas50](https://github.com/tas50)
+- Notify :immediately not :immediate - [@tas50](https://github.com/tas50)
+- Update the chefignore to include more files - [@tas50](https://github.com/tas50)
+- Remove SLES 11 specs since it's EOL - [@tas50](https://github.com/tas50)
+- Specify OPTIONS in /etc/defaults for Debian systemd platforms - [@e1ven](https://github.com/e1ven)
+
+## 11.4.0 (2019-11-13)
+
+- Add support for ohai.optional_plugins with a new attribute - [@cnaude](https://github.com/cnaude)
+
+## 11.3.6 (2019-10-24)
+
+This release removes `default['chef_client']['config']['client_fork'] = true` from the attributes file.
+
+Having this default value in place adds --fork to the chef-client run,  which forces --fork on cli use of chef-client as well. This causes additional issues for CLI use where the supervisor chef-client process is not necessary or required. The use of the --interval flag or --once or similar flags correctly gets the default setting of fork/no-fork right and that behavior inside the chef-client should be left alone.
+
+A concrete example of the kind of problems this causes is that running the chef_client_updater cookbook from the command line will send SIGKILL to the PPID if it is running with client_fork. that is the correct behavior, but for some reason that can SIGKILL the shell running chef-client as well, which is some kind of weird process-group leader issue -- one which i don't have the time to research so the best solution is that CLI invocation of the client should never fork (because the supervisor process on a CLI invocation is super duper 100.% useless) but with client_fork true that means everyone needs to know to use --no-fork on every command line invocation -- but forking works fine for 99% of the time until you hit the use cases where it doesn't.
+
+## 11.3.5 (2019-10-18)
+
+- convert symbol-like log_location to symbols - [@dwmarshall](https://github.com/dwmarshall)
+- make sure node[chef_client][cron][nice_path] is used everywhere - [@scalp42](https://github.com/scalp42)
+- Update the platforms we test on in Test Kitchen - [@tas50](https://github.com/tas50)
+- Remove the EOL platform opensuse from the metadata - [@tas50](https://github.com/tas50)
+
+## 11.3.4 (2019-10-01)
+
+- Add ignore_failure to the windows_service stop - [@tas50](https://github.com/tas50)
+
+## 11.3.3 (2019-10-01)
+
+- Stop chef-client windows service after creating scheduled task - [@jasonwbarnett](https://github.com/jasonwbarnett)
+- Allow changing nice path - [@scalp42](https://github.com/scalp42)
+- Do not restart try to restart the timer when switching to service mode - [@Annih](https://github.com/Annih)
+- Restart chef-client service after only when timer is setup - [@Annih](https://github.com/Annih)
+
+## 11.3.2 (2019-10-01)
+
+- Remove long_description and recipe metadata from metadata.rb - [@tas50](https://github.com/tas50)
+- Fix chef-client.service reload - [@dheerajd-msys](https://github.com/dheerajd-msys)
+
+## 11.3.1 (2019-09-17)
+
+- MSYS-1092 Fix for nil class error if chef client handlers are not defined. - [@Vasu1105](https://github.com/Vasu1105)
+- Removed unwanted condition - [@Vasu1105](https://github.com/Vasu1105)
+- Fix for nil class error if chef client handlers are not defined. (#635) - [@lamont-granquist](https://github.com/lamont-granquist)
+
+## 11.3.0 (2019-08-19)
+- Added KillMode option for systemd - [@kimbernator](https://github.com/kimbernator)
+
+## 11.2.0 (2019-04-30)
+
+- Added the ability to accept upcoming Chef 15+ license via attribute - [@tyler-ball](https://github.com/tyler-ball)
+
 ## 11.1.3 (2019-04-08)
 
 - Replace :reload with :restart - [@americanhanko](https://github.com/americanhanko)

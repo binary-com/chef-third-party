@@ -2,7 +2,7 @@
 # Cookbook:: openstack-common
 # library:: default
 #
-# Copyright:: 2012-2013, AT&T Services, Inc.
+# Copyright:: 2012-2021, AT&T Services, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -72,6 +72,21 @@ when 'debian'
   end
 
 when 'rhel'
+  case node['platform_version'].to_i
+  when 7
+    # TODO(ramereth): These packages conflict with the RDO repo for Train
+    node.default['yum']['epel']['exclude'] = 'python2-qpid-proton python2-pyngus qpid-proton-c'
+  when 8
+    # Need PowerTools repo for some of the python deps
+    node.default['yum']['powertools']['enabled'] = true
+    node.default['yum']['powertools']['managed'] = true
+    # Need to use RabbitMQ repo on EL8
+    node.default['yum']['centos-rabbitmq']['enabled'] = true
+    node.default['yum']['centos-rabbitmq']['managed'] = true
+
+    include_recipe 'yum-centos'
+  end
+
   include_recipe 'yum-epel'
 
   repo_action = if node['openstack']['yum']['rdo_enabled']
@@ -108,7 +123,7 @@ when 'rhel'
 
   package 'centos-release-qemu-ev' do
     action :upgrade
-  end
+  end if node['platform_version'].to_i < 8
 end
 
 # install a python

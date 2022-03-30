@@ -2,9 +2,9 @@
 # Cookbook:: openstack-dashboard
 # Attributes:: default
 #
-# Copyright:: 2012, AT&T, Inc.
-# Copyright:: 2013-2014, IBM, Corp.
-# Copyright:: 2016-2020, Oregon State University
+# Copyright:: 2012-2021, AT&T, Inc.
+# Copyright:: 2013-2021, IBM, Corp.
+# Copyright:: 2016-2021, Oregon State University
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -98,33 +98,31 @@ when 'rhel'
   default['openstack']['dashboard']['key_group'] = 'root'
   default['openstack']['dashboard']['horizon_user'] = 'apache'
   default['openstack']['dashboard']['horizon_group'] = 'apache'
-  default['openstack']['dashboard']['secret_key_path'] =
-    '/usr/share/openstack-dashboard/openstack_dashboard/local/.secret_key_store'
+  default['openstack']['dashboard']['django_path'] = '/usr/share/openstack-dashboard'
+  default['openstack']['dashboard']['dash_path'] = "#{node['openstack']['dashboard']['django_path']}/openstack_dashboard"
+  default['openstack']['dashboard']['dash_state_path'] = "#{node['openstack']['dashboard']['dash_path']}/local"
+  default['openstack']['dashboard']['secret_key_path'] = "#{node['openstack']['dashboard']['dash_state_path']}/.secret_key_store"
   default['openstack']['dashboard']['ssl']['cert_dir'] = '/etc/pki/tls/certs/'
   default['openstack']['dashboard']['ssl']['key_dir'] = '/etc/pki/tls/private/'
   default['openstack']['dashboard']['local_settings_path'] = '/etc/openstack-dashboard/local_settings'
-  default['openstack']['dashboard']['django_path'] = '/usr/share/openstack-dashboard'
   default['openstack']['dashboard']['static_path'] = '/usr/share/openstack-dashboard/static'
   default['openstack']['dashboard']['policy_files_path'] = '/etc/openstack-dashboard'
   default['openstack']['dashboard']['login_url'] = "#{node['openstack']['dashboard']['webroot']}auth/login/"
   default['openstack']['dashboard']['logout_url'] = "#{node['openstack']['dashboard']['webroot']}auth/logout/"
   default['openstack']['dashboard']['login_redirect_url'] = node['openstack']['dashboard']['webroot']
   default['openstack']['dashboard']['platform'] = {
-    'horizon_packages' => %w(openstack-dashboard mod_wsgi),
-    'memcache_python_packages' => %w(python-memcached),
+    'horizon_packages' => %w(openstack-dashboard),
+    'memcache_python_packages' => node['platform_version'].to_i >= 8 ? %w(python3-memcached) : %w(python-memcached),
     'package_overrides' => '',
   }
 when 'debian'
   default['openstack']['dashboard']['key_group'] = 'ssl-cert'
   default['openstack']['dashboard']['horizon_user'] = 'horizon'
   default['openstack']['dashboard']['horizon_group'] = 'horizon'
-  default['openstack']['dashboard']['secret_key_path'] = '/var/lib/openstack-dashboard/secret_key'
+  default['openstack']['dashboard']['django_path'] = '/usr/share/openstack-dashboard'
   default['openstack']['dashboard']['ssl']['cert_dir'] = '/etc/ssl/certs/'
   default['openstack']['dashboard']['ssl']['key_dir'] = '/etc/ssl/private/'
   default['openstack']['dashboard']['local_settings_path'] = '/etc/openstack-dashboard/local_settings.py'
-  default['openstack']['dashboard']['django_path'] = '/usr/share/openstack-dashboard'
-  default['openstack']['dashboard']['static_path'] = '/var/lib/openstack-dashboard/static'
-  default['openstack']['dashboard']['policy_files_path'] = '/usr/share/openstack-dashboard/openstack_dashboard/conf'
   default['openstack']['dashboard']['login_url'] = nil
   default['openstack']['dashboard']['logout_url'] = nil
   default['openstack']['dashboard']['login_redirect_url'] = nil
@@ -135,15 +133,26 @@ when 'debian'
   default['openstack']['dashboard']['platform']['horizon_packages'] =
     %w(
       node-less
-      libapache2-mod-wsgi-py3
       python3-django-horizon
       openstack-dashboard
     )
+  if platform?('ubuntu')
+    default['openstack']['dashboard']['dash_path'] = "#{node['openstack']['dashboard']['django_path']}/openstack_dashboard"
+    default['openstack']['dashboard']['dash_state_path'] = "#{node['openstack']['dashboard']['dash_path']}/local"
+    default['openstack']['dashboard']['secret_key_path'] = '/var/lib/openstack-dashboard/secret_key'
+    default['openstack']['dashboard']['static_path'] = '/var/lib/openstack-dashboard/static'
+    default['openstack']['dashboard']['policy_files_path'] = '/usr/share/openstack-dashboard/openstack_dashboard/conf'
+  else
+    default['openstack']['dashboard']['dash_path'] = node['openstack']['dashboard']['django_path']
+    default['openstack']['dashboard']['dash_state_path'] = '/var/lib/openstack-dashboard'
+    default['openstack']['dashboard']['secret_key_path'] = "#{node['openstack']['dashboard']['dash_state_path']}/secret_key"
+    default['openstack']['dashboard']['static_path'] = "#{node['openstack']['dashboard']['dash_state_path']}/static"
+    default['openstack']['dashboard']['policy_files_path'] = '/etc/openstack-dashboard/policy'
+  end
 else
   default['openstack']['dashboard']['key_group'] = 'root'
 end
 
-default['openstack']['dashboard']['dash_path'] = "#{node['openstack']['dashboard']['django_path']}/openstack_dashboard"
 default['openstack']['dashboard']['wsgi_path'] = node['openstack']['dashboard']['dash_path'] + '/wsgi.py'
 default['openstack']['dashboard']['wsgi_socket_prefix'] = nil
 default['openstack']['dashboard']['session_backend'] = 'memcached'
