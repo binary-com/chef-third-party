@@ -3,7 +3,8 @@
 # Cookbook Name:: rabbitmq
 # Resource:: vhost
 #
-# Copyright 2011, Chef Software, Inc.
+# Copyright 2011-201, Chef Software, Inc.
+# Copyright 2019-2021, VMware, Inc or its affiliates.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +19,11 @@
 # limitations under the License.
 #
 
+<<<<<<< HEAD
 unified_mode true
+=======
+unified_mode true if respond_to?(:unified_mode)
+>>>>>>> 78423de9c1a225a6f6fdfb60876e9c8cfeb2aafe
 
 actions :add, :delete
 default_action :add

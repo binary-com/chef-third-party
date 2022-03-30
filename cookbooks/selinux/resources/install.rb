@@ -2,7 +2,7 @@
 # Cookbook:: selinux
 # Resource:: install
 #
-# Copyright:: 2016-2019, Chef Software, Inc.
+# Copyright:: 2016-2022, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,8 +17,30 @@
 # limitations under the License.
 
 unified_mode true
+<<<<<<< HEAD
+=======
+
+include SELinux::Cookbook::InstallHelpers
+
+property :packages, [String, Array],
+          default: lazy { default_install_packages },
+          description: 'SELinux packages for system'
+
+action_class do
+  def do_package_action(action)
+    # friendly message for unsupported platforms
+    raise "The platform #{node['platform']} is not currently supported by the `selinux_install` resource. Please file an issue at https://github.com/sous-chefs/selinux/issues/new with details on the platform this cookbook is running on." if new_resource.packages.nil?
+
+    package 'selinux' do
+      package_name new_resource.packages
+      action action
+    end
+  end
+end
+
+>>>>>>> 78423de9c1a225a6f6fdfb60876e9c8cfeb2aafe
 action :install do
-  package package_list
+  do_package_action(action)
 
   directory '/etc/selinux' do
     owner 'root'
@@ -28,15 +50,8 @@ action :install do
   end
 end
 
-action_class do
-  #
-  # The complete list of package
-  #
-  # @return [Array<string>]
-  #
-  def package_list
-    list = %w(policycoreutils selinux-policy selinux-policy-targeted libselinux-utils)
-    list << 'mcstrans' if node['selinux']['install_mcstrans_package']
-    list
+%i(upgrade remove).each do |a|
+  action a do
+    do_package_action(a)
   end
 end

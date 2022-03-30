@@ -5,6 +5,47 @@ This file is used to list changes made in each version of the etcd cookbook.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+## 9.0.1 - *2022-02-10*
+
+- Standardise files with files in sous-chefs/repo-management
+- Remove delivery folder
+
+## 9.0.0 - *2021-12-01*
+
+- Use partials instead of including a library.
+  - Require Chef 16 for resource partials
+- Remove unused libraries
+
+## 8.0.0 - *2021-12-01*
+
+- Remove Ubuntu 16.04 testing
+- Remove OpenSUSE Leap testing
+- Ignore deprecations as errors
+- Remove `-debug` line from etcd_cmd as it is deprecated as of etcd 3.5.0 (#122)
+- Set unified mode to be false, otherwise resources are not correctly being passed through to systemd resource (#120)
+
+## 7.0.3 - *2021-11-03*
+
+- Add CentOS Stream 8 to CI pipeline
+
+## 7.0.2 - *2021-08-30*
+
+- Standardise files with files in sous-chefs/repo-management
+
+## 7.0.1 - *2021-06-01*
+
+- Standardise files with files in sous-chefs/repo-management
+
+## 7.0.0 - *2021-05-12*
+
+- Chef 17 compatibility fixes
+  - Set `unified_mode true` on all resources
+  - Exclude `install_method` and `service_manager` methods when using `copy_properties_from`
+- Require Chef 15.3+
+- Remove backported `copy_properties_from` method library
+
 ## 6.3.0 - *2020-12-07*
 
 - Add configuration flag [listen-metrics-urls](https://github.com/etcd-io/etcd/blob/master/Documentation/op-guide/configuration.md#--listen-metrics-urls)

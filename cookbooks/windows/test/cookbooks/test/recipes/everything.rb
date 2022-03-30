@@ -1,5 +1,0 @@
-include_recipe '::certificate'
-include_recipe '::http_acl'
-include_recipe '::share'
-include_recipe '::user_privilege'
-include_recipe '::zipfile'

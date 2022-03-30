@@ -2,6 +2,53 @@
 
 This file is used to list changes made in each version of the resolver cookbook.
 
+## Unreleased
+
+## 4.0.3 - *2022-02-08*
+
+- Remove delivery folder
+
+## 4.0.2 - *2021-08-30*
+
+- Standardise files with files in sous-chefs/repo-management
+
+## 4.0.1 - *2021-06-01*
+
+- Standardise files with files in sous-chefs/repo-management
+
+## 4.0.0 - *2021-05-26*
+
+- Switch to `unified_mode`
+- Update `chef_version` to only support Chef 15.3 or later
+
+## 3.0.4 - *2021-03-03*
+
+- Fixed typo in the `CacheFromLocalhost` parameter in the systemd-resolved template
+
+## 3.0.3 - *2021-02-25*
+
+- Fix blog link for wrapper cookbooks
+
+## 3.0.2 - *2021-02-25*
+
+- Merge resolv.conf options & remove extra colons
+
+## 3.0.1 - *2021-02-20*
+
+- Update `Chef` -> `Chef Infra`
+
+## 3.0.0 - *2021-02-18*
+
+- Port recipes and attributes to resources
+- Add support for overriding system configuration methods to resolver_config
+- Add systemd-resolved support
+
+## 2.2.0 - *2021-02-10*
+
+- Sous Chefs Adoption
+- Add InSpec Tests
+- Remove Deprecated Platforms, Centos 6, Ubuntu 16.04, opensuse-42, fedora-29
+
 ## 2.1.0 (2018-07-18)
 
 - Test with Local Delivery instead of Rake
@@ -48,8 +95,6 @@ This file is used to list changes made in each version of the resolver cookbook.
 - [#14] Exclude search in template if attribute is empty
 
 ## v1.1.4
-
-### Improvement
 
 - **[COOK-3375](https://tickets.chef.io/browse/COOK-3375)** - Add Solaris support
 

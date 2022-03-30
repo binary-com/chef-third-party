@@ -2,9 +2,9 @@
 # Cookbook:: openstack-common
 # Attributes:: database
 #
-# Copyright:: 2012-2013, AT&T Services, Inc.
-# Copyright:: 2013-2014, SUSE Linux GmbH
-# Copyright:: 2020, Oregon State University
+# Copyright:: 2012-2021, AT&T Services, Inc.
+# Copyright:: 2013-2021, SUSE Linux GmbH
+# Copyright:: 2020-2021, Oregon State University
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -122,9 +122,15 @@ default['openstack']['db']['python_packages'] = {
 case node['platform_family']
 when 'rhel'
   default['openstack']['db']['service_type'] = 'mariadb'
-  default['openstack']['db']['python_packages']['mariadb'] = ['MySQL-python']
-  default['openstack']['db']['python_packages']['percona-cluster'] = ['MySQL-python']
-  default['openstack']['db']['python_packages']['galera'] = ['MySQL-python']
+  if node['platform_version'].to_i >= 8
+    default['openstack']['db']['python_packages']['mariadb'] = ['python3-PyMySQL']
+    default['openstack']['db']['python_packages']['percona-cluster'] = ['python3-PyMySQL']
+    default['openstack']['db']['python_packages']['galera'] = ['python3-PyMySQL']
+  else
+    default['openstack']['db']['python_packages']['mariadb'] = ['MySQL-python']
+    default['openstack']['db']['python_packages']['percona-cluster'] = ['MySQL-python']
+    default['openstack']['db']['python_packages']['galera'] = ['MySQL-python']
+  end
 when 'debian'
   default['openstack']['db']['service_type'] = 'mariadb'
   default['openstack']['db']['python_packages']['mariadb'] = ['python3-mysqldb']

@@ -19,6 +19,7 @@
 unified_mode true
 
 provides :mariadb_configuration
+unified_mode true
 
 include MariaDBCookbook::Helpers
 

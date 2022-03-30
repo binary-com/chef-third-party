@@ -24,6 +24,7 @@ unified_mode true
 
 resource_name :memcached_instance
 provides :memcached_instance
+unified_mode true
 provides :memcached_instance_systemd # legacy name
 
 property :instance_name, String, name_property: true

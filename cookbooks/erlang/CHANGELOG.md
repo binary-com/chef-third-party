@@ -5,6 +5,21 @@ This file is used to list changes made in each version of the erlang cookbook.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+## 8.1.4 - *2022-02-17*
+
+- Standardise files with files in sous-chefs/repo-management
+- Remove delivery folder
+
+## 8.1.3 - *2021-11-03*
+
+- Add CentOS Stream 8 to CI pipeline
+
+## 8.1.2 - *2021-08-30*
+
+- Standardise files with files in sous-chefs/repo-management
+
 ## 8.1.0 (2020-10-15)
 
 ### Changed

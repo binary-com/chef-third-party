@@ -5,6 +5,7 @@
 #
 # Author: Sunggun Yu <sunggun.dev@gmail.com>
 # Copyright (C) 2015 Sunggun Yu
+# Copyright 2019-2021, VMware, Inc or its affiliates.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +20,7 @@
 # limitations under the License.
 #
 
-unified_mode true
+unified_mode true if respond_to?(:unified_mode)
 
 actions :join, :set_cluster_name, :change_cluster_node_type
 

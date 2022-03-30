@@ -2,9 +2,9 @@
 # Cookbook:: openstack-network
 # Attributes:: default
 #
-# Copyright:: 2013, AT&T
-# Copyright:: 2014, IBM Corp.
-# Copyright:: 2016-2020, Oregon State University
+# Copyright:: 2013-2021, AT&T
+# Copyright:: 2014-2021, IBM Corp.
+# Copyright:: 2016-2021, Oregon State University
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -142,7 +142,7 @@ default['openstack']['network']['platform'].tap do |platform|
   platform['neutron_server_service'] = 'neutron-server'
   platform['neutron_rpc_server_service'] = 'neutron-rpc-server'
   case node['platform_family']
-  when 'fedora', 'rhel' # :pragma-foodcritic: ~FC024 - won't fix this
+  when 'rhel'
     platform['neutron_packages'] =
       %w(
         ebtables
@@ -195,8 +195,8 @@ default['openstack']['network']['platform'].tap do |platform|
         python-zopeinterface
       )
     platform['neutron_openvswitch_agent_packages'] = %w(neutron-openvswitch-agent)
-    platform['neutron_linuxbridge_agent_packages'] = %w(neutron-plugin-linuxbridge neutron-plugin-linuxbridge-agent)
-    platform['neutron_linuxbridge_agent_service'] = 'neutron-plugin-linuxbridge-agent'
+    platform['neutron_linuxbridge_agent_packages'] = %w(neutron-linuxbridge-agent)
+    platform['neutron_linuxbridge_agent_service'] = 'neutron-linuxbridge-agent'
     platform['neutron_metadata_agent_packages'] = %w(neutron-metadata-agent)
     platform['neutron_metering_agent_packages'] = %w(neutron-metering-agent)
     platform['neutron_server_packages'] = %w(neutron-server)
