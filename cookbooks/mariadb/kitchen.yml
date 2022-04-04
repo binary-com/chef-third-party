@@ -1,0 +1,73 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_infra
+  product_name: <%= ENV['CHEF_PRODUCT_NAME'] || 'chef' %>
+  product_version: <%= ENV['CHEF_VERSION'] || 'latest' %>
+  chef_license: accept-no-persist
+  enforce_idempotency: true
+  multiple_converge: 2
+  deprecations_as_errors: true
+  log_level: <%= ENV['CHEF_LOG_LEVEL'] || 'auto' %>
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: almalinux-8
+  - name: amazonlinux-2
+  - name: debian-10
+  - name: debian-11
+  - name: centos-7
+  - name: centos-stream-8
+  - name: fedora-latest
+  - name: ubuntu-18.04
+  - name: ubuntu-20.04
+  - name: rockylinux-8
+
+suites:
+  - name: repository
+    run_list:
+      - recipe[test::repository]
+  - name: client_install
+    run_list:
+      - recipe[test::client_install]
+  - name: server_install_10.3
+    run_list:
+      - recipe[test::server_install]
+    attributes:
+      mariadb_server_test_version: '10.3'
+    verifier:
+      inspec_tests:
+        - path: test/integration/server_install
+  - name: server_install_10.4
+    run_list:
+      - recipe[test::server_install]
+    attributes:
+      mariadb_server_test_version: '10.4'
+    verifier:
+      inspec_tests:
+        - path: test/integration/server_install
+  - name: configuration
+    run_list:
+      - recipe[test::configuration]
+  - name: server_configuration
+    run_list:
+      - recipe[test::server_configuration]
+  - name: resources
+    run_list:
+      - recipe[test::user_database]
+  - name: replication
+    run_list:
+      - recipe[test::replication]
+  - name: datadir
+    run_list:
+      - recipe[test::datadir]
+  - name: port
+    run_list:
+      - recipe[test::port]
+  - name: galera_configuration
+    run_list:
+      - recipe[test::galera_configuration]

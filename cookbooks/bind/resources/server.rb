@@ -1,8 +1,13 @@
-# frozen_string_literal: true
+unified_mode true
+
 ServerOptions = Struct.new(:name, :options)
 
-property :bind_config, String, default: 'default'
-property :options, Array, default: []
+property :bind_config, String,
+          default: 'default',
+          description: 'Name of the bind_config resource to notify actions on'
+property :options, Array,
+          default: [],
+          description: 'Array of option strings. Each option should be a valid BIND option minus the trailing semicolon.'
 
 action :create do
   config_template.variables[:servers] << ServerOptions.new(
