@@ -21,6 +21,8 @@
 # purposes until the functionality can be refactored into a custom resource.
 # Original: https://github.com/chef-boneyard/database
 
+unified_mode true
+
 resource_name :openstack_database
 provides :openstack_database
 unified_mode true

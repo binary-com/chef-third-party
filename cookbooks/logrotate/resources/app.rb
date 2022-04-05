@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+unified_mode true
+
 property :path, [String, Array], required: true
 property :frequency, String, default: 'weekly'
 property :cookbook, default: 'logrotate'
