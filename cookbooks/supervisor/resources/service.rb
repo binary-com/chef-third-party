@@ -18,6 +18,8 @@
 # limitations under the License.
 #
 
+unified_mode true
+
 # property :name, name_property: true, kind_of: String, required: true, :name_property => true
 # property :service_name, :kind_of => String
 property :service_name, kind_of: String, name_property: true

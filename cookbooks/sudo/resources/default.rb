@@ -23,8 +23,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+unified_mode true
+
 chef_version_for_provides '< 14.0' if respond_to?(:chef_version_for_provides)
 resource_name :sudo
+provides :sudo
 
 # acording to the sudo man pages sudo will ignore files in an include dir that have a `.` or `~`
 # We convert either to `__`

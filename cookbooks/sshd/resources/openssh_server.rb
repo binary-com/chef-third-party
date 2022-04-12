@@ -18,6 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+unified_mode true
+
 resource_name :openssh_server
 provides :openssh_server
 
