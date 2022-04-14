@@ -18,6 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+unified_mode true
+
 property :sshd_config, Hash, default: {}
 property :template_action, default: :create
 property :cookbook, String, default: 'sshd'
