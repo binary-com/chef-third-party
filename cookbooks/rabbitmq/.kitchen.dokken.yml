@@ -1,0 +1,481 @@
+driver:
+  name: dokken
+  privileged: true # because Docker and SystemD/Upstart
+  chef_version: <%= ENV['CHEF_VERSION'] || 'current' %>
+  volumes:
+    - /sys/fs/cgroup:/sys/fs/cgroup
+  chef_license: accept-no-persist
+
+transport:
+  name: dokken
+
+provisioner:
+  name: dokken
+  multiple_converge: 2
+  # this is an awful productivity killer,
+  # see rabbitmq/chef-cookbook#555
+  enforce_idempotency: false
+  # chef_log_level: debug
+
+verifier:
+  root_path: '/opt/verifier'
+  sudo: false
+
+platforms:
+  - name: opensuse-leap-15
+    driver:
+      image: dokken/opensuse-leap-15
+      platform: suse
+      pid_one_command: /usr/lib/systemd/systemd
+      hostname: localhost
+      intermediate_instructions:
+        - RUN zypper -n install sudo lsof which openssl net-tools
+
+  - name: centos-8
+    driver:
+      image: dokken/centos-stream-8
+      platform: rhel
+      pid_one_command: /usr/lib/systemd/systemd
+      intermediate_instructions:
+        - RUN yum -y install sudo lsof which systemd-sysv initscripts openssl net-tools
+
+  - name: scientificlinux-7
+    driver:
+      image: sl:7
+      platform: rhel
+      pid_one_command: /usr/lib/systemd/systemd
+      intermediate_instructions:
+        - RUN yum -y install sudo lsof which systemd-sysv initscripts openssl net-tools
+
+  - name: fedora-34
+    driver:
+      image: dokken/fedora-34
+      pid_one_command: /usr/lib/systemd/systemd
+      intermediate_instructions:
+        - RUN dnf -y install sudo
+
+  - name: amazonlinux-2
+    driver:
+      image: dokken/amazonlinux-2
+      pid_one_command: /usr/lib/systemd/systemd
+      intermediate_instructions:
+        - RUN yum -y install sudo lsof which systemd-sysv initscripts openssl net-tools
+
+  - name: ubuntu-21.04
+    driver:
+      image: dokken/ubuntu-21.04
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - ENV DEBIAN_FRONTEND noninteractive
+        - RUN /usr/bin/apt-get update -y
+        - RUN /usr/bin/apt-get upgrade -y
+        - RUN /usr/bin/apt-get install -y ca-certificates sudo apt-transport-https lsb-release procps net-tools
+
+  - name: ubuntu-20.04
+    driver:
+      image: dokken/ubuntu-20.04
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - ENV DEBIAN_FRONTEND noninteractive
+        - RUN /usr/bin/apt-get update -y
+        - RUN /usr/bin/apt-get upgrade -y
+        - RUN /usr/bin/apt-get install -y ca-certificates sudo apt-transport-https lsb-release procps net-tools
+
+  - name: ubuntu-18.04
+    driver:
+      image: dokken/ubuntu-18.04
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - ENV DEBIAN_FRONTEND noninteractive
+        - RUN /usr/bin/apt-get update -y
+        - RUN /usr/bin/apt-get upgrade -y
+        - RUN /usr/bin/apt-get install -y ca-certificates sudo apt-transport-https lsb-release procps net-tools
+
+  - name: debian-11
+    driver:
+      image: dokken/debian-11
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - ENV DEBIAN_FRONTEND noninteractive
+        - RUN /usr/bin/apt-get update -y
+        - RUN /usr/bin/apt-get upgrade -y
+        - RUN /usr/bin/apt-get install -y ca-certificates sudo apt-transport-https lsb-release procps net-tools
+
+  - name: debian-10
+    driver:
+      image: dokken/debian-10
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - ENV DEBIAN_FRONTEND noninteractive
+        - RUN /usr/bin/apt-get update -y
+        - RUN /usr/bin/apt-get upgrade -y
+        - RUN /usr/bin/apt-get install -y ca-certificates sudo apt-transport-https lsb-release procps net-tools
+
+  - name: opensuse-leap
+    driver:
+      image: dokken/opensuse-leap
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+      - RUN zypper --non-interactive install sudo
+
+#
+# Suites
+#
+
+suites:
+  - name: default-deb
+    run_list:
+      - recipe[erlang::default]
+      - recipe[rabbitmq::plugins]
+      - recipe[rabbitmq::management_ui]
+      - recipe[rabbitmq::vhosts]
+      - recipe[rabbitmq::users]
+      - recipe[rabbitmq::policies]
+    attributes:
+      erlang:
+        install_method: "esl"
+        esl:
+          version: "1:24.0.2-1"
+      rabbitmq:
+        version: "3.8.17"
+        virtualhosts:
+          - vhost1
+          - vhost2
+        enabled_users:
+          - name: user1
+            password: user1-pwd
+            tag: management
+            rights:
+              - vhost: vhost1
+                read: ".*"
+                write: ".*"
+                conf: ".*"
+          - name: user2
+            password: user2-pwd
+            tag: management
+            rights:
+              - vhost: vhost2
+                read: ".*"
+                write: ".*"
+                conf: ".*"
+        policies:
+          mirroring:
+            pattern: "^mirrored\\."
+            params:
+              ha-mode: exactly
+              ha-params: 2
+            priority: 1
+    verifier:
+      inspec_tests:
+        - test/integration/default
+    includes: ["ubuntu-20.04", "ubuntu-18.04", "debian-10"]
+
+  - name: management-plugin-deb
+    run_list:
+      - recipe[erlang::default]
+      - recipe[rabbitmq::management_ui]
+    attributes:
+      erlang:
+        install_method: "esl"
+        esl:
+          version: "1:24.0.2-1"
+      rabbitmq:
+        version: "3.8.17"
+    verifier:
+      inspec_tests:
+        - test/integration/management_plugin
+    includes: ["ubuntu-20.04"]
+
+  - name: system-limits-deb
+    run_list:
+      - recipe[erlang::default]
+      - recipe[rabbitmq::systemd_limits]
+      - recipe[rabbitmq::plugins]
+    attributes:
+      erlang:
+        install_method: "esl"
+        esl:
+          version: "1:24.0.2-1"
+      rabbitmq:
+        version: "3.8.17"
+        systemd:
+          limits:
+            NOFILE: 54000
+    verifier:
+      inspec_tests:
+        - test/integration/limits
+    includes: ["ubuntu-20.04", "debian-10"]
+
+  - name: use-distro-version-deb
+    run_list:
+      - recipe[erlang::default]
+      - recipe[rabbitmq::default]
+      - recipe[rabbitmq::management_ui]
+      - recipe[rabbitmq::vhosts]
+      - recipe[rabbitmq::users]
+      - recipe[rabbitmq::policies]
+    attributes:
+      erlang:
+        install_method: "esl"
+        esl:
+          version: "1:20.3.8.26-1"
+      rabbitmq:
+        use_distro_version: true
+        virtualhosts:
+          - vhost1
+          - vhost2
+        enabled_users:
+          - name: user1
+            password: user1-pwd
+            tag: management
+            rights:
+              - vhost: vhost1
+                read: ".*"
+                write: ".*"
+                conf: ".*"
+          - name: user2
+            password: user2-pwd
+            tag: management
+            rights:
+              - vhost: vhost2
+                read: ".*"
+                write: ".*"
+                conf: ".*"
+        policies:
+          mirroring:
+            pattern: "^mirrored\\."
+            params:
+              ha-mode: exactly
+              ha-params: 2
+            priority: 2
+          dlx:
+            pattern: "^dlx\\."
+            params:
+              dead-letter-exchange: deadlettered
+            priority: 1
+    verifier:
+      inspec_tests:
+        - test/integration/36x
+    includes: ["ubuntu-18.04"]
+
+  - name: default-rpm
+    run_list:
+      - recipe[erlang::default]
+      - recipe[rabbitmq::plugins]
+    attributes:
+      erlang:
+        install_method: "esl"
+        esl:
+          version: "23.3.1-1"
+      rabbitmq:
+        version: "3.8.17"
+    verifier:
+      inspec_tests:
+        - test/integration/default
+    includes: ["centos-8"]
+
+  # Fedora and Amazon Linux 2 require recipe[rabbitmq::erlang_package]
+  - name: default-modern-rpm
+    run_list:
+      - recipe[rabbitmq::erlang_package]
+      - recipe[rabbitmq::plugins]
+    attributes:
+      rabbitmq:
+        erlang:
+          enabled: true
+          version: "23.3.4.4"
+        version: "3.8.17"
+    verifier:
+      inspec_tests:
+        - test/integration/default
+    includes: ["centos-8", "fedora-34", "amazonlinux-2"]
+
+  - name: system-limits-rpm
+    run_list:
+      - recipe[erlang::default]
+      - recipe[rabbitmq::systemd_limits]
+      - recipe[rabbitmq::plugins]
+    attributes:
+      erlang:
+        install_method: "esl"
+        esl:
+          version: "23.3.1-1"
+      rabbitmq:
+        version: "3.8.17"
+        systemd:
+          limits:
+            NOFILE: 54000
+    verifier:
+      inspec_tests:
+        - test/integration/limits
+    includes: ["centos-8"]
+
+  - name: lwrps
+    run_list:
+      - recipe[erlang::default]
+      - recipe[rabbitmq_test::lwrps]
+    attributes:
+      erlang:
+        install_method: "esl"
+        esl:
+          version: "1:24.0.2-1"
+      rabbitmq:
+        version: "3.8.17"
+    verifier:
+      inspec_tests:
+        - test/integration/default
+        - test/integration/lwrps
+    includes: ["ubuntu-20.04"]
+
+  - name: cluster-deb
+    run_list:
+      - recipe[erlang::default]
+      - recipe[rabbitmq_test::cluster]
+    attributes:
+      erlang:
+        install_method: "esl"
+        esl:
+          version: "1:24.0.2-1"
+      rabbitmq:
+        version: "3.8.17"
+    verifier:
+      inspec_tests:
+        - test/integration/default
+        - test/integration/cluster
+    includes: ["ubuntu-20.04", "debian-10"]
+
+  - name: cluster-rpm
+    run_list:
+      - recipe[erlang::default]
+      - recipe[rabbitmq_test::cluster]
+    attributes:
+      erlang:
+        install_method: "esl"
+        esl:
+          version: "23.3.1-1"
+      rabbitmq:
+        version: "3.8.17"
+    verifier:
+      inspec_tests:
+        - test/integration/default
+        - test/integration/cluster
+    includes: ["centos-8"]
+
+  - name: default-force-yes
+    run_list:
+      - recipe[erlang::default]
+      - recipe[rabbitmq::default]
+    attributes:
+      erlang:
+        install_method: "esl"
+        esl:
+          version: "1:24.0.2-1"
+      rabbitmq:
+        version: "3.8.17"
+    attributes:
+      apt:
+        confd:
+          assume_yes: true
+          force-yes: true
+      erlang:
+        install_method: "esl"
+        esl:
+          version: "1:24.0.2-1"
+      rabbitmq:
+        version: "3.8.17"
+    verifier:
+      inspec_tests:
+        - test/integration/default
+    includes: ["debian-10"]
+
+  - name: default-force-yes-false
+    run_list:
+      - recipe[erlang::default]
+      - recipe[rabbitmq::default]
+    attributes:
+      apt:
+        confd:
+          assume_yes: false
+          force-yes: false
+      erlang:
+        install_method: "esl"
+        esl:
+          version: "1:24.0.2-1"
+      rabbitmq:
+        version: "3.8.17"
+    verifier:
+      inspec_tests:
+        - test/integration/default
+    includes: ["debian-10"]
+
+  #
+  # Team RabbitMQ Erlang packages
+  #
+
+  # Latest Erlang package, Debian
+  - name: rabbitmq-erlang-latest-deb
+    run_list:
+      - recipe[rabbitmq::erlang_package]
+      - recipe[rabbitmq::default]
+    attributes:
+      # relies on node.rabbitmq.erlang.version default
+      # which is nil/"install latest"
+      rabbitmq:
+        erlang:
+          enabled: true
+        version: "3.8.17"
+    verifier:
+      inspec_tests:
+        - test/erlang_package/latest_deb
+    includes: ["debian-11", "debian-10", "ubuntu-20.04", "ubuntu-18.04"]
+
+  # Erlang package, Debian, version pinning
+  - name: rabbitmq-erlang-pinned-deb
+    run_list:
+      - recipe[rabbitmq::erlang_package]
+      - recipe[rabbitmq::default]
+    attributes:
+      rabbitmq:
+        erlang:
+          enabled: true
+          version: "1:24.0.2-1"
+        version: "3.8.17"
+    verifier:
+      inspec_tests:
+        - test/erlang_package/pinned_deb
+    includes: ["debian-10", "ubuntu-20.04"]
+
+
+  # Latest Erlang package, RPM
+  - name: rabbitmq-erlang-latest-rpm-el8
+    run_list:
+      - recipe[rabbitmq::erlang_package]
+      - recipe[rabbitmq::default]
+    attributes:
+      # relies on node.rabbitmq.erlang.version default
+      # which is nil/"install latest"
+      rabbitmq:
+        erlang:
+          enabled: true
+        version: "3.8.17"
+    verifier:
+      inspec_tests:
+        - test/erlang_package/latest_rpm
+    includes: ["fedora-34", "centos-8"]
+
+    # Latest Erlang package, RPM, openSUSE leap 15 repo
+  - name: rabbitmq-erlang-latest-suse
+    run_list:
+      - recipe[rabbitmq::erlang_package]
+      - recipe[rabbitmq::default]
+    attributes:
+        rabbitmq:
+          erlang:
+            enabled: true
+            zypper:
+              baseurl: https://download.opensuse.org/repositories/network:/messaging:/amqp/openSUSE_Leap_15.1/
+          version: "3.8.17"
+    verifier:
+      inspec_tests:
+        - test/erlang_package/latest_rpm
+    includes: ["opensuse-leap-15"]

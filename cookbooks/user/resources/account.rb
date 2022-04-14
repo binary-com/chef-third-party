@@ -19,6 +19,8 @@
 # limitations under the License.
 #
 
+unified_mode true
+
 actions :create, :remove, :modify, :manage, :lock, :unlock
 
 attribute :username,      :kind_of => String, :name_attribute => true

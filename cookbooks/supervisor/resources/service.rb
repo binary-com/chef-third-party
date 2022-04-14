@@ -18,6 +18,8 @@
 # limitations under the License.
 #
 
+unified_mode true
+
 # property :name, name_property: true, kind_of: String, required: true, :name_property => true
 # property :service_name, :kind_of => String
 property :service_name, kind_of: String, name_property: true
@@ -49,7 +51,7 @@ property :stderr_capture_maxbytes, kind_of: String, default: '0'
 property :stderr_events_enabled, kind_of: [TrueClass, FalseClass], default: false
 property :environment, kind_of: Hash, default: {}
 property :directory, kind_of: [String, NilClass], default: nil
-property :umask, kind_of: [NilClass, String], default: nil
+property :umask, kind_of: [NilClass, String], default: '022'
 property :serverurl, kind_of: String, default: 'AUTO'
 
 property :eventlistener, kind_of: [TrueClass, FalseClass], default: false

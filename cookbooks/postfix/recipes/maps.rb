@@ -1,5 +1,4 @@
-# encoding: utf-8
-# Copyright:: 2012-2017, Chef Software, Inc.
+# Copyright:: 2012-2019, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +14,7 @@
 #
 
 node['postfix']['maps'].each do |type, maps|
-  if node['platform_family'] == 'debian'
+  if platform_family?('debian')
     package "postfix-#{type}" if %w(pgsql mysql ldap cdb).include?(type)
   end
 

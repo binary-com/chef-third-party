@@ -2,6 +2,60 @@
 
 This file is used to list changes made in each version of the git cookbook.
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## Unreleased
+
+- Remove delivery folder
+
+## 11.0.1 - *2021-08-30*
+
+- Standardise files with files in sous-chefs/repo-management
+
+## 11.0.0 - *2021-07-31*
+
+- Enable `unified_mode` for Chef 17 compatibility
+- Add some missing test coverage
+- Convert `git_service` LWRP to custom resource
+- Convert `git_client` LWRP to custom resource
+  - **BREAKING**: source provider changed to `:install_from_source` action
+  - use `ark` cookbook for source install
+
+## 10.1.0 (2020-10-12)
+
+### Changed
+
+- Sous Chefs Adoption
+- Update Changelog to Sous Chefs
+- Update to use Sous Chefs GH workflow
+- Update README to sous-chefs
+- Update metadata.rb to Sous Chefs
+- Update test-kitchen to Sous Chefs
+
+### Fixes
+
+- Cookstyle fixes
+- Yamllint fixes
+- Fix `git_service` on various systemd platforms
+- Fix idempotency issues with xinetd service
+
+### Added
+
+- Include mdlrc file
+- Add testing for Ubuntu 20.04
+
+### Removed
+
+- Remove support for Amazon Linux 1
+- Remove support for CentOS 6
+
+## 10.0.0 (2019-10-16)
+
+- Add testing for CentOS 8, openSUSE 15, Ubuntu 18.04 in Travis
+- Require Chef Infra Client 14 or later so we can drop the dependency on build-essential
+- Resolve multiple cookstyle warnings
+
 ## 9.0.1 (2018-06-02)
 
 - Update the platforms we test on
