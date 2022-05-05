@@ -50,6 +50,9 @@ property :options, [String, Array],
           default: %w(missingok compress delaycompress copytruncate notifempty),
           coerce: proc { |p| options_from(p.is_a?(Array) ? p : p.split) }
 
+property :sharedscripts, [true, false], 
+          default: false
+
 ::Logrotate::Cookbook::LogrotateHelpers::SCRIPTS.each { |script_name| property(script_name.to_sym, coerce: proc { |p| Array(p).join("\n    ") }) }
 
 ::Logrotate::Cookbook::LogrotateHelpers::PARAMETERS.each { |configurable_name| property(configurable_name.to_sym) }
