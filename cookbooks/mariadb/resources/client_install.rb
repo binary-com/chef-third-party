@@ -18,7 +18,7 @@
 provides :mariadb_client_install
 unified_mode true
 
-property :version,    String, default: '10.3'
+property :version,    String, default: '11.0.2'
 property :setup_repo, [true, false], default: true
 
 action :install do
