@@ -23,13 +23,13 @@ property :setup_repo, [true, false], default: true
 
 action :install do
   mariadb_repository 'Add mariadb.org repository' do
-    version new_resource.version
+    version '11.0.2'
     only_if { new_resource.setup_repo }
   end
 
   case node['platform_family']
   when 'debian'
-    package "mariadb-client-#{new_resource.version}"
+    package "mariadb-client"
   when 'rhel', 'fedora', 'amazon'
     package 'MariaDB-client'
   end

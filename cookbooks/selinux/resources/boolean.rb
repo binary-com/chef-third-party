@@ -36,9 +36,9 @@ load_current_value do |new_resource|
   value shell_out!("getsebool #{new_resource.boolean}").stdout.split('-->').map(&:strip).last
 end
 
-action_class do
-  include SELinux::Cookbook::StateHelpers
-end
+#action_class do
+ # include SELinux::Cookbook::StateHelpers
+#end
 
 action :set do
   if selinux_disabled?
