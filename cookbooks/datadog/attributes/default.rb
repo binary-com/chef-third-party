@@ -2,7 +2,7 @@
 # Cookbook:: datadog
 # Attributes:: default
 #
-# Copyright:: 2011-2015, Datadog
+# Copyright:: 2011-Present, Datadog
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -161,7 +161,6 @@ default['datadog']['aptrepo_retries'] = 4
 # not running on RHEL/CentOS <= 5 and not providing custom yumrepo.
 # You can set it to true/false explicitly to override this behaviour.
 default['datadog']['yumrepo_repo_gpgcheck'] = nil
-default['datadog']['yumrepo_gpgkey'] = "#{yum_protocol}://keys.datadoghq.com/DATADOG_RPM_KEY.public"
 default['datadog']['yumrepo_proxy'] = nil
 default['datadog']['yumrepo_proxy_username'] = nil
 default['datadog']['yumrepo_proxy_password'] = nil
@@ -176,8 +175,9 @@ default['datadog']['windows_agent_installer_prefix'] = nil
 # of the Agent will be signed with this key.
 # DATADOG_RPM_KEY_CURRENT always contains the key that is used to sign repodata and latest packages
 default['datadog']['yumrepo_gpgkey_new_current'] = "#{yum_protocol}://keys.datadoghq.com/DATADOG_RPM_KEY_CURRENT.public"
-default['datadog']['yumrepo_gpgkey_new_e09422b3'] = "#{yum_protocol}://keys.datadoghq.com/DATADOG_RPM_KEY_E09422B3.public"
+default['datadog']['yumrepo_gpgkey_new_b01082d3'] = "#{yum_protocol}://keys.datadoghq.com/DATADOG_RPM_KEY_B01082D3.public"
 default['datadog']['yumrepo_gpgkey_new_fd4bf915'] = "#{yum_protocol}://keys.datadoghq.com/DATADOG_RPM_KEY_FD4BF915.public"
+default['datadog']['yumrepo_gpgkey_new_e09422b3'] = "#{yum_protocol}://keys.datadoghq.com/DATADOG_RPM_KEY_E09422B3.public"
 
 # Windows Agent Blacklist
 # Attribute to enforce silent failures on agent installs when attempting to install a
@@ -360,6 +360,10 @@ default['datadog']['process_agent']['rtprocess_interval'] = nil
 default['datadog']['process_agent']['container_interval'] = nil
 default['datadog']['process_agent']['rtcontainer_interval'] = nil
 
+# Cloud Workload Security functionality settings
+default['datadog']['security_agent']['cws']['enabled'] = false
+default['datadog']['security_agent']['cspm']['enabled'] = false
+
 # System probe functionality settings
 
 # Whether this cookbook should write system-probe.yaml or not.
@@ -369,7 +373,13 @@ default['datadog']['system_probe']['manage_config'] = true
 # the NPM module of system probe will still run.
 default['datadog']['system_probe']['enabled'] = false
 # sysprobe_socket defines the unix socket location
-default['datadog']['system_probe']['sysprobe_socket'] = '/opt/datadog-agent/run/sysprobe.sock'
+default['datadog']['system_probe']['sysprobe_socket'] =
+  if platform_family?('windows')
+    'localhost:3333'
+  else
+    '/opt/datadog-agent/run/sysprobe.sock'
+  end
+
 # debug_port is the http port for expvar, it is disabled if set to 0
 default['datadog']['system_probe']['debug_port'] = 0
 default['datadog']['system_probe']['bpf_debug'] = false
@@ -380,6 +390,7 @@ default['datadog']['system_probe']['enable_conntrack'] = false
 # When this is set to nil (default), `network_config` won't be rendered in system-probe.yaml,
 # making the Agent use the default setting for this value.
 default['datadog']['system_probe']['network_enabled'] = nil
+default['datadog']['system_probe']['service_monitoring_enabled'] = nil
 
 # Logs functionality settings (Agent 6/7 only)
 # Set `enable_logs_agent` to:

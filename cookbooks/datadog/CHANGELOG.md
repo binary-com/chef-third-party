@@ -1,10 +1,52 @@
 Changes
 =======
 
-# Unreleased
+# 4.18.0 / 2023-07-25
+ * [BUGFIX] Syntax update to support old chef-infra versions [#898] [@chouetz]
+ * [FEATURE] Update recipes to support amazonlinux 2023 installation [#896] [@chouetz]
+ * [FEATURE] Add agent configuration value to config template [#888] [@nichols2k]
+ * [FEATURE] Actually enforce `apt` and `yum` versions in the `metadata.rb` file [#874] [@amenasria]
+ * [FEATURE] support weblogic integration [#891] [@vigohe]
+ * [FEATURE] Add new APT and RPM signing keys [#890] [@chouetz]
+ * [BUGFIX] Fix dead link in http_check.rb recipe [#887] [@amenasria]
 
-* [FEATURE] Enabled unified mode on compatible platforms since it will be the default on Chef 18. See [CHEF-33](https://docs.chef.io/deprecations_unified_mode/) deprecation.
-* [FEATURE] Added support for Chef 18+.
+# 4.17.0 / 2023-02-20
+* [FEATURE] Added the option to enable Universal Service Monitoring (USM) [#876][] [@guyarb][]
+* [BUGFIX] Fix crash for jmx integrations with `init_config` attributes set [#869][] [@KSerrania][]
+
+# 4.16.0 / 2023-01-12
+
+* [DEPRECATION] Remove old RPM GPG key. This also removes the `yumrepo_gpgkey` parameter [#877][] [@amenasria][]
+* [FEATURE] Add min_collection_interval option to ssh_check config [#867][] [@nilskuehme][]
+* [BUGFIX] Remove source file and datadog-signing-keys package when removing the Agent [#865][] [@amenasria][]
+
+# 4.15.0 / 2022-10-06
+* [BUGFIX] Enforce calls of agent version without color output [#863][] [@KSerrania][]
+* [FEATURE] Add configuration for custom_log_collection [#861][] [@nilskuehme][]
+* [FEATURE] Add configuration for gearmand integration [#860][] [@nilskuehme][]
+* [FEATURE] Add unit types to Systemd integration [#859][] [@nilskuehme][]
+* [BUGFIX] Specify release but not epoch for RPM packages on Chef < 14 [#858][] [@KSerrania][]
+* [BUGFIX] Don't use epoch/release for yum package version on Chef < 14 [#856][] [@bkabrda][]
+* [FEATURE] Use agent version instead of agent status to determine the current Agent version [#852][] [@amenasria][]
+
+# 4.14.0 / 2022-06-14
+* [BUGFIX] Fix system probe recipe on Windows [#850][] [@julien-lebot][]
+
+# 4.13.0 / 2022-03-30
+
+* [FEATURE] Allow enabling CWS and CSPM [#843][] [@lebauce][]
+* [FEATURE] Add support for AlmaLinux and Rocky Linux [#836][] [@bkabrda][]
+* [FEATURE] Add `monitor_unlisted_consumer_groups` and `kafka_consumer_offsets` to kafka_consumer [#834][] [@ganeshkumarsv][]
+* [BUGFIX] Specify package epoch on RH-like platforms to ensure proper upgrade path [#839][] [@bkabrda][]
+* [BUGFIX] Use the correct socket for system probe on Windows [#833][] [@julien-lebot][]
+* [BUGFIX] Add is_jmx by default to jmxfetch checks [#792][] [@albertvaka][]
+
+# 4.12.0 / 2021-12-03
+
+* [FEATURE] Added support for Chef 18+. [@axl89][] [#822][]
+* [FEATURE] Enabled unified mode on compatible platforms since it will be the default on Chef 18. See [CHEF-33](https://docs.chef.io/deprecations_unified_mode/) deprecation. [@axl89][] [#822][]
+* [FEATURE] Include `dogstatsd_port` in `datadog.yaml` for Agent 6 and Agent 7 [@brentm5][] [#828][]
+* [BUGFIX] Ignore `apt update` failures to keep running if some sources are offline [#830][] [@bkabrda][]
 
 # 4.11.1 / 2021-08-24
 
@@ -994,6 +1036,7 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [#786]: https://github.com/DataDog/chef-datadog/issues/786
 [#789]: https://github.com/DataDog/chef-datadog/issues/789
 [#791]: https://github.com/DataDog/chef-datadog/issues/791
+[#792]: https://github.com/DataDog/chef-datadog/issues/792
 [#793]: https://github.com/DataDog/chef-datadog/issues/793
 [#796]: https://github.com/DataDog/chef-datadog/issues/796
 [#799]: https://github.com/DataDog/chef-datadog/issues/799
@@ -1002,6 +1045,35 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [#806]: https://github.com/DataDog/chef-datadog/issues/806
 [#810]: https://github.com/DataDog/chef-datadog/issues/810
 [#813]: https://github.com/DataDog/chef-datadog/issues/813
+[#822]: https://github.com/DataDog/chef-datadog/issues/822
+[#828]: https://github.com/DataDog/chef-datadog/issues/828
+[#830]: https://github.com/DataDog/chef-datadog/issues/830
+[#833]: https://github.com/DataDog/chef-datadog/issues/833
+[#834]: https://github.com/DataDog/chef-datadog/issues/834
+[#836]: https://github.com/DataDog/chef-datadog/issues/836
+[#839]: https://github.com/DataDog/chef-datadog/issues/839
+[#843]: https://github.com/DataDog/chef-datadog/issues/843
+[#850]: https://github.com/DataDog/chef-datadog/issues/850
+[#852]: https://github.com/DataDog/chef-datadog/issues/852
+[#856]: https://github.com/DataDog/chef-datadog/issues/856
+[#858]: https://github.com/DataDog/chef-datadog/issues/858
+[#859]: https://github.com/DataDog/chef-datadog/issues/859
+[#860]: https://github.com/DataDog/chef-datadog/issues/860
+[#861]: https://github.com/DataDog/chef-datadog/issues/861
+[#863]: https://github.com/DataDog/chef-datadog/issues/863
+[#865]: https://github.com/DataDog/chef-datadog/issues/865
+[#867]: https://github.com/DataDog/chef-datadog/issues/867
+[#869]: https://github.com/DataDog/chef-datadog/issues/869
+[#874]: https://github.com/DataDog/chef-datadog/issues/874
+[#876]: https://github.com/DataDog/chef-datadog/issues/876
+[#877]: https://github.com/DataDog/chef-datadog/issues/877
+[#887]: https://github.com/DataDog/chef-datadog/issues/887
+[#888]: https://github.com/DataDog/chef-datadog/issues/888
+[#890]: https://github.com/DataDog/chef-datadog/issues/890
+[#891]: https://github.com/DataDog/chef-datadog/issues/891
+[#895]: https://github.com/DataDog/chef-datadog/issues/895
+[#896]: https://github.com/DataDog/chef-datadog/issues/896
+[#898]: https://github.com/DataDog/chef-datadog/issues/898
 [@ABrehm264]: https://github.com/ABrehm264
 [@AlexBevan]: https://github.com/AlexBevan
 [@Azraeht]: https://github.com/Azraeht
@@ -1024,9 +1096,11 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [@albertvaka]: https://github.com/albertvaka
 [@alexism]: https://github.com/alexism
 [@alq]: https://github.com/alq
+[@amenasria]: https://github.com/amenasria
 [@antonio-osorio]: https://github.com/antonio-osorio
 [@arthurnn]: https://github.com/arthurnn
 [@asherf]: https://github.com/asherf
+[@axl89]: https://github.com/axl89
 [@aymen-chetoui]: https://github.com/aymen-chetoui
 [@azuretek]: https://github.com/azuretek
 [@babbottscott]: https://github.com/babbottscott
@@ -1068,12 +1142,14 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [@flah00]: https://github.com/flah00
 [@foobarto]: https://github.com/foobarto
 [@frezbo]: https://github.com/frezbo
+[@ganeshkumarsv]: https://github.com/ganeshkumarsv
 [@gkze]: https://github.com/gkze
 [@gmmeyer]: https://github.com/gmmeyer
 [@graemej]: https://github.com/graemej
 [@gregf]: https://github.com/gregf
 [@grogancolin]: https://github.com/grogancolin
 [@gswallow]: https://github.com/gswallow
+[@guyarb]: https://github.com/guyarb
 [@haidars]: https://github.com/haidars
 [@hartfordfive]: https://github.com/hartfordfive
 [@hilli]: https://github.com/hilli
@@ -1106,6 +1182,7 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [@kurochan]: https://github.com/kurochan
 [@kylegoch]: https://github.com/kylegoch
 [@lchayoun]: https://github.com/lchayoun
+[@lebauce]: https://github.com/lebauce
 [@lefthand]: https://github.com/lefthand
 [@martinisoft]: https://github.com/martinisoft
 [@mattrobenolt]: https://github.com/mattrobenolt
@@ -1163,3 +1240,6 @@ A fix has gone in to `apt` 2.1.0 that relaxes this condition, and plays well wit
 [@xt99]: https://github.com/xt99
 [@yannmh]: https://github.com/yannmh
 [@zshenker]: https://github.com/zshenker
+[@nichols2k]: https://github.com/nichols2k
+[@chouetz]: https://github.com/chouetz
+[@vigohe]: https://github.com/vigohe

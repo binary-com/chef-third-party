@@ -2,7 +2,7 @@
 # Cookbook:: datadog
 # Recipe:: dd-agent
 #
-# Copyright:: 2011-2015, Datadog
+# Copyright:: 2011-Present, Datadog
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -165,6 +165,9 @@ system_probe_supported = (agent_version_greater_than_6_11 && !is_windows) || (ag
 
 # system-probe is a dependency of the agent on Linux or Windows
 include_recipe '::system-probe' if system_probe_managed && system_probe_supported
+
+# security-agent is a dependency of the agent on Linux or Windows
+include_recipe '::security-agent' unless is_windows
 
 # Installation metadata to let know the agent about installation method and its version
 include_recipe '::install_info'

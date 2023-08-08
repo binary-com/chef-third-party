@@ -1,7 +1,8 @@
 #
 # Cookbook:: datadog
 # Recipe:: repository
-# Copyright:: 2013-2015, Datadog
+#
+# Copyright:: 2011-Present, Datadog
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,22 +30,27 @@ agent_major_version = Chef::Datadog.agent_major_version(node)
 # DATADOG_APT_KEY_CURRENT always contains the key that is used to sign repodata and latest packages
 # A2923DFF56EDA6E76E55E492D3A80E30382E94DE expires in 2022
 # D75CEA17048B9ACBF186794B32637D44F14F620E expires in 2032
+# 5F1E256061D813B125E156E8E6266D4AC0962C7D expires in 2028
 apt_gpg_keys = {
   'DATADOG_APT_KEY_CURRENT.public'           => 'https://keys.datadoghq.com/DATADOG_APT_KEY_CURRENT.public',
+  '5F1E256061D813B125E156E8E6266D4AC0962C7D' => 'https://keys.datadoghq.com/DATADOG_APT_KEY_C0962C7D.public',
   'D75CEA17048B9ACBF186794B32637D44F14F620E' => 'https://keys.datadoghq.com/DATADOG_APT_KEY_F14F620E.public',
   'A2923DFF56EDA6E76E55E492D3A80E30382E94DE' => 'https://keys.datadoghq.com/DATADOG_APT_KEY_382E94DE.public',
 }
 apt_trusted_d_keyring = '/etc/apt/trusted.gpg.d/datadog-archive-keyring.gpg'
 apt_usr_share_keyring = '/usr/share/keyrings/datadog-archive-keyring.gpg'
-apt_sources_list_file = '/etc/apt/sources.list.d/datadog.list'
+# Importing apt_sources_list_file variable from recipe_helpers.rb
+apt_sources_list_file = Chef::Datadog.apt_sources_list_file
 apt_repo_uri = 'https://apt.datadoghq.com'
 
 # DATADOG_RPM_KEY_CURRENT always contains the key that is used to sign repodata and latest packages
 # DATADOG_RPM_KEY_E09422B3.public expires in 2022
 # DATADOG_RPM_KEY_FD4BF915.public expires in 2024
+# DATADOG_RPM_KEY_B01082D3.public expires in 2028
 rpm_gpg_keys = [['DATADOG_RPM_KEY_CURRENT.public', 'current', ''],
-                ['DATADOG_RPM_KEY_E09422B3.public', 'e09422b3', 'A4C0 B90D 7443 CF6E 4E8A  A341 F106 8E14 E094 22B3'],
-                ['DATADOG_RPM_KEY_FD4BF915.public', 'fd4bf915', 'C655 9B69 0CA8 82F0 23BD  F3F6 3F4D 1729 FD4B F915']]
+                ['DATADOG_RPM_KEY_B01082D3.public', 'b01082d3', '7408 BFD5 6BC5 BF0C 361A  AAE8 5D88 EEA3 B010 82D3'],
+                ['DATADOG_RPM_KEY_FD4BF915.public', 'fd4bf915', 'C655 9B69 0CA8 82F0 23BD  F3F6 3F4D 1729 FD4B F915'],
+                ['DATADOG_RPM_KEY_E09422B3.public', 'e09422b3', 'A4C0 B90D 7443 CF6E 4E8A  A341 F106 8E14 E094 22B3']]
 
 # Local file name of the key
 rpm_gpg_keys_name = 0
@@ -52,6 +58,25 @@ rpm_gpg_keys_name = 0
 rpm_gpg_keys_short_fingerprint = 1
 # Space delimited full fingerprint
 rpm_gpg_keys_full_fingerprint = 2
+
+# This method deletes an RPM GPG key if it is installed
+def remove_rpm_gpg_key(rpm_gpg_key_full_fingerprint)
+  execute "rpm-remove old gpg key #{rpm_gpg_key_full_fingerprint}" do
+    command "rpm --erase gpg-pubkey-#{rpm_gpg_key_full_fingerprint}"
+    only_if "rpm -q gpg-pubkey-#{rpm_gpg_key_full_fingerprint}"
+    action :run
+  end
+end
+
+def warn_deprecated_yumrepo_gpgkey
+  log 'yum deprecated parameters warning' do
+    level :warn
+    message 'Attribute "yumrepo_gpgkey" is deprecated since version 4.16.0'
+    only_if {
+      !node['datadog']['yumrepo_gpgkey'].nil?
+    }
+  end
+end
 
 case node['platform_family']
 when 'debian'
@@ -63,7 +88,9 @@ when 'debian'
     }
   end
 
-  apt_update 'update'
+  apt_update 'update' do
+    ignore_failure true
+  end
 
   package 'install-apt-transport-https' do
     package_name 'apt-transport-https'
@@ -147,19 +174,18 @@ when 'debian'
   end
 
   # Previous versions of the cookbook could create these repo files, make sure we remove it now
-  apt_repository 'datadog-beta' do
-    action :remove
-  end
-
-  apt_repository 'datadog_apt_A2923DFF56EDA6E76E55E492D3A80E30382E94DE' do
-    action :remove
-  end
-
-  apt_repository 'datadog_apt_D75CEA17048B9ACBF186794B32637D44F14F620E' do
-    action :remove
+  ['datadog-beta',
+   'datadog_apt_D75CEA17048B9ACBF186794B32637D44F14F620E',
+   'datadog_apt_A2923DFF56EDA6E76E55E492D3A80E30382E94DE'].each do |repo|
+    apt_repository repo do
+      action :remove
+    end
   end
 
 when 'rhel', 'fedora', 'amazon'
+  # The yumrepo_gpgkey parameter was removed because the DATADOG_RPM_KEY.public (4172a230) is not used anymore
+  warn_deprecated_yumrepo_gpgkey()
+
   # gnupg is required to check the downloaded key's fingerprint
   package 'gnupg' do
     action :install
@@ -191,6 +217,9 @@ when 'rhel', 'fedora', 'amazon'
       action :nothing
     end
   end
+
+  # The DATADOG_RPM_KEY.public (4172a230) is not used anymore, it should be deleted if present
+  remove_rpm_gpg_key('4172a230-55dd14f6')
 
   # When the user has set yumrepo_repo_gpgcheck explicitly, we respect that.
   # Otherwise, we turn on repo_gpgcheck by default when both:
@@ -232,9 +261,6 @@ when 'rhel', 'fedora', 'amazon'
       yumrepo_gpgkeys.push(node['datadog']["yumrepo_gpgkey_new_#{rpm_gpg_key[rpm_gpg_keys_short_fingerprint]}"])
     end
   end
-  # yum/dnf go through entries in the order in which they're set in the repofile;
-  # add the old key last so it doesn't get imported at all if a newer key can be used
-  yumrepo_gpgkeys.push(node['datadog']['yumrepo_gpgkey']) if agent_major_version < 7
 
   yum_repository 'datadog' do
     description 'datadog'
@@ -248,6 +274,9 @@ when 'rhel', 'fedora', 'amazon'
     action :create
   end
 when 'suse'
+  # The yumrepo_gpgkey parameter was removed because the DATADOG_RPM_KEY.public (4172a230) is not used anymore
+  warn_deprecated_yumrepo_gpgkey()
+
   # Import new RPM key
   rpm_gpg_keys.each do |rpm_gpg_key|
     next unless node['datadog']["yumrepo_gpgkey_new_#{rpm_gpg_key[rpm_gpg_keys_short_fingerprint]}"]
@@ -272,21 +301,8 @@ when 'suse'
     end
   end
 
-  # Now the old key is mostly hard-coded
-  old_key_local_path = ::File.join(Chef::Config[:file_cache_path], 'DATADOG_RPM_KEY.public')
-  remote_file 'DATADOG_RPM_KEY.public' do
-    path old_key_local_path
-    source node['datadog']['yumrepo_gpgkey']
-    not_if 'rpm -q gpg-pubkey-4172a230' # (key already imported)
-    notifies :run, 'execute[rpm-import datadog key 4172a230]', :immediately
-  end
-
-  # Import key if fingerprint matches
-  execute 'rpm-import datadog key 4172a230' do
-    command "rpm --import #{old_key_local_path}"
-    only_if "gpg --dry-run --quiet --with-fingerprint #{old_key_local_path} | grep '60A3 89A4 4A0C 32BA E3C0  3F0B 069B 56F5 4172 A230' || gpg --dry-run --import --import-options import-show #{old_key_local_path} | grep '60A389A44A0C32BAE3C03F0B069B56F54172A230'"
-    action :nothing
-  end
+  # The DATADOG_RPM_KEY.public (4172a230) is not used anymore, it should be deleted if present
+  remove_rpm_gpg_key('4172a230-55dd14f6')
 
   if !node['datadog']['yumrepo_suse'].nil?
     baseurl = node['datadog']['yumrepo_suse']
@@ -305,7 +321,7 @@ when 'suse'
   zypper_repository 'datadog' do
     description 'datadog'
     baseurl baseurl
-    gpgkey agent_major_version < 6 ? node['datadog']['yumrepo_gpgkey'] : node['datadog']['yumrepo_gpgkey_new_current']
+    gpgkey node['datadog']['yumrepo_gpgkey_new_current']
     gpgautoimportkeys false
     gpgcheck false
     # zypper has no repo_gpgcheck option, but it does repodata signature checks

@@ -1,3 +1,17 @@
+# Copyright:: 2011-Present, Datadog
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 require 'spec_helper'
 require 'digest'
 
@@ -124,6 +138,36 @@ describe 'datadog::dd-agent' do
         ChefSpec::SoloRunner.new(
           :platform => 'fedora',
           :version => '31'
+        ) do |node|
+          node.normal['datadog'] = { 'api_key' => 'somethingnotnil' }
+          node.normal['languages'] = { 'python' => { 'version' => '2.7.9' } }
+        end.converge described_recipe
+      end
+
+      it_behaves_like 'repo recipe'
+      it_behaves_like 'rhellions dnf no version set'
+    end
+
+    context 'on AlmaLinux distro', if: min_chef_version('17.0.69') do
+      cached(:chef_run) do
+        ChefSpec::SoloRunner.new(
+          :platform => 'almalinux',
+          :version => '8'
+        ) do |node|
+          node.normal['datadog'] = { 'api_key' => 'somethingnotnil' }
+          node.normal['languages'] = { 'python' => { 'version' => '2.7.9' } }
+        end.converge described_recipe
+      end
+
+      it_behaves_like 'repo recipe'
+      it_behaves_like 'rhellions dnf no version set'
+    end
+
+    context 'on Rocky Linux distro', if: min_chef_version('17.1.35') do
+      cached(:chef_run) do
+        ChefSpec::SoloRunner.new(
+          :platform => 'rocky',
+          :version => '8'
         ) do |node|
           node.normal['datadog'] = { 'api_key' => 'somethingnotnil' }
           node.normal['languages'] = { 'python' => { 'version' => '2.7.9' } }
@@ -1416,7 +1460,11 @@ describe 'datadog::dd-agent' do
       end.converge described_recipe
     end
     it 'installs the full version' do
-      expect(chef_run).to install_dnf_package('datadog-agent').with_version('6.16.0-1')
+      if Chef::Datadog.chef_version_ge? 14
+        expect(chef_run).to install_dnf_package('datadog-agent').with_version('1:6.16.0-1')
+      else
+        expect(chef_run).to install_dnf_package('datadog-agent').with_version('6.16.0-1')
+      end
     end
   end
 end
