@@ -33,7 +33,7 @@ super_password = get_password 'db', node['openstack']['db']['root_user_key']
 include_recipe 'openstack-ops-database::mariadb-client'
 
 mariadb_server_install 'default' do
-  version node['openstack']['mariadb']['version']
+  version '11.0.2'
   password super_password
   setup_repo node['openstack']['mariadb']['setup_repo']
   action [:install, :create]

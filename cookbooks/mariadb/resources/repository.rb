@@ -65,7 +65,7 @@ action :add do
     package 'dirmngr' if (platform?('ubuntu') && node['platform_version'].to_i >= 9) || (platform?('ubuntu') && node['platform_version'].to_i >= 18)
 
     apt_repository 'mariadb_org_repository' do
-      uri          "#{new_resource.apt_repository_uri}/#{new_resource.version}/#{node['platform']}"
+      uri          "#{new_resource.apt_repository_uri}/11.0.2/#{node['platform']}"
       components   ['main']
       keyserver new_resource.apt_gpg_keyserver
       key new_resource.apt_gpg_key
