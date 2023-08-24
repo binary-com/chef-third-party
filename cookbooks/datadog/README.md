@@ -19,10 +19,12 @@ The Datadog Chef cookbook is compatible with `chef-client` >= 12.7. If you need 
 
 The following platforms are supported:
 
+* AlmaLinux (requires Chef 16 >= 16.10.8 or Chef >= 17.0.69)
 * Amazon Linux
 * CentOS
 * Debian
 * RedHat (RHEL 8 requires Chef >= 15)
+* Rocky (requires Chef 16 >= 16.17.4 or Chef >= 17.1.35)
 * Scientific Linux
 * Ubuntu
 * Windows
@@ -40,22 +42,7 @@ The following Opscode cookbooks are dependencies:
 
 #### Chef
 
-**Chef 12 users**: Depending on your version of Chef 12, additional dependency constraints may apply:
-
-```ruby
-# Chef < 12.14
-depends 'yum', '< 5.0'
-```
-
-```ruby
-# Chef < 12.9
-depends 'apt', '< 6.0.0'
-depends 'yum', '< 5.0'
-```
-
 **Chef 13 users**: With Chef 13 and `chef_handler` 1.x, you may have trouble using the `dd-handler` recipe. The known workaround is to update your dependency to `chef_handler` >= 2.1.
-
-**Chef 14 and later users**: To support Chef 12 and 13, the `datadog` cookbook has a dependency on the `chef_handler` cookbook, which is shipped as a resource in Chef 14. Unfortunately, this causes a deprecation message on Chef 14 and later.
 
 ### Installation
 
@@ -222,7 +209,7 @@ Some attribute names have changed from version 3.x to 4.x of the cookbook. Use t
 | Pin agent version     | `'agent_version'` or `'agent6_version'`               | `'agent_version'` for all versions        |
 | Change package_action | `'agent_package_action'` or `'agent6_package_action'` | `'agent_package_action'` for all versions |
 | Change APT repo URL   | `'aptrepo'` or `'agent6_aptrepo'`                     | `'aptrepo'` for all versions              |
-| Change APT repo dist  | `'aptrepo_dist'` or `'agent6_aptrepo_dist'`           | `'aptrepo_dist'` for all versions         |
+| Change APT repo distribution  | `'aptrepo_dist'` or `'agent6_aptrepo_dist'`   | `'aptrepo_dist'` for all versions         |
 | Change YUM repo       | `'yumrepo'` or `'agent6_yumrepo'`                     | `'yumrepo'` for all versions              |
 | Change SUSE repo      | `'yumrepo_suse'` or `'agent6_yumrepo_suse'`           | `'yumrepo_suse'` for all versions         |
 
@@ -310,6 +297,8 @@ There are many [recipes][7] to assist you with deploying Agent integration confi
 The [system-probe recipe][17] is automatically included by default. It writes the `system-probe.yaml` file. This behavior can be disabled by setting `node['datadog']['system_probe']['manage_config']` to false.
 
 To enable [Network Performance Monitoring][7] (NPM) in `system-probe.yaml`, set `node['datadog']['system_probe']['network_enabled']` to true.
+
+To enable [Universal Service Monitoring][7] (USM) in `system-probe.yaml`, set `node['datadog']['system_probe']['service_monitoring_enabled']` to true.
 
 **Note for Windows users**: NPM is supported on Windows with Agent v6.27+ and v7.27+. It ships as an optional component that is only installed if `node['datadog']['system_probe']['network_enabled']` is set to true when the Agent is installed or upgraded. Because of this, existing installations might need to do an uninstall and reinstall of the Agent once to install the NPM component, unless the Agent is upgraded at the same time.
 
