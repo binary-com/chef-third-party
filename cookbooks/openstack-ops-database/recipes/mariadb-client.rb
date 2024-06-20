@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 mariadb_client_install 'default' do
-  version node['openstack']['mariadb']['version']
+  version '11.0.2'
   setup_repo node['openstack']['mariadb']['setup_repo']
 end
 
