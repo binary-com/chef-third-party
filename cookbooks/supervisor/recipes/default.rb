@@ -25,8 +25,34 @@ if platform_family?('smartos')
   end
 end
 
-execute 'pip install supervisor' do
-   command 'pip install supervisor --index=https://pypi.python.org/simple/'
+# In Debian 12+, pip cannot install packages system-wide due to PEP 668
+# We need to create a virtual environment for supervisor
+if platform?('debian') && node['platform_version'].to_i >= 12
+  # Ensure python3-venv is installed
+  package 'python3-venv'
+  
+  # Create a virtual environment for supervisor
+  execute 'create supervisor venv' do
+    command 'python3 -m venv /opt/supervisor-venv'
+    not_if { ::Dir.exist?('/opt/supervisor-venv') }
+  end
+  
+  # Install supervisor in the virtual environment
+  execute 'install supervisor in venv' do
+    command '/opt/supervisor-venv/bin/pip install supervisor --index=https://pypi.python.org/simple/'
+  end
+  
+  # Create symlinks to make supervisor commands accessible system-wide
+  %w(supervisord supervisorctl).each do |cmd|
+    link "/usr/local/bin/#{cmd}" do
+      to "/opt/supervisor-venv/bin/#{cmd}"
+    end
+  end
+else
+  # For older Debian versions or other platforms, install directly with pip
+  execute 'pip install supervisor' do
+    command 'pip install supervisor --index=https://pypi.python.org/simple/'
+  end
 end
 
 directory node['supervisor']['dir'] do
