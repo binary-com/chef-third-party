@@ -17,7 +17,6 @@
 # limitations under the License.
 #
 
-
 # foodcritic FC023: we prefer not having the resource on non-smartos
 if platform_family?('smartos')
   package 'py27-expat' do
@@ -25,8 +24,27 @@ if platform_family?('smartos')
   end
 end
 
-execute 'pip install supervisor' do
-   command 'pip install supervisor --index=https://pypi.python.org/simple/'
+# In Debian 12+, pip cannot install packages system-wide due to PEP 668
+if platform?('debian') && node['platform_version'].to_i >= 12
+  # Install pipx for isolated Python package installation
+  package 'pipx'
+
+  # Ensure pipx is in PATH
+  execute 'pipx ensurepath' do
+    command 'pipx ensurepath'
+    not_if 'grep -q "PATH.*\.local/bin" /etc/environment'
+  end
+
+  # Install supervisor using pipx
+  execute 'install supervisor with pipx' do
+    command 'pipx install supervisor --index=https://pypi.python.org/simple/'
+    not_if 'pipx list | grep -q supervisor'
+  end
+else
+  # For older Debian versions or other platforms, install directly with pip
+  execute 'pip install supervisor' do
+    command 'pip install supervisor --index=https://pypi.python.org/simple/'
+  end
 end
 
 directory node['supervisor']['dir'] do
@@ -49,8 +67,8 @@ template node['supervisor']['conffile'] do
       supervisord_minfds: node['supervisor']['minfds'],
       supervisord_minprocs: node['supervisor']['minprocs'],
       supervisor_version: node['supervisor']['version'],
-      socket_file: node['supervisor']['socket_file']
-	  }
+      socket_file: node['supervisor']['socket_file'],
+    }
   end)
 end
 
