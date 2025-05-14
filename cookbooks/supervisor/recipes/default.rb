@@ -25,8 +25,15 @@ if platform_family?('smartos')
   end
 end
 
-execute 'pip install supervisor' do
-   command 'pip install supervisor --index=https://pypi.python.org/simple/'
+# Install supervisor based on Debian version
+if platform?('debian') && (node['platform_version'] == '12' || node['lsb']['codename'] == 'bookworm')
+  execute 'pipx install supervisor' do
+    command 'pipx install supervisor --index=https://pypi.python.org/simple/'
+  end
+else
+  execute 'pip install supervisor' do
+    command 'pip install supervisor --index=https://pypi.python.org/simple/'
+  end
 end
 
 directory node['supervisor']['dir'] do
