@@ -28,7 +28,7 @@ end
 # Install supervisor based on Debian version
 if platform?('debian') && (node['platform_version'] == '12' || node['lsb']['codename'] == 'bookworm')
   execute 'pipx install supervisor' do
-    command 'pipx install supervisor --index=https://pypi.python.org/simple/'
+    command 'PIPX_HOME=/opt/pipx PIPX_BIN_DIR=/usr/local/bin pipx install supervisor --index=https://pypi.python.org/simple/'
   end
 else
   execute 'pip install supervisor' do
@@ -118,3 +118,4 @@ when 'smartos'
     action [:enable]
   end
 end
+
