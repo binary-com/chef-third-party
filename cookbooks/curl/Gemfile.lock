@@ -106,7 +106,7 @@ GEM
       cucumber-core (>= 1.3)
       erubis
       ffi-yajl (~> 2.0)
-      nokogiri (>= 1.5, < 2.0)
+      nokogiri (>= 1.18.8)
       rake
       rufus-lru (~> 1.0)
       treetop (~> 1.4)
