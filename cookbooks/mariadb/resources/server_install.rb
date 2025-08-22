@@ -20,7 +20,7 @@ unified_mode true
 
 include MariaDBCookbook::Helpers
 
-property :version,           String,        default: '10.3'
+property :version,           String,        default: '11.0.2'
 property :setup_repo,        [true, false], default: true
 property :mycnf_file,        String,        default: lazy { "#{conf_dir}/my.cnf" }
 property :extconf_directory, String,        default: lazy { ext_conf_dir }
@@ -36,13 +36,13 @@ action :install do
   node.run_state['mariadb']['version'] = new_resource.version
 
   mariadb_client_install 'Install MariaDB Client' do
-    version new_resource.version
+    version '11.0.2'
     setup_repo new_resource.setup_repo
   end
 
   package server_pkg_name
 
-  selinux_install 'mariadb' if selinux_enabled?
+  #selinux_install 'mariadb' if selinux_enabled?
 
   %w(mariadb-server mariadb).each do |m|
     selinux_module m do
