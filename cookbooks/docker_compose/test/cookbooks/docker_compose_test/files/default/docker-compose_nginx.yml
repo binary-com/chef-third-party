@@ -1,0 +1,14 @@
+version: '2'
+services:
+  web_server_1:
+    image: nginx
+    ports:
+      - "8001:80"
+  web_server_2:
+    image: nginx
+    ports:
+      - "8002:80"
+  web_server_3:
+    image: nginx
+    ports:
+      - "8003:80"
