@@ -272,7 +272,7 @@ DEPENDENCIES
   chef (~> 13.6)
   chefspec (~> 7.1)
   foodcritic (~> 12.2)
-  rake (~> 12.3)
+  rake (~> 13.3)
   rubocop (~> 0.52)
   stove (~> 6.0)
 
