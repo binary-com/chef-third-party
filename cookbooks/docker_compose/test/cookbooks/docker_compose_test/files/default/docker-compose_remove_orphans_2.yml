@@ -1,0 +1,6 @@
+version: '2'
+services:
+  web_server_1:
+    image: nginx
+    ports:
+      - "8891:80"
