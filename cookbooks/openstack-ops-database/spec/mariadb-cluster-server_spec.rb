@@ -16,7 +16,7 @@ describe 'openstack-ops-database::mariadb-cluster-server' do
 
     it do
       expect(chef_run).to create_mariadb_galera_configuration('MariaDB Galera Configuration').with(
-        version: '10.3',
+        version: '11.0.2',
         cluster_name: 'openstack',
         gcomm_address: 'gcomm://',
         wsrep_provider_options: { 'gcache.size': '512M', 'gmcast.listen_addr': 'tcp://127.0.0.1:4567' },

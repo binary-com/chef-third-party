@@ -215,13 +215,13 @@ module MariaDBCookbook
       if platform_family?('rhel', 'fedora', 'amazon')
         'MariaDB-backup'
       else
-        new_resource.version == '10.3' ? 'mariadb-backup' : "mariadb-backup-#{new_resource.version}"
+        new_resource.version == '11.0.2' ? 'mariadb-backup' : "mariadb-backup-#{new_resource.version}"
       end
     end
 
     # determine the platform specific server package name
     def server_pkg_name
-      platform_family?('debian') ? "mariadb-server-#{new_resource.version}" : 'MariaDB-server'
+      platform_family?('debian') ? "mariadb-server" : 'MariaDB-server'
     end
 
     # given the base URL build the complete URL string for a yum repo
