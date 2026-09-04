@@ -50,6 +50,11 @@ module DockerCookbook
       false
     end
 
+    def trixie?
+      return true if platform?('debian') && node['platform_version'].to_i == 13
+      false
+    end
+
     def bionic?
       return true if platform?('ubuntu') && node['platform_version'] == '18.04'
       false
@@ -63,12 +68,22 @@ module DockerCookbook
     # https://github.com/chef/chef/issues/4103
     def version_string(v)
       return if v.nil?
+
+      # If the caller already provides a fully-qualified Docker package version
+      # (e.g. "5:28.5.2-1~debian.13~trixie"), use it verbatim. The heuristics
+      # below only know how to build the legacy "~ce~3-0~debian-<codename>"
+      # style strings, which no longer match the packages published for newer
+      # Debian releases such as trixie.
+      return v if v =~ /~debian\.\d+~|~ubuntu\.\d+~|~ce/ || v.include?(':')
+
       codename = if stretch? # deb 9
                    'stretch'
                  elsif buster? # deb 10
                    'buster'
                  elsif bullseye? # deb 11
                    'bullseye'
+                 elsif trixie? # deb 13
+                   'trixie'
                  elsif bionic? # ubuntu 18.04
                    'bionic'
                  elsif focal? # ubuntu 20.04
@@ -129,11 +144,26 @@ module DockerCookbook
 
           package 'apt-transport-https'
 
+          # Debian 13 (trixie) and modern apt no longer ship `apt-key`.
+          # Install the Docker GPG key into a dedicated keyring and reference
+          # it via the `signed-by` option instead of the deprecated apt-key flow.
+          directory '/etc/apt/keyrings' do
+            mode '0755'
+            recursive true
+          end
+
+          docker_apt_keyring = '/etc/apt/keyrings/docker.asc'
+
+          remote_file docker_apt_keyring do
+            source "https://download.docker.com/linux/#{node['platform']}/gpg"
+            mode '0644'
+          end
+
           apt_repository 'Docker' do
             components Array(new_resource.repo_channel)
             uri "https://download.docker.com/linux/#{node['platform']}"
             arch deb_arch
-            key "https://download.docker.com/linux/#{node['platform']}/gpg"
+            options "signed-by=#{docker_apt_keyring}"
             action :add
           end
         else
@@ -143,9 +173,26 @@ module DockerCookbook
 
       version = new_resource.package_version || version_string(new_resource.version)
 
+      # On Debian/Ubuntu, explicitly install the CLI (and containerd) in addition
+      # to the docker-ce (daemon) package. Relying solely on docker-ce's
+      # dependency resolution can leave /usr/bin/docker (docker-ce-cli) missing
+      # when apt pin priorities force specific versions, which produces a golden
+      # image whose `docker` command is absent even though the daemon converged.
+      if debuntu?
+        package 'docker-ce-cli' do
+          version version
+          options new_resource.package_options
+          retries 6
+          retry_delay 15
+          action :install
+        end
+      end
+
       package new_resource.package_name do
         version version
         options new_resource.package_options
+        retries 6
+        retry_delay 15
         action :install
       end
     end
