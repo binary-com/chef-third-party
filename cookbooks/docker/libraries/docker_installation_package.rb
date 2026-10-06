@@ -50,6 +50,16 @@ module DockerCookbook
       false
     end
 
+    def bookworm?
+      return true if platform?('debian') && node['platform_version'].to_i == 12
+      false
+    end
+
+    def trixie?
+      return true if platform?('debian') && node['platform_version'].to_i == 13
+      false
+    end
+
     def bionic?
       return true if platform?('ubuntu') && node['platform_version'] == '18.04'
       false
@@ -69,6 +79,10 @@ module DockerCookbook
                    'buster'
                  elsif bullseye? # deb 11
                    'bullseye'
+                 elsif bookworm? # deb 12
+                   'bookworm'
+                 elsif trixie? # deb 13
+                   'trixie'
                  elsif bionic? # ubuntu 18.04
                    'bionic'
                  elsif focal? # ubuntu 20.04
@@ -77,6 +91,12 @@ module DockerCookbook
 
       # https://github.com/seemethere/docker-ce-packaging/blob/9ba8e36e8588ea75209d813558c8065844c953a0/deb/gen-deb-ver#L16-L20
       test_version = '3'
+
+      # Debian 13 (trixie): the docker-ce repo uses the modern revision scheme
+      # "5:<v>-1~debian.13~trixie" (not the legacy "5:<v>~3-0~debian-<codename>"),
+      # so the generic branch below would build a version string that matches no
+      # package and silently fall back to latest. Return the correct trixie form.
+      return "5:#{v}-1~debian.13~trixie" if trixie? && v.to_f >= 18.09
 
       if v.to_f < 18.06 && !bionic?
         return "#{v}~ce-0~debian" if debian?
@@ -129,12 +149,54 @@ module DockerCookbook
 
           package 'apt-transport-https'
 
-          apt_repository 'Docker' do
-            components Array(new_resource.repo_channel)
-            uri "https://download.docker.com/linux/#{node['platform']}"
-            arch deb_arch
-            key "https://download.docker.com/linux/#{node['platform']}/gpg"
-            action :add
+          # Debian 13 (trixie) removed `apt-key`; chef's apt_repository `key`
+          # attribute shells out to `apt-key add`, which fails on trixie. Use a
+          # dearmored keyring + signed-by there. Other releases keep the original.
+          if platform?('debian') && node['platform_version'].to_i >= 13
+            directory '/etc/apt/keyrings' do
+              owner 'root'
+              group 'root'
+              mode '0755'
+              recursive true
+            end
+
+            execute 'dearmor-docker-key' do
+              command 'gpg --batch --yes --dearmor -o /etc/apt/keyrings/docker.gpg /etc/apt/keyrings/docker.asc'
+              action :nothing
+            end
+
+            remote_file '/etc/apt/keyrings/docker.asc' do
+              source "https://download.docker.com/linux/#{node['platform']}/gpg"
+              owner 'root'
+              group 'root'
+              mode '0644'
+              retries 3
+              retry_delay 5
+              # Re-dearmor whenever the upstream key changes (key rotation), so the
+              # keyring never goes stale. A `creates` guard would skip regeneration.
+              notifies :run, 'execute[dearmor-docker-key]', :immediately
+            end
+
+            codename = node['lsb']['codename']
+            file '/etc/apt/sources.list.d/docker.list' do
+              content "deb [arch=#{deb_arch} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/#{node['platform']} #{codename} #{new_resource.repo_channel}\n"
+              owner 'root'
+              group 'root'
+              mode '0644'
+              notifies :update, 'apt_update[docker_trixie]', :immediately
+            end
+
+            apt_update 'docker_trixie' do
+              action :nothing
+            end
+          else
+            apt_repository 'Docker' do
+              components Array(new_resource.repo_channel)
+              uri "https://download.docker.com/linux/#{node['platform']}"
+              arch deb_arch
+              key "https://download.docker.com/linux/#{node['platform']}/gpg"
+              action :add
+            end
           end
         else
           Chef::Log.warn("Cannot setup the Docker repo for platform #{node['platform']}. Skipping.")

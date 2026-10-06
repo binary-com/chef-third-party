@@ -25,8 +25,12 @@ if platform_family?('smartos')
   end
 end
 
-# Install supervisor based on Debian version
-if platform?('debian') && (node['platform_version'] == '12' || node['lsb']['codename'] == 'bookworm')
+# Install supervisor based on Debian version. Debian 12 (bookworm) and 13
+# (trixie) mark the system Python as externally managed (PEP 668), so a bare
+# `pip install` fails with "externally-managed-environment". Use pipx there.
+if platform?('debian') &&
+   (node['platform_version'].to_i >= 12 ||
+    %w(bookworm trixie).include?(node['lsb']['codename']))
   execute 'pipx install supervisor' do
     command 'PIPX_HOME=/opt/pipx PIPX_BIN_DIR=/usr/local/bin pipx install supervisor --index=https://pypi.python.org/simple/'
     not_if { ::File.exist?('/usr/local/bin/supervisorctl') }
